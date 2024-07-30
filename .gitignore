@@ -3,6 +3,7 @@ UI/bot_screenshots/*
 **__pycache__/
 .idea
 venv/
+.env
 
 !basics/bot_screenshots/.gitkeep
 !UI/bot_screenshots/.gitkeep

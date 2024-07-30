@@ -6,33 +6,37 @@ from datetime import datetime
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QTextEdit, QLabel, QVBoxLayout, QWidget
 from functions import full_event  # Ensure your full_event function is modified to check for the stop signal
 import random
+from config import BOT_SCREENSHOTS_DIR
 
-
-screen_dir = "/home/jorenvdg/PycharmProjects/top_drives/UI/bot_screenshots"
 
 def start_bot():
     print("Bot started!")
 
+
 def stop_bot():
     print("Bot stopped")
+
 
 def tap(x, y):
     os.system(f"adb shell input tap {x} {y}")
 
+
 def swipe(x1, y1, x2, y2):
     os.system(f"adb shell input swipe {x1} {y1} {x2} {y2}")
+
 
 def capture_screenshot():
     # Get the current timestamp
     timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     # Construct the screenshot filename
-    filename = f"{screen_dir}/screenshot_{timestamp}.png"
+    filename = f"{BOT_SCREENSHOTS_DIR}/screenshot_{timestamp}.png"
     # Take the screenshot
     os.system("adb shell screencap -p /sdcard/screenshot.png")
     os.system("adb pull /sdcard/screenshot.png " + filename)
     os.system("adb shell rm /sdcard/screenshot.png")
     print(f"Screenshot saved to {filename}")
     return filename
+
 
 class BotUI(QMainWindow):
     def __init__(self):
@@ -125,6 +129,7 @@ class BotUI(QMainWindow):
 
     def run_full_event(self):
         full_event(self.stop_event)  # Pass the stop_event to full_event function
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -1,2 +1,8 @@
-basics/bot_screenshots/
-UI/bot_screenshots/
+basics/bot_screenshots/*
+UI/bot_screenshots/*
+**__pycache__/
+.idea
+venv/
+
+!basics/bot_screenshots/.gitkeep
+!UI/bot_screenshots/.gitkeep

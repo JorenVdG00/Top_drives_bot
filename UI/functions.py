@@ -129,6 +129,9 @@ def check_event_available(event_number: int = 1):
         else:
             print("event available")
             return True
+    else:
+        print("event available")
+        return True
 
 
 def tap_play_event():

@@ -25,8 +25,15 @@ tst_img_path = './bot_screenshots/tst.png'
 selected_hand_fault_img_path = './bot_screenshots/selected_hand_fault.png'
 event_unavailable_img_path = './bot_screenshots/event_unavailable.png'
 
-img_path = event_unavailable_img_path
-standard_size = (2210, 1248)
+#CARS
+maserati_img_path = '../image_reader/test_cropped_imgs/Maserati_Ghibli.png'
+
+#CLUBS
+
+
+img_path = maserati_img_path
+# standard_size = (2210, 1248)
+standard_size = (557, 343) #(cars)
 
 
 def click_and_get_coords(event, x, y, flags, param):

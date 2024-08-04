@@ -4,80 +4,30 @@ import random
 from datetime import datetime
 import time
 import subprocess
-from config import BOT_SCREENSHOTS_DIR
-
-
-basic_width = 2210
-basic_height = 1248
-
-global resize_values  # Declare global variable
-
-
-def resize_coordinate(value, resize_factor):
-    return int(value * resize_factor)
-
-
-def resize_same_factor(value1: int, value2: int, resize_factor: float):
-    return int(value1 * resize_factor), int(value2 * resize_factor)
-
-
-def resize_coordinates(x: int, y: int, resize_factor: list):
-    return resize_coordinate(x, resize_factor[0]), resize_coordinate(y, resize_factor[1])
-
-
-def resize_ranges(x1: int, x2: int, y1: int, y2: int, resize_factor: list):
-    return (resize_coordinate(x1, resize_factor[0]), resize_coordinate(x2, resize_factor[0]),
-            resize_coordinate(y1, resize_factor[1]), resize_coordinate(y2, resize_factor[1]))
-
-
-def tap(x, y):
-    os.system(f"adb shell input tap {x} {y}")
-
-
-def swipe(x1, y1, x2, y2):
-    os.system(f"adb shell input swipe {x1} {y1} {x2} {y2}")
-
-
-def capture_screenshot():
-    # Get the current timestamp
-    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    # Construct the screenshot filename
-    filename = f"{BOT_SCREENSHOTS_DIR}/screenshot_{timestamp}.png"
-    # Take the screenshot
-    os.system("adb shell screencap -p /sdcard/screenshot.png")
-    os.system("adb pull /sdcard/screenshot.png " + filename)
-    os.system("adb shell rm /sdcard/screenshot.png")
-    print(f"Screenshot saved to {filename}")
-    return filename
-
-
-def calculate_screen_size():
-    global resize_values
-    size_result = subprocess.run("adb shell wm size", shell=True, capture_output=True, text=True)
-    size = size_result.stdout.strip()
-    print("size: " + size)
-    print("size_result: " + str(size_result))
-    # Parse the size information
-    if "Physical size: " in size:
-        size = size.split("Physical size: ")[1]
-        width, height = map(int, size.split("x"))
-        print(f"Width: {width}, Height: {height}")
-        resize_values = [width / basic_width, height / basic_height]
-        return resize_values
+from .general_functions import capture_screenshot, remove_screenshot, swipe, tap
+from .resize_functions import resize_coordinate, resize_coordinates, resize_ranges, resize_same_factor, \
+    calculate_screen_size
 
 
 def check_ticket(img_path):
+    ticket_color = (248, 171, 23, 255)
+    empty_ticket_color = (146, 146, 146, 255)
     print("checking ticket")
     img = Image.open(img_path)
     x, y = resize_coordinates(890, 1150, resize_values)
     color = img.getpixel((x, y))
-    if color == (248, 171, 23, 255):
-        print(color)
+    if color == ticket_color:
         print("Ticket found!")
-        return True
+        ticket_str = "Ticket"
+        return ticket_str
+    elif color == empty_ticket_color:
+        print("empty Ticket found!")
+        ticket_str = "empty Ticket"
+        return ticket_str
     else:
         print('No ticket found')
-        return False
+        ticket_str = "N/A"
+        return ticket_str
 
 
 def check_empty_ticket(img_path):
@@ -88,7 +38,6 @@ def check_empty_ticket(img_path):
 
     color = img.getpixel((x, y))
     if color == empty_ticket_color:
-        print(color)
         print("empty Ticket found!")
         return True
     else:
@@ -100,26 +49,26 @@ def tap_event(event_number: int = 1):
     print("tapping event")
     y1, y2 = resize_coordinate(400, resize_values[1]), resize_coordinate(800, resize_values[1])
     y = random.randint(y1, y2)
-    if event_number == 1:
+    if event_number == 1 or event_number == 3:
         x1, x2 = resize_coordinate(840, resize_values[0]), resize_coordinate(1180, resize_values[0])
         x = random.randint(x1, x2)
-    elif event_number == 2:
+    elif event_number == 2 or event_number == 4:
         x1, x2 = resize_coordinate(1480, resize_values[0]), resize_coordinate(1890, resize_values[0])
         x = random.randint(x1, x2)
-    elif event_number == 3:
+    elif event_number == 5:
         x1, x2 = resize_coordinate(2000, resize_values[0]), resize_coordinate(2150, resize_values[0])
         x = random.randint(x1, x2)
     else:
         x1, x2 = resize_coordinate(2000, resize_values[0]), resize_coordinate(2150, resize_values[0])
         x = random.randint(x1, x2)
     tap(x, y)
-    time.sleep(3)
+    time.sleep(2)
 
 
 def check_event_available(event_number: int = 1):
     unavailable_color = (112, 112, 112, 255)
     screenshot = capture_screenshot()
-    if event_number == 3:
+    if event_number == 3 or event_number == 5:
         img = Image.open(screenshot)
         x, y = resize_coordinates(1978, 285, resize_values)
         color = img.getpixel((x, y))
@@ -211,15 +160,15 @@ def swipe_cars_to_slots():
     # TODO: add logic for race slots
 
     swipe(car1, y_car, race_slot1, race_slot_y)
-    time.sleep(1)
+    time.sleep(0.5)
     swipe(car2, y_car, race_slot2, race_slot_y)
-    time.sleep(1)
+    time.sleep(0.5)
     swipe(car3, y_car, race_slot3, race_slot_y)
-    time.sleep(1)
+    time.sleep(0.5)
     swipe(car4, y_car, race_slot4, race_slot_y)
-    time.sleep(1)
+    time.sleep(0.5)
     swipe(car5, y_car, race_slot5, race_slot_y)
-    time.sleep(7)
+    time.sleep(0.5)
 
 
 def skip_ingame():
@@ -231,7 +180,7 @@ def skip_ingame():
     while not check_accept and times_checked < 5:
         x, y = random.randint(x3, x4), random.randint(y3, y4)
         tap(x, y)
-        time.sleep(5)
+        time.sleep(3)
         tap(x, y)
         check_accept = check_accept_skip()
         times_checked += 1
@@ -256,7 +205,8 @@ def check_accept_skip():
     x, y = resize_coordinates(1290, 830, resize_values)
     color = img.getpixel((x, y))
     remove_screenshot(img_path)
-    if color == (26, 199, 213, 255):
+    # print(color)
+    if color == (27, 199, 214, 255):
         print(color)
         print("skip_accept found!")
         return True
@@ -273,7 +223,6 @@ def get_upgrade_after_match():
     x, y = resize_coordinates(1031, 178, resize_values)
     color = img.getpixel((x, y))
     print(color)
-    remove_screenshot(img_path)
     if color == upgrade_color:
         time.sleep(1)
         x1, x2, y1, y2 = resize_ranges(860, 880, 1050, 1060, resize_values)
@@ -282,12 +231,17 @@ def get_upgrade_after_match():
         print("Upgrade found!")
         time.sleep(2)
         tap(rand_x, rand_y)
+        return True, img_path
+    else:
+        print('Upgrade not found')
+        return False, img_path
 
 
-def count_prizecards():
+def count_prizecards(img_path=None):
     print("counting prizecards")
     star_color = (242, 165, 23, 255)
-    img_path = capture_screenshot()
+    if img_path is None:
+        img_path = capture_screenshot()
     img = Image.open(img_path)
     number_of_prizes = 0
     x, y = resize_coordinates(1910, 200, resize_values)
@@ -317,9 +271,9 @@ def collect_prizecards(img, number_of_prizes, img_path):
             color = img.getpixel((x, y))
             if color == prize_card_color:
                 tap(x, y)
-                time.sleep(2)
+                time.sleep(1)
                 tap(x, y)
-                time.sleep(2)
+                time.sleep(1)
                 number_of_prizes -= 1
                 if number_of_prizes == 0:
                     remove_screenshot(img_path)
@@ -337,7 +291,9 @@ def tap_home():
 
 
 def full_event(stop_event):
-    calculate_screen_size()
+    global resize_values
+    resize_values = calculate_screen_size()
+    print(resize_values)
     event_number = 1
     while event_number <= 5:
         if stop_event.is_set():
@@ -376,9 +332,78 @@ def full_event(stop_event):
             remove_screenshot(screenshot)
 
 
+def full_event_V2(stop_event):
+    global resize_values
+    resize_values = calculate_screen_size()
+    event_number = 1
+    while event_number <= 5:
+        if stop_event.is_set():
+            print("Stopping full event bot...")
+            break
+        ticket = True
 
-def remove_screenshot(filename):
-    os.remove(filename)
+        # Tap home
+        tap_home()
+
+        # Tap events
+        tap_events()
+
+        # Swipe right on events if more than 3
+        if event_number >= 3:
+            swipe_right_event()
+
+        # TODO: Optimize this
+        if not check_event_available(event_number):
+            print("event not available")
+            print("last event done")
+            break
+
+        # Tap event (event_number)
+        tap_event(event_number)
+
+        # While ticket stay in this event
+        while ticket:
+            if stop_event.is_set():
+                print("Stopping full event bot...")
+                break
+            screenshot = capture_screenshot()
+            ticket_str = check_ticket(screenshot)
+            if ticket_str == "Ticket":
+                # Tap play
+                tap_play_event()
+
+                # Tap go button
+                tap_go_button_event()
+                if check_cannot_play():
+                    print("cannot play found")
+                    event_number += 1
+                    remove_screenshot(screenshot)
+                    break
+                tap_in_event_play()
+                swipe_cars_to_slots()
+                skip_ingame()
+                can_ad_upgrade, img_path = get_upgrade_after_match()
+                if can_ad_upgrade:
+                    remove_screenshot(img_path)
+                    number_of_prizes, img, img_path = count_prizecards()
+
+                else:
+                    number_of_prizes, img, img_path = count_prizecards(img_path=img_path)
+
+                collect_prizecards(img, number_of_prizes, img_path)
+            else:
+                if ticket_str == "empty Ticket":
+                    print("empty Ticket found")
+                    event_number += 1
+                else:
+                    print("no Ticket found")
+                remove_screenshot(screenshot)
+                ticket = False
+
+
+def swipe_right_event():
+    x1, x2, y1, y2 = resize_ranges(1195, 657, 237, 237, resize_values)
+    swipe(x1, y1, x2, y2)
 
 
 if __name__ == "__main__":

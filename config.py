@@ -8,3 +8,7 @@ BASICS_DIR = os.path.join(BASE_DIR, 'basics')
 UI_DIR = os.path.join(BASE_DIR, 'UI')
 BOT_SCREENSHOTS_DIR = os.path.join(UI_DIR, 'bot_screenshots')
 
+BASIC_WIDTH = 2210
+BASIC_HEIGHT = 1248
+
+resize_values = None

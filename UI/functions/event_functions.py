@@ -9,6 +9,7 @@ from .resize_functions import resize_coordinate, resize_coordinates, resize_rang
     calculate_screen_size
 from .general_game_functions import check_cannot_play
 
+
 def check_ticket(img_path):
     ticket_color = (248, 171, 23, 255)
     empty_ticket_color = (146, 146, 146, 255)
@@ -203,6 +204,8 @@ def check_accept_skip():
     img_path = capture_screenshot()
     img = Image.open(img_path)
     x, y = resize_coordinates(1290, 830, resize_values)
+    refresh_color = (90, 197, 159, 255)
+    refresh_x, refresh_y = resize_coordinates(2107, 44, resize_values)
     color = img.getpixel((x, y))
     remove_screenshot(img_path)
     # print(color)
@@ -210,9 +213,25 @@ def check_accept_skip():
         print(color)
         print("skip_accept found!")
         return True
+    elif color == refresh_color:
+        print(color)
+        print("refresh found!")
+        print("swipe_cars failed!")
+        swipe_cars_fault()
+        return check_accept_skip()
     else:
         print('Not skipped yet found')
         return False
+
+
+def swipe_cars_fault():
+    time.sleep(1)
+    x1, x2, y1, y2 = resize_ranges(2100, 2120, 40, 45, resize_values)
+    rand_x, rand_y = random.randint(x1, x2), random.randint(y1, y2)
+    tap(rand_x, rand_y)
+    time.sleep(1)
+    swipe_cars_to_slots()
+    time.sleep(3)
 
 
 def get_upgrade_after_match():
@@ -381,6 +400,7 @@ def full_event_V2(stop_event):
                     break
                 tap_in_event_play()
                 swipe_cars_to_slots()
+
                 skip_ingame()
                 can_ad_upgrade, img_path = get_upgrade_after_match()
                 if can_ad_upgrade:
@@ -404,4 +424,3 @@ def full_event_V2(stop_event):
 def swipe_right_event():
     x1, x2, y1, y2 = resize_ranges(1195, 657, 237, 237, resize_values)
     swipe(x1, y1, x2, y2)
-

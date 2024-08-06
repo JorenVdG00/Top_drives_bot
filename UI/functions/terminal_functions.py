@@ -14,6 +14,7 @@ def start_waydroid_session():
         print(f"Exception occurred: {e}")
         return None
 
+
 def stop_waydroid_session():
     try:
         result = subprocess.run(['waydroid', 'session', 'stop'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -37,6 +38,14 @@ def get_waydroid_status():
     except Exception as e:
         print(f"Exception occurred: {e}")
         return None
+
+
+def is_waydroid_running():
+    status_output = get_waydroid_status()
+    if 'RUNNING' in status_output:
+        return True
+    else:
+        return False
 
 
 def extract_ip_address(status_output):
@@ -87,13 +96,17 @@ def adb_devices():
 def check_adb_connection():
     status = adb_devices()
     ip_address = extract_ip_address(get_waydroid_status())
-    if status:
-        if ip_address in status:
-            return True
+    if ip_address:
+        if status:
+            if ip_address in status:
+                return True
+            else:
+                return False
         else:
             return False
     else:
         return False
+
 
 if __name__ == '__main__':
     connect_adb_to_waydroid()

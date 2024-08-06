@@ -7,7 +7,7 @@ import subprocess
 from .general_functions import capture_screenshot, remove_screenshot, swipe, tap
 from .resize_functions import resize_coordinate, resize_coordinates, resize_ranges, resize_same_factor, \
     calculate_screen_size
-
+from .general_game_functions import check_cannot_play
 
 def check_ticket(img_path):
     ticket_color = (248, 171, 23, 255)
@@ -92,25 +92,25 @@ def tap_play_event():
     time.sleep(2)
 
 
-def check_cannot_play():
-    print("checking cannot play")
-    cannot_play_color = (51, 51, 51, 255)
-    selected_hand_fault_color = (27, 31, 40, 255)
-    selected_hand_fault_coords = (490, 815)
-    img_path = capture_screenshot()
-    img = Image.open(img_path)
-    x, y = resize_coordinates(720, 750, resize_values)
-    color1 = img.getpixel((x, y))
-    x, y = resize_coordinates(selected_hand_fault_coords[0], selected_hand_fault_coords[1], resize_values)
-    color2 = img.getpixel((x, y))
-    remove_screenshot(img_path)
-    print(color1, color2)
-    if color1 == cannot_play_color or color2 == selected_hand_fault_color:
-        print("cannot play found!")
-        return True
-    else:
-        print('cannot play not found')
-        return False
+# def check_cannot_play():
+#     print("checking cannot play")
+#     cannot_play_color = (51, 51, 51, 255)
+#     selected_hand_fault_color = (27, 31, 40, 255)
+#     selected_hand_fault_coords = (490, 815)
+#     img_path = capture_screenshot()
+#     img = Image.open(img_path)
+#     x, y = resize_coordinates(720, 750, resize_values)
+#     color1 = img.getpixel((x, y))
+#     x, y = resize_coordinates(selected_hand_fault_coords[0], selected_hand_fault_coords[1], resize_values)
+#     color2 = img.getpixel((x, y))
+#     remove_screenshot(img_path)
+#     print(color1, color2)
+#     if color1 == cannot_play_color or color2 == selected_hand_fault_color:
+#         print("cannot play found!")
+#         return True
+#     else:
+#         print('cannot play not found')
+#         return False
 
 
 def tap_events():
@@ -290,46 +290,46 @@ def tap_home():
     time.sleep(2)
 
 
-def full_event(stop_event):
-    global resize_values
-    resize_values = calculate_screen_size()
-    print(resize_values)
-    event_number = 1
-    while event_number <= 5:
-        if stop_event.is_set():
-            print("Stopping full event bot...")
-            break
-        ticket = True
-        tap_home()
-        tap_events()
-        if not check_event_available(event_number):
-            print("event not available")
-            print("last event done")
-            break
-        tap_event(event_number)
-        while ticket:
-            screenshot = capture_screenshot()
-            if check_ticket(screenshot):
-                tap_play_event()
-                tap_go_button_event()
-                if check_cannot_play():
-                    print("cannot play found")
-                    event_number += 1
-                    break
-                tap_in_event_play()
-                swipe_cars_to_slots()
-                skip_ingame()
-                get_upgrade_after_match()
-                number_of_prizes, img, img_path = count_prizecards()
-                collect_prizecards(img, number_of_prizes, img_path)
-            else:
-                if check_empty_ticket(screenshot):
-                    print("empty Ticket found")
-                    event_number += 1
-                else:
-                    print("no Ticket found")
-                ticket = False
-            remove_screenshot(screenshot)
+# def full_event(stop_event):
+#     global resize_values
+#     resize_values = calculate_screen_size()
+#     print(resize_values)
+#     event_number = 1
+#     while event_number <= 5:
+#         if stop_event.is_set():
+#             print("Stopping full event bot...")
+#             break
+#         ticket = True
+#         tap_home()
+#         tap_events()
+#         if not check_event_available(event_number):
+#             print("event not available")
+#             print("last event done")
+#             break
+#         tap_event(event_number)
+#         while ticket:
+#             screenshot = capture_screenshot()
+#             if check_ticket(screenshot):
+#                 tap_play_event()
+#                 tap_go_button_event()
+#                 if check_cannot_play():
+#                     print("cannot play found")
+#                     event_number += 1
+#                     break
+#                 tap_in_event_play()
+#                 swipe_cars_to_slots()
+#                 skip_ingame()
+#                 get_upgrade_after_match()
+#                 number_of_prizes, img, img_path = count_prizecards()
+#                 collect_prizecards(img, number_of_prizes, img_path)
+#             else:
+#                 if check_empty_ticket(screenshot):
+#                     print("empty Ticket found")
+#                     event_number += 1
+#                 else:
+#                     print("no Ticket found")
+#                 ticket = False
+#             remove_screenshot(screenshot)
 
 
 def full_event_V2(stop_event):
@@ -374,7 +374,7 @@ def full_event_V2(stop_event):
 
                 # Tap go button
                 tap_go_button_event()
-                if check_cannot_play():
+                if check_cannot_play(resize_values):
                     print("cannot play found")
                     event_number += 1
                     remove_screenshot(screenshot)
@@ -405,7 +405,3 @@ def swipe_right_event():
     x1, x2, y1, y2 = resize_ranges(1195, 657, 237, 237, resize_values)
     swipe(x1, y1, x2, y2)
 
-
-if __name__ == "__main__":
-    # Run any code you want to execute when the script is run directly
-    full_event()

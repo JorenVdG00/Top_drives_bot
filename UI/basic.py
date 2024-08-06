@@ -3,7 +3,7 @@ import threading
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QTextEdit, QLabel, QVBoxLayout, QWidget
 from UI.functions.event_functions import full_event_V2 as full_event  # Ensure your full_event function is modified to check for the stop signal
 from UI.functions.general_functions import capture_screenshot, swipe
-
+from functions.terminal_functions import connect_adb_to_waydroid
 def start_bot():
     print("Bot started!")
 
@@ -24,6 +24,7 @@ class BotUI(QMainWindow):
 
         # Create widgets
         self.start_button = QPushButton('Start Bot', self)
+
         self.stop_button = QPushButton('Stop Bot', self)
         self.capture_button = QPushButton('Capture Screenshot', self)
         self.swipe_right_button = QPushButton('Swipe Right Event', self)

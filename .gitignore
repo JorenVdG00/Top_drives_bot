@@ -1,9 +1,10 @@
-basics/bot_screenshots/*
-UI/bot_screenshots/*
-image_reader/test_cropped_imgs/*
-image_reader/test_IMG/*
-image_reader/*
-**__pycache__/
+#basics/bot_screenshots/*
+#UI/bot_screenshots/*
+#image_reader/Failed_test/test_cropped_imgs/*
+#image_reader/Failed_test/test_IMG/*
+#image_reader/Failed_test/
+#image_reader/AAAA
+#**__pycache__/
 .idea
 venv/
 .env

@@ -2,12 +2,13 @@ import sys
 import threading
 import time
 
+from PyQt5.QtCore import pyqtSignal, QObject
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QTextEdit, QLabel, QVBoxLayout, QWidget, QTabWidget, \
     QToolTip
 from functions.terminal_functions import start_waydroid_session, stop_waydroid_session, connect_adb_to_waydroid, \
     check_adb_connection, is_waydroid_running
 from functions.event_functions import full_event_V2 as full_event, capture_screenshot, swipe
-
+from functions.ad_functions import watch_ads
 
 def start_bot():
     print("Bot started!")
@@ -21,12 +22,27 @@ waydroid_running = is_waydroid_running()
 adb_connection = check_adb_connection()
 
 
+class Worker(QObject):
+    adb_checked = pyqtSignal(bool, str)
+    waydroid_running = pyqtSignal(bool, str)
+
+    def check_adb_connection(self):
+        connection = check_adb_connection()
+        if connection:
+            self.adb_checked.emit(True, "ADB is online.")
+        else:
+            self.adb_checked.emit(False, "ADB is offline.")
+
 class BotUI(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.worker = Worker()
+
         self.initUI()
         self.bot_thread = None
         self.stop_event = threading.Event()
+
+        self.check_adb_on_startup()
 
     def initUI(self):
         self.setWindowTitle('Game Bot Manager')
@@ -53,11 +69,13 @@ class BotUI(QMainWindow):
         event_tab = QWidget()
         event_layout = QVBoxLayout()
         self.capture_button = QPushButton('Capture Screenshot', self)
+        self.watch_ads_button = QPushButton('Watch Ads', self)
         self.swipe_right_button = QPushButton('Swipe Right Event', self)
         self.swipe_up_button = QPushButton('Swipe Up Event', self)
         self.full_event_button = QPushButton('Full Event', self)
         self.stop_full_event_button = QPushButton('Stop Full Event', self)
         event_layout.addWidget(self.capture_button)
+        event_layout.addWidget(self.watch_ads_button)
         event_layout.addWidget(self.swipe_right_button)
         event_layout.addWidget(self.swipe_up_button)
         event_layout.addWidget(self.full_event_button)
@@ -70,10 +88,7 @@ class BotUI(QMainWindow):
 
         # Status and log
         self.status_label = QLabel('Status: Idle', self)
-        if adb_connection:
-            self.adb_status_label = QLabel('ADB Status: Online', self)
-        else:
-            self.adb_status_label = QLabel('ADB Status: Offline', self)
+        self.adb_status_label = QLabel('ADB Status: Offline', self)
         if waydroid_running:
             self.waydroid_status_label = QLabel('Waydroid Status: Online', self)
         else:
@@ -91,19 +106,24 @@ class BotUI(QMainWindow):
         container.setLayout(main_layout)
         self.setCentralWidget(container)
 
+        self.check_adb_button.clicked.connect(self.check_adb)
+
+        # Connect the worker signal to the update function
+        self.worker.adb_checked.connect(self.update_adb_status)
+
         # Connect buttons to functions
         self.start_waydroid_button.clicked.connect(self.start_waydroid)
         self.stop_waydroid_button.clicked.connect(self.stop_waydroid)
         self.connect_adb_button.clicked.connect(self.connect_adb)
-        self.check_adb_button.clicked.connect(self.check_adb)
         self.capture_button.clicked.connect(self.capture_screenshot)
+        self.watch_ads_button.clicked.connect(self.watch_ads_event)
         self.swipe_right_button.clicked.connect(self.swipe_right_event)
         self.swipe_up_button.clicked.connect(self.swipe_up_event)
         self.full_event_button.clicked.connect(self.full_event_bot)
         self.stop_full_event_button.clicked.connect(self.stop_full_event_bot)
 
         # Initialize status checks
-        self.update_adb_status()
+        # self.update_adb_status()
         self.update_waydroid_status()
 
     def log(self, message):
@@ -121,7 +141,7 @@ class BotUI(QMainWindow):
             time.sleep(3)
             times_checked += 1
         self.update_waydroid_status()
-        self.update_adb_status()
+        self.check_adb()
 
     def stop_waydroid(self):
         self.log("Stopping waydroid session...")
@@ -139,26 +159,37 @@ class BotUI(QMainWindow):
 
     def _connect_adb_to_waydroid(self):
         connect_adb_to_waydroid()
-        self.update_adb_status()
+        self.check_adb()
 
     def check_adb(self):
         self.log("Checking ADB...")
-        threading.Thread(target=self._check_adb_connection).start()
+        threading.Thread(target=self.worker.check_adb_connection).start()
 
-    def _check_adb_connection(self):
-        connection = check_adb_connection()
-        if connection:
+    def update_adb_status(self, online, message):
+        if online:
             self.adb_status_label.setText("ADB Status: Online")
-            self.log("ADB is online.")
+            self.connect_adb_button.setEnabled(False)
         else:
             self.adb_status_label.setText("ADB Status: Offline")
-            self.log("ADB is offline.")
-        self.update_adb_status()
+            self.connect_adb_button.setEnabled(True)
+        self.log(message)
+
+    def check_adb_on_startup(self):
+        # Check ADB status immediately after UI launch
+        adb_connected = check_adb_connection()
+        if adb_connected:
+            self.update_adb_status(True, "ADB is already connected.")
+        else:
+            self.update_adb_status(False, "ADB is not connected.")
 
     def capture_screenshot(self):
         self.log("Capturing screenshot...")
         result = capture_screenshot()
         self.log(result)
+
+    def watch_ads_event(self):
+        self.log("Watching ads event...")
+        watch_ads()
 
     def swipe_right_event(self):
         self.log("Swiping right event...")
@@ -185,18 +216,6 @@ class BotUI(QMainWindow):
     def run_full_event(self):
         full_event(self.stop_event)
 
-    def update_adb_status(self):
-        # Implement ADB status check logic here
-        adb_online = self._is_adb_online()
-        if adb_online:
-            self.adb_status_label.setText('ADB Status: Online')
-            QToolTip.setFont(self.adb_status_label.font())
-            self.adb_status_label.setToolTip('ADB is connected and online.')
-        else:
-            self.adb_status_label.setText('ADB Status: Offline')
-            QToolTip.setFont(self.adb_status_label.font())
-            self.adb_status_label.setToolTip('ADB is not connected.')
-
     def update_waydroid_status(self):
         # Implement Waydroid status check logic here
         waydroid_online = self._is_waydroid_online()
@@ -221,6 +240,7 @@ class BotUI(QMainWindow):
         if not is_waydroid_online:
             return False
         return True
+
 
 
 if __name__ == '__main__':

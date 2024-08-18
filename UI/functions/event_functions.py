@@ -23,7 +23,7 @@ def check_ticket(img_path):
         return ticket_str
     elif color == empty_ticket_color:
         print("empty Ticket found!")
-        ticket_str = "empty Ticket"
+        ticket_str = "Empty Ticket"
         return ticket_str
     else:
         print('No ticket found')
@@ -69,8 +69,9 @@ def tap_event(event_number: int = 1):
 def check_event_available(event_number: int = 1):
     unavailable_color = (112, 112, 112, 255)
     screenshot = capture_screenshot()
-    if event_number == 3 or event_number == 5:
-        img = Image.open(screenshot)
+    img = Image.open(screenshot)
+    remove_screenshot(screenshot)
+    if event_number == 4 or event_number == 5:
         x, y = resize_coordinates(1978, 285, resize_values)
         color = img.getpixel((x, y))
         if color == unavailable_color:
@@ -83,6 +84,17 @@ def check_event_available(event_number: int = 1):
         print("event available")
         return True
 
+def event_requirements_met(screenshot):
+    x, y = resize_coordinates(640, 293, resize_values)
+    not_met_color = (91,91,91,255)
+    img = Image.open(screenshot)
+    color = img.getpixel((x, y))
+    if color == not_met_color:
+        print("event requirements not met")
+        return False
+    else:
+        print("event requirements met")
+        return True
 
 def tap_play_event():
     print("tapping play event")
@@ -204,16 +216,17 @@ def check_accept_skip():
     img_path = capture_screenshot()
     img = Image.open(img_path)
     x, y = resize_coordinates(1290, 830, resize_values)
-    refresh_color = (90, 197, 159, 255)
+    refresh_color_color = (90, 197, 159, 255)
     refresh_x, refresh_y = resize_coordinates(2107, 44, resize_values)
     color = img.getpixel((x, y))
+    refresh_color = img.getpixel((refresh_x, refresh_y))
     remove_screenshot(img_path)
-    # print(color)
+    print(color)
     if color == (27, 199, 214, 255):
         print(color)
         print("skip_accept found!")
         return True
-    elif color == refresh_color:
+    elif refresh_color == refresh_color_color:
         print(color)
         print("refresh found!")
         print("swipe_cars failed!")
@@ -387,38 +400,43 @@ def full_event_V2(stop_event):
                 break
             screenshot = capture_screenshot()
             ticket_str = check_ticket(screenshot)
-            if ticket_str == "Ticket":
-                # Tap play
-                tap_play_event()
+            if event_requirements_met(screenshot):
+                if ticket_str == "Ticket":
+                    # Tap play
+                    tap_play_event()
 
-                # Tap go button
-                tap_go_button_event()
-                if check_cannot_play(resize_values):
-                    print("cannot play found")
-                    event_number += 1
-                    remove_screenshot(screenshot)
-                    break
-                tap_in_event_play()
-                swipe_cars_to_slots()
+                    # Tap go button
+                    tap_go_button_event()
+                    if check_cannot_play(resize_values):
+                        print("cannot play found")
+                        event_number += 1
+                        remove_screenshot(screenshot)
+                        break
+                    tap_in_event_play()
+                    swipe_cars_to_slots()
 
-                skip_ingame()
-                can_ad_upgrade, img_path = get_upgrade_after_match()
-                if can_ad_upgrade:
-                    remove_screenshot(img_path)
-                    number_of_prizes, img, img_path = count_prizecards()
+                    skip_ingame()
+                    can_ad_upgrade, img_path = get_upgrade_after_match()
+                    if can_ad_upgrade:
+                        remove_screenshot(img_path)
+                        number_of_prizes, img, img_path = count_prizecards()
 
+                    else:
+                        number_of_prizes, img, img_path = count_prizecards(img_path=img_path)
+
+                    collect_prizecards(img, number_of_prizes, img_path)
                 else:
-                    number_of_prizes, img, img_path = count_prizecards(img_path=img_path)
-
-                collect_prizecards(img, number_of_prizes, img_path)
+                    if ticket_str == "Empty Ticket":
+                        print("empty Ticket found")
+                        event_number += 1
+                    else:
+                        print("no Ticket found")
+                    ticket = False
             else:
-                if ticket_str == "empty Ticket":
-                    print("empty Ticket found")
-                    event_number += 1
-                else:
-                    print("no Ticket found")
-                remove_screenshot(screenshot)
+                print("event requirements not met")
+                event_number += 1
                 ticket = False
+            remove_screenshot(screenshot)
 
 
 def swipe_right_event():

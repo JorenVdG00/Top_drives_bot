@@ -1,15 +1,12 @@
 #Test Directories
 
-#ZZZZZZ-ProjectsTests/*
-#ZZZZZZ-FIND_COORDS&COLORS/bot_screenshots/*
-#ZZZZZ-TEST-IIIIIIIIMG/AAAA/*
-#
+ZZZZZZ-ProjectsTests/*
+ZZZZZZ-FIND_COORDS&COLORS/*
+ZZZZZ-TEST-IIIIIIIIMG/*
+
 UI/bot_screenshots/*
-#image_reader/Failed_test/test_cropped_imgs/*
-#image_reader/Failed_test/test_IMG/*
-#image_reader/Failed_test/
-#ZZZZZ-TEST-IIIIIIIIMG/AAAA
-#
+
+
 
 
 

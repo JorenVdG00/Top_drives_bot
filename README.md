@@ -111,43 +111,5 @@ Linux:
     pip install -r requirements.txt
     ```
 
-4. Set up the database:
-    ```sh
-    flask db upgrade
-    ```
 
-5. Run create_admin.py
-
-6. Run create_frituur.py
-
-7. Run the application:
-    ```sh
-    flask run
-    ```
-8. Make opening hours for new frituur.
-
-## Configuration
-
-Make an .env file with these:
-
-DB_USER=
-DB_USER_PASSWORD=
-DB_HOST=
-DB_NAME=
-DB_URI=
-STRIPE_SECRET_KEY=
-STRIPE_PUBLISHABLE_KEY=
-
-MAIL_SERVER=
-MAIL_PORT=
-MAIL_USE_TLS=
-MAIL_USERNAME=
-MAIL_PASSWORD=
-MAIL_DEFAULT_SENDER =
-
-### Usage
-
-To login as admin you need to use the credentials
-
-usermail : admin1@localhost.com
-password : admin1
+#TODO: Complete the read.me

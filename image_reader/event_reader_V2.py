@@ -285,7 +285,7 @@ def check_consecutive_pixels(image_path, filter_color, tolerance=10, required_co
 
 
 ###DIRECTORIES###
-test1_dir = 'AAAA/event_test_V2_cropped/RACING_TRIALS_-_STAGE_2/'
+test1_dir = '../ZZZZZ-TEST-IIIIIIIIMG/event_test_V2_cropped/RACING_TRIALS_-_STAGE_2/'
 base_dir, name = split_path(test1_dir)
 enhanced_dir = create_dir_if_not_exists(base_dir, (name + '_enhanced/'))
 used_img_dir = test1_dir

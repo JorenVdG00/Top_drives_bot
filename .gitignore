@@ -1,13 +1,22 @@
-#basics/bot_screenshots/*
-#UI/bot_screenshots/*
+#Test Directories
+
+#ZZZZZZ-ProjectsTests/*
+#ZZZZZZ-FIND_COORDS&COLORS/bot_screenshots/*
+#ZZZZZ-TEST-IIIIIIIIMG/AAAA/*
+#
+UI/bot_screenshots/*
 #image_reader/Failed_test/test_cropped_imgs/*
 #image_reader/Failed_test/test_IMG/*
 #image_reader/Failed_test/
-#image_reader/AAAA
-#**__pycache__/
+#ZZZZZ-TEST-IIIIIIIIMG/AAAA
+#
+
+
+
+**__pycache__/
 .idea
 venv/
 .env
 
-!basics/bot_screenshots/.gitkeep
+!ZZZZZZ-FIND_COORDS&COLORS/bot_screenshots/.gitkeep
 !UI/bot_screenshots/.gitkeep

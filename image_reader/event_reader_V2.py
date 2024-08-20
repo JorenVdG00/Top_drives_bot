@@ -3,12 +3,12 @@ import pytesseract
 import re
 import os
 import itertools
+import math
 from image_enhancer import (full_image_enhancer)
 
 condition_colors = {
     'SUN': (255, 232, 147, 255),
     'HIGH': (255, 114, 85, 255),
-    'ROLLING_START': (255, 116, 85, 255),
     'WET': (109, 208, 247, 255)
 }
 
@@ -228,14 +228,14 @@ def complete_extraction(preprocessing_options, extract_data, is_race=True):
     return extract_data
 
 
-def contains_color(image_path, target_rgb):
+def contains_color(image_path, target_rgb, tolerance=5):
     image = Image.open(image_path)
     pixels = image.load()
 
     # Loop through the pixels and check for the target color
     for x in range(image.width):
         for y in range(image.height):
-            if pixels[x, y] == target_rgb:
+            if color_distance(pixels[x, y], target_rgb) <= tolerance:
                 return True
     return False
 
@@ -245,13 +245,43 @@ def get_conditions(image_path, second_try=False):
     if second_try:
         condition_colors = {
             'SUN': (255, 232, 147, 255),
-            'HIGH': (255, 114, 85, 255),
-            'ROLLING_START': (255, 116, 85, 255),
+            'ROLLING': (255, 114, 85, 255),
             'WET': (109, 206, 245, 255)
         }
     for condition, color_code in condition_colors.items():
-        condition_dict[condition] = contains_color(image_path, color_code)
+        if condition == 'ROLLING':
+            if contains_color(image_path, color_code):
+                if check_consecutive_pixels(image_path, color_code, required_consecutive=30):
+                    condition_dict['HIGH'] = True
+                else:
+                    condition_dict['ROLLING'] = True
+        else:
+            condition_dict[condition] = contains_color(image_path, color_code)
+
     return condition_dict
+
+
+def color_distance(c1, c2):
+    return math.sqrt(sum((a - b) ** 2 for a, b in zip(c1[:3], c2[:3])))  # Ignore the alpha channel
+
+
+# Function to check if there are 30 consecutive pixels matching the filter color along the y-axis
+def check_consecutive_pixels(image_path, filter_color, tolerance=10, required_consecutive=30):
+    image = Image.open(image_path).convert('RGBA')
+    width, height = image.size
+
+    for y in range(height):
+        consecutive_count = 0
+        for x in range(width):
+            pixel_color = image.getpixel((x, y))
+            if color_distance(pixel_color, filter_color) <= tolerance:
+                consecutive_count += 1
+                if consecutive_count >= required_consecutive:
+                    return True  # Found 30 consecutive matching pixels
+            else:
+                consecutive_count = 0  # Reset the count if the color doesn't match
+
+    return False  # No matching sequence found
 
 
 ###DIRECTORIES###

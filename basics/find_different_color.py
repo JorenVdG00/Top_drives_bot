@@ -10,6 +10,7 @@ rolling_img_dir_path = 'bot_screenshots/conditions/ROLLING'
 
 filter_color = (255, 115, 85, 255)
 tolerance = 10
+required_consecutive = 30
 
 def color_distance(c1, c2):
     return math.sqrt(sum((a - b) ** 2 for a, b in zip(c1[:3], c2[:3])))  # Ignore the alpha channel
@@ -58,6 +59,41 @@ def find_unique_colors_in_dirs(dir1, dir2, filter_color, tolerance):
     return unique_to_dir1, unique_to_dir2
 
 
+# Function to check if there are 30 consecutive pixels matching the filter color along the y-axis
+def check_consecutive_pixels(image_path, filter_color, tolerance, required_consecutive=30):
+    image = Image.open(image_path).convert('RGBA')
+    width, height = image.size
+
+    for y in range(height):
+        consecutive_count = 0
+        for x in range(width):
+            pixel_color = image.getpixel((x, y))
+            if color_distance(pixel_color, filter_color) <= tolerance:
+                consecutive_count += 1
+                if consecutive_count >= required_consecutive:
+                    return True  # Found 30 consecutive matching pixels
+            else:
+                consecutive_count = 0  # Reset the count if the color doesn't match
+
+    return False  # No matching sequence found
+
+def check_is_high_in_dir(dir_path, filter_color, tolerance):
+    dict = {}
+
+    for filename in os.listdir(dir_path):
+        if filename.endswith(('.png', '.jpg', '.jpeg')):
+            image_path = os.path.join(dir_path, filename)
+            if check_consecutive_pixels(image_path, filter_color, tolerance):
+                dict[filename] = True
+            else:
+                dict[filename] = False
+    return dict
+
+high_dict = check_is_high_in_dir(high_img_dir_path, filter_color, tolerance)
+rolling_dict = check_is_high_in_dir(rolling_img_dir_path, filter_color, tolerance)
+
+print(high_dict)
+print(rolling_dict)
 # image1 = Image.open(image_path_1)
 # cropped_image1 = image1.crop((155, 4, 250, 70))
 # cropped_image1.show()
@@ -74,4 +110,4 @@ def find_unique_colors_in_dirs(dir1, dir2, filter_color, tolerance):
 # pixel = image.getpixel((0, 0))
 # print(pixel)
 
-unique_colors_dir1, unique_colors_dir2 = find_unique_colors_in_dirs(high_img_dir_path, rolling_img_dir_path, filter_color, tolerance)
+# unique_colors_dir1, unique_colors_dir2 = find_unique_colors_in_dirs(high_img_dir_path, rolling_img_dir_path, filter_color, tolerance)

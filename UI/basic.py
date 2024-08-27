@@ -5,8 +5,8 @@ import time
 from PyQt5.QtCore import pyqtSignal, QObject
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QTextEdit, QLabel, QVBoxLayout, QWidget, QTabWidget, \
     QToolTip
-from functions.terminal_functions import start_waydroid_session, stop_waydroid_session, connect_adb_to_waydroid, \
-    check_adb_connection, is_waydroid_running
+from functions.windows_terminal_functions import start_waydroid_session, stop_waydroid_session, connect_adb_to_waydroid, \
+    check_adb_connection, is_waydroid_running, connect_adb_to_bluestacks
 from functions.event_functions import full_event_V2 as full_event, capture_screenshot, swipe
 from functions.ad_functions import watch_ads
 
@@ -41,7 +41,7 @@ class BotUI(QMainWindow):
         self.initUI()
         self.bot_thread = None
         self.stop_event = threading.Event()
-
+        # connect_adb_to_bluestacks()
         self.check_adb_on_startup()
 
     def initUI(self):
@@ -122,9 +122,11 @@ class BotUI(QMainWindow):
         self.full_event_button.clicked.connect(self.full_event_bot)
         self.stop_full_event_button.clicked.connect(self.stop_full_event_bot)
 
+
+        connect_adb_to_bluestacks()
         # Initialize status checks
         # self.update_adb_status()
-        self.update_waydroid_status()
+        # self.update_waydroid_status()
 
     def log(self, message):
         self.log_area.append(message)

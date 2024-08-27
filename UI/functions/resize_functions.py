@@ -1,5 +1,6 @@
 import subprocess
 from config import BASIC_WIDTH, BASIC_HEIGHT
+from .general_functions import set_cwd, run_subprocess_from_path
 
 # import config
 
@@ -25,8 +26,12 @@ def resize_ranges(x1: int, x2: int, y1: int, y2: int, resize_factor: list):
 
 def calculate_screen_size():
     global resize_values
-    size_result = subprocess.run("adb shell wm size", shell=True, capture_output=True, text=True)
-    size = size_result.stdout.strip()
+    windows, diff_os = set_cwd()
+    # size_result = subprocess.run(f"{diff_os}adb shell wm size",cwd=windows, shell=True, capture_output=True, text=True)
+    command = f"adb shell wm size"
+    size_result = run_subprocess_from_path(command)
+    print(size_result)
+    size = size_result.strip()
     print("size: " + size)
     print("size_result: " + str(size_result))
     # Parse the size information

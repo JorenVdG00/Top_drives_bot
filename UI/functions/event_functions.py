@@ -14,36 +14,36 @@ def check_ticket(img_path):
     ticket_color = (248, 171, 23, 255)
     empty_ticket_color = (146, 146, 146, 255)
     print("checking ticket")
-    img = Image.open(img_path)
-    x, y = resize_coordinates(890, 1150, resize_values)
-    color = img.getpixel((x, y))
-    if color == ticket_color:
-        print("Ticket found!")
-        ticket_str = "Ticket"
-        return ticket_str
-    elif color == empty_ticket_color:
-        print("empty Ticket found!")
-        ticket_str = "Empty Ticket"
-        return ticket_str
-    else:
-        print('No ticket found')
-        ticket_str = "N/A"
-        return ticket_str
+    with Image.open(img_path) as img:
+        x, y = resize_coordinates(890, 1150, resize_values)
+        color = img.getpixel((x, y))
+        if color == ticket_color:
+            print("Ticket found!")
+            ticket_str = "Ticket"
+            return ticket_str
+        elif color == empty_ticket_color:
+            print("empty Ticket found!")
+            ticket_str = "Empty Ticket"
+            return ticket_str
+        else:
+            print('No ticket found')
+            ticket_str = "N/A"
+            return ticket_str
 
 
 def check_empty_ticket(img_path):
     print("checking empty ticket")
-    img = Image.open(img_path)
-    empty_ticket_color = (146, 146, 146, 255)
-    x, y = resize_coordinates(890, 1150, resize_values)
+    with Image.open(img_path) as img:
+        empty_ticket_color = (146, 146, 146, 255)
+        x, y = resize_coordinates(890, 1150, resize_values)
 
-    color = img.getpixel((x, y))
-    if color == empty_ticket_color:
-        print("empty Ticket found!")
-        return True
-    else:
-        print('No ticket found')
-        return False
+        color = img.getpixel((x, y))
+        if color == empty_ticket_color:
+            print("empty Ticket found!")
+            return True
+        else:
+            print('No ticket found')
+            return False
 
 
 def tap_event(event_number: int = 1):
@@ -68,33 +68,35 @@ def tap_event(event_number: int = 1):
 
 def check_event_available(event_number: int = 1):
     unavailable_color = (112, 112, 112, 255)
-    screenshot = capture_screenshot()
-    img = Image.open(screenshot)
-    remove_screenshot(screenshot)
-    if event_number == 4 or event_number == 5:
-        x, y = resize_coordinates(1978, 285, resize_values)
-        color = img.getpixel((x, y))
-        if color == unavailable_color:
-            print("event not available")
-            return False
+    img_path = capture_screenshot()
+    with Image.open(img_path) as img:
+        if event_number == 4 or event_number == 5:
+            x, y = resize_coordinates(1978, 285, resize_values)
+            color = img.getpixel((x, y))
+            if color == unavailable_color:
+                print("event not available")
+                is_available = False
+            else:
+                print("event available")
+                is_available = True
         else:
             print("event available")
-            return True
-    else:
-        print("event available")
-        return True
+            is_available = True
+    remove_screenshot(img_path)
+    return is_available
 
-def event_requirements_met(screenshot):
+def event_requirements_met(img_path):
     x, y = resize_coordinates(640, 293, resize_values)
     not_met_color = (91,91,91,255)
-    img = Image.open(screenshot)
-    color = img.getpixel((x, y))
-    if color == not_met_color:
-        print("event requirements not met")
-        return False
-    else:
-        print("event requirements met")
-        return True
+
+    with Image.open(img_path) as img:
+        color = img.getpixel((x, y))
+        if color == not_met_color:
+            print("event requirements not met")
+            return False
+        else:
+            print("event requirements met")
+            return True
 
 def tap_play_event():
     print("tapping play event")
@@ -192,6 +194,7 @@ def skip_ingame():
     x3, x4, y3, y4 = resize_ranges(1000, 1200, 55, 95, resize_values)
     while not check_accept and times_checked < 5:
         x, y = random.randint(x3, x4), random.randint(y3, y4)
+        time.sleep(2)
         tap(x, y)
         time.sleep(3)
         tap(x, y)
@@ -214,27 +217,28 @@ def skip_ingame():
 def check_accept_skip():
     print("checking accept skip")
     img_path = capture_screenshot()
-    img = Image.open(img_path)
-    x, y = resize_coordinates(1290, 830, resize_values)
-    refresh_color_color = (90, 197, 159, 255)
-    refresh_x, refresh_y = resize_coordinates(2107, 44, resize_values)
-    color = img.getpixel((x, y))
-    refresh_color = img.getpixel((refresh_x, refresh_y))
+    with Image.open(img_path) as img:
+        x, y = resize_coordinates(1290, 830, resize_values)
+        refresh_color_color = (90, 197, 159, 255)
+        refresh_x, refresh_y = resize_coordinates(2107, 44, resize_values)
+        color = img.getpixel((x, y))
+        refresh_color = img.getpixel((refresh_x, refresh_y))
+        print(color)
+        if color == (27, 199, 214, 255):
+            print(color)
+            print("skip_accept found!")
+            returnbool = True
+        elif refresh_color == refresh_color_color:
+            print(color)
+            print("refresh found!")
+            print("swipe_cars failed!")
+            swipe_cars_fault()
+            returnbool = check_accept_skip()
+        else:
+            print('Not skipped yet found')
+            returnbool = False
     remove_screenshot(img_path)
-    print(color)
-    if color == (27, 199, 214, 255):
-        print(color)
-        print("skip_accept found!")
-        return True
-    elif refresh_color == refresh_color_color:
-        print(color)
-        print("refresh found!")
-        print("swipe_cars failed!")
-        swipe_cars_fault()
-        return check_accept_skip()
-    else:
-        print('Not skipped yet found')
-        return False
+    return returnbool
 
 
 def swipe_cars_fault():
@@ -251,22 +255,22 @@ def get_upgrade_after_match():
     print("getting upgrade after match")
     upgrade_color = (0, 101, 239, 255)
     img_path = capture_screenshot()
-    img = Image.open(img_path)
-    x, y = resize_coordinates(1031, 178, resize_values)
-    color = img.getpixel((x, y))
-    print(color)
-    if color == upgrade_color:
-        time.sleep(1)
-        x1, x2, y1, y2 = resize_ranges(860, 880, 1050, 1060, resize_values)
-        rand_x, rand_y = random.randint(x1, x2), random.randint(y1, y2)
-        tap(rand_x, rand_y)
-        print("Upgrade found!")
-        time.sleep(2)
-        tap(rand_x, rand_y)
-        return True, img_path
-    else:
-        print('Upgrade not found')
-        return False, img_path
+    with Image.open(img_path) as img:
+        x, y = resize_coordinates(1031, 178, resize_values)
+        color = img.getpixel((x, y))
+        print(color)
+        if color == upgrade_color:
+            time.sleep(1)
+            x1, x2, y1, y2 = resize_ranges(860, 880, 1050, 1060, resize_values)
+            rand_x, rand_y = random.randint(x1, x2), random.randint(y1, y2)
+            tap(rand_x, rand_y)
+            print("Upgrade found!")
+            time.sleep(2)
+            tap(rand_x, rand_y)
+            return True, img_path
+        else:
+            print('Upgrade not found')
+            return False, img_path
 
 
 def count_prizecards(img_path=None):
@@ -274,44 +278,52 @@ def count_prizecards(img_path=None):
     star_color = (242, 165, 23, 255)
     if img_path is None:
         img_path = capture_screenshot()
-    img = Image.open(img_path)
-    number_of_prizes = 0
-    x, y = resize_coordinates(1910, 200, resize_values)
-    color = img.getpixel((x, y))
-    if color == star_color:
-        number_of_prizes += 1
-        x = resize_coordinate(2000, resize_values[0])
+    with Image.open(img_path) as img:
+        number_of_prizes = 0
+        x, y = resize_coordinates(1910, 200, resize_values)
         color = img.getpixel((x, y))
         if color == star_color:
             number_of_prizes += 1
-            x = resize_coordinate(2090, resize_values[0])
+            x = resize_coordinate(2000, resize_values[0])
             color = img.getpixel((x, y))
             if color == star_color:
                 number_of_prizes += 1
-    else:
-        number_of_prizes = 0
-    print(number_of_prizes)
-    return number_of_prizes, img, img_path
+                x = resize_coordinate(2090, resize_values[0])
+                color = img.getpixel((x, y))
+                if color == star_color:
+                    number_of_prizes += 1
+        else:
+            number_of_prizes = 0
+        print(number_of_prizes)
+        return number_of_prizes, img_path
 
 
-def collect_prizecards(img, number_of_prizes, img_path):
+def collect_prizecards(number_of_prizes, img_path):
     print("collecting prizecards")
+
+    if number_of_prizes == 0:
+        remove_screenshot(img_path)
+        return
     prize_card_color = (239, 90, 36, 255)
     x_start, x_plus, y_start, y_plus = resize_ranges(195, 414, 413, 264, resize_values)
-    for y in range(y_start, int(1000 * resize_values[1]), y_plus):
-        for x in range(x_start, int(1900 * resize_values[0]), x_plus):
-            color = img.getpixel((x, y))
-            if color == prize_card_color:
-                tap(x, y)
-                time.sleep(1)
-                tap(x, y)
-                time.sleep(1)
-                number_of_prizes -= 1
-                if number_of_prizes == 0:
-                    remove_screenshot(img_path)
-                    return
+
+    with Image.open(img_path) as img:
+        for y in range(y_start, int(1000 * resize_values[1]), y_plus):
+            for x in range(x_start, int(1900 * resize_values[0]), x_plus):
+                color = img.getpixel((x, y))
+                if color == prize_card_color:
+                    tap(x, y)
+                    time.sleep(1)
+                    tap(x, y)
+                    time.sleep(1)
+                    number_of_prizes -= 1
+                    if number_of_prizes == 0:
+                        break
+            if number_of_prizes == 0:
+                break  # Breaks out of the outer loop
+
     remove_screenshot(img_path)
-    return
+
 
 
 def tap_home():
@@ -419,12 +431,12 @@ def full_event_V2(stop_event):
                     can_ad_upgrade, img_path = get_upgrade_after_match()
                     if can_ad_upgrade:
                         remove_screenshot(img_path)
-                        number_of_prizes, img, img_path = count_prizecards()
+                        number_of_prizes, img_path = count_prizecards()
 
                     else:
-                        number_of_prizes, img, img_path = count_prizecards(img_path=img_path)
+                        number_of_prizes, img_path = count_prizecards(img_path=img_path)
 
-                    collect_prizecards(img, number_of_prizes, img_path)
+                    collect_prizecards(number_of_prizes, img_path)
                 else:
                     if ticket_str == "Empty Ticket":
                         print("empty Ticket found")

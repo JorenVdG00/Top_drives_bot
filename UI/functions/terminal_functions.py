@@ -76,7 +76,10 @@ def connect_adb_to_waydroid():
         ip_address = extract_ip_address(status_output)
         if ip_address:
             adb_connect(ip_address)
-
+#
+# def connect_adb_to_bluestacks():
+#     ip_address = "127.0.0.1"
+#     adb_connect(ip_address)
 
 def adb_devices():
     try:

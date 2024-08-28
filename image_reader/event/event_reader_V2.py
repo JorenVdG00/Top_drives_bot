@@ -4,7 +4,44 @@ import re
 import os
 import itertools
 import math
-from image_enhancer import (full_image_enhancer)
+from image_reader.image_enhancer import full_image_enhancer
+import csv
+from config import TRACK_NAMES_PATH
+from dotenv import load_dotenv
+load_dotenv()
+
+
+
+
+track_names = set()
+track_names_path = TRACK_NAMES_PATH
+pytesseract.pytesseract.tesseract_cmd = os.getenv('TESSERACT_PATH')
+
+with open(track_names_path, mode='r', newline='') as file:
+    csv_reader = csv.reader(file)
+    next(csv_reader)  # Skip the header row if there's one
+    for row in csv_reader:
+        track_names.add(row[0].strip())
+
+
+# Check if any track name is in a given string and return the found track name
+def contains_track_name(s):
+    for track_name in track_names:
+        if track_name in s:
+            return track_name
+    return None
+
+
+# race_type_possibilities = [
+#     'G-FORCE TEST', 'MOUNTAIN SLALOM', '1/2 MILE DRAG', '1 MILE DRAG', '1/4 MILE DRAG',
+#     'KARTING CIRCUIT', '0-100MPH', '0-150MPH', 'CAR PARK', 'CITY STREETS SMALL', 'CITY STREETS MEDIUM', 'FOREST ROAD',
+#     'FOREST SLALOM', 'TWISTY ROAD', 'CANYON TOUR', 'FAST CIRCUIT', 'TWISTY CIRCUIT',
+#     'LOOKOUT', 'BUTTE', 'MOUNTAIN HILL CLIMB', 'MOUNTAIN HAIRPIN', 'MOUNTAIN INCLINE ROAD', 'FAST CIRCUIT'
+# ]
+
+road_type_possibilities = [
+    'ASPHALT', 'SNOW', 'DIRT', 'MIXED', 'GRASS', 'SAND', 'ICE', 'GRAVEL'
+]
 
 condition_colors = {
     'SUN': (255, 232, 147, 255),
@@ -12,16 +49,7 @@ condition_colors = {
     'WET': (109, 208, 247, 255)
 }
 
-race_type_possibilities = [
-    'G-FORCE TEST', 'MOUNTAIN SLALOM', '1/2 MILE DRAG', '1 MILE DRAG', '1/4 MILE DRAG',
-    'KARTING CIRCUIT', '0-100MPH', '0-150MPH', 'CAR PARK', 'CITY STREETS SMALL', 'CITY STREETS MEDIUM', 'FOREST ROAD',
-    'FOREST SLALOM', 'TWISTY ROAD', 'CANYON TOUR', 'FAST CIRCUIT', 'TWISTY CIRCUIT',
-    'LOOKOUT', 'BUTTE', 'MOUNTAIN HILL CLIMB', 'MOUNTAIN HAIRPIN', 'MOUNTAIN INCLINE ROAD', 'FAST CIRCUIT'
-]
 
-road_type_possibilities = [
-    'ASPHALT', 'SNOW', 'DIRT', 'MIXED', 'GRASS', 'SAND', 'ICE', 'GRAVEL'
-]
 custom_config = r'--oem 3 --psm 6'
 
 preprocessing_options = {
@@ -35,8 +63,8 @@ preprocessing_options = {
 
 
 # Function to run extractions with given preprocessing options
-def run_extraction_with_options(options, faulty_dirs):
-    new_extracted_data = extract_event_types(faulty_dirs,
+def run_extraction_with_options(options, faulty_dirs, used_img_dir, enhanced_dir):
+    new_extracted_data = extract_event_types(faulty_dirs, used_img_dir, enhanced_dir,
                                              denoise=options['denoise'],
                                              deskew=options['deskew'],
                                              grayscale=options['grayscale'],
@@ -52,12 +80,13 @@ def calculate_percentage_correct(extract_data, is_race=True):
     faults = {}
     if is_race:
         type = 'race_type'
-        possibilities = race_type_possibilities
+        possibilities = track_names
     else:
         type = 'road_type'
         possibilities = road_type_possibilities
-
+    print(extract_data)
     for dir, races in extract_data.items():
+        print(dir)
         if races[type]:
             race_type = races[type]
             total += 1
@@ -70,8 +99,10 @@ def calculate_percentage_correct(extract_data, is_race=True):
         else:
             if dir not in faults:
                 faults[dir] = {}
+            print("No fault detected")
             faults[dir] = None
     if faults == {}:
+        print("No faults detected")
         return 1, None
     return correct / total, faults
 
@@ -119,7 +150,7 @@ def clean_data(extract_data):
     return extract_data
 
 
-def extract_event_types(dirs, denoise=False, deskew=False, grayscale=False, binarize=False, contrast=False,
+def extract_event_types(dirs, used_img_dir, enhanced_dir, denoise=False, deskew=False, grayscale=False, binarize=False, contrast=False,
                         sharpness=False):
     extract_data = {}
     for dir in dirs:
@@ -156,7 +187,7 @@ def solve_faults(preprocessing_options, faulty_dirs, is_race=True):
     # Initialize variables
     if is_race:
         type = 'race_type'
-        possibilities = race_type_possibilities
+        possibilities = track_names
 
     else:
         type = 'road_type'
@@ -223,9 +254,13 @@ def change_data_to_correct_results(extract_data, correct_results, is_race=True):
 
 def complete_extraction(preprocessing_options, extract_data, is_race=True):
     percentage, faults = calculate_percentage_correct(extract_data, is_race)
-    faulty_dir = get_faulty_dirs(faults)
-    correct_results = solve_faults(preprocessing_options, faulty_dir, is_race)
-    extract_data = change_data_to_correct_results(extract_data, correct_results, is_race)
+    print(faults)
+    if faults:
+        faulty_dir = get_faulty_dirs(faults)
+        correct_results = solve_faults(preprocessing_options, faulty_dir, is_race)
+        extract_data = change_data_to_correct_results(extract_data, correct_results, is_race)
+    else:
+        print("No faults found")
     return extract_data
 
 
@@ -243,12 +278,12 @@ def contains_color(image_path, target_rgb, tolerance=5):
 
 def get_conditions(image_path, second_try=False):
     condition_dict = {}
-    if second_try:
-        condition_colors = {
-            'SUN': (255, 232, 147, 255),
-            'ROLLING': (255, 114, 85, 255),
-            'WET': (109, 206, 245, 255)
-        }
+    # if second_try:
+        # condition_colors = {
+        #     'SUN': (255, 232, 147, 255),
+        #     'ROLLING': (255, 114, 85, 255),
+        #     'WET': (109, 206, 245, 255)
+        # }
     for condition, color_code in condition_colors.items():
         if condition == 'ROLLING':
             if contains_color(image_path, color_code):
@@ -284,37 +319,38 @@ def check_consecutive_pixels(image_path, filter_color, tolerance=10, required_co
 
     return False  # No matching sequence found
 
+def get_full_event_type_list(events_dir):
+    base_dir, name = split_path(events_dir)
+    enhanced_dir = create_dir_if_not_exists(base_dir, (name + '_enhanced/'))
+    used_img_dir = events_dir
 
-###DIRECTORIES###
-test1_dir = '../ZZZZZ-TEST-IIIIIIIIMG/event_test_V2_cropped/RACING_TRIALS_-_STAGE_2/'
-base_dir, name = split_path(test1_dir)
-enhanced_dir = create_dir_if_not_exists(base_dir, (name + '_enhanced/'))
-used_img_dir = test1_dir
+    dirs = get_directories(used_img_dir)
+    sorted_dirs = sorted(dirs)
+    extract_data = extract_event_types(sorted_dirs, used_img_dir, enhanced_dir, sharpness=True)
 
-dirs = get_directories(used_img_dir)
-sorted_dirs = sorted(dirs)
-extract_data = extract_event_types(sorted_dirs, sharpness=True)
+    race_type_complete_data = complete_extraction(preprocessing_options, extract_data)
+    # all_type_complete_data = complete_extraction(preprocessing_options, race_type_complete_data, is_race=False)
 
-race_type_complete_data = complete_extraction(preprocessing_options, extract_data)
-all_type_complete_data = complete_extraction(preprocessing_options, race_type_complete_data, is_race=False)
+    perc, faults = calculate_percentage_correct(race_type_complete_data)
+    print('Race Type Percentage correct: ', perc)
+    for key, data in extract_data.items():
+        print(f'{key}: {data}')
+    perc, faults = calculate_percentage_correct(race_type_complete_data, is_race=False)
+    print('Road Type Percentage correct: ', perc)
 
-perc, faults = calculate_percentage_correct(race_type_complete_data)
-print('Race Type Percentage correct: ', perc)
-for key, data in extract_data.items():
-    print(f'{key}: {data}')
-perc, faults = calculate_percentage_correct(race_type_complete_data, is_race=False)
-print('Road Type Percentage correct: ', perc)
-
-for dir in dirs:
-    condition_dict = get_conditions(used_img_dir + dir + '/conditions.png')
-    extract_data[dir]['conditions'] = []
-    for key, value in condition_dict.items():
-        if value:
-            extract_data[dir]['conditions'].append(key)
-
-for dir in extract_data.keys():
-    if not extract_data[dir]['conditions']:
+    for dir in dirs:
         condition_dict = get_conditions(used_img_dir + dir + '/conditions.png')
+        extract_data[dir]['conditions'] = []
+        for key, value in condition_dict.items():
+            if value:
+                extract_data[dir]['conditions'].append(key)
 
-for key, value in extract_data.items():
-    print(f'{key}: {value}')
+    for dir in extract_data.keys():
+        if not extract_data[dir]['conditions']:
+            condition_dict = get_conditions(used_img_dir + dir + '/conditions.png')
+
+    for key, value in extract_data.items():
+        print(f'{key}: {value}')
+
+
+get_full_event_type_list('../tests/test_granD_c_cropped/GRAND_CANYON/')

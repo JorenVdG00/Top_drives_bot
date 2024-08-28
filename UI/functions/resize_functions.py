@@ -1,9 +1,10 @@
-import subprocess
+import os
 from config import BASIC_WIDTH, BASIC_HEIGHT
 from .general_functions import set_cwd, run_subprocess_from_path
-
+from dotenv import load_dotenv
+load_dotenv()
 # import config
-
+adb_serial_cmd = os.getenv('ADB_SERIAL_COMMAND')
 global resize_values
 
 
@@ -26,9 +27,8 @@ def resize_ranges(x1: int, x2: int, y1: int, y2: int, resize_factor: list):
 
 def calculate_screen_size():
     global resize_values
-    windows, diff_os = set_cwd()
-    # size_result = subprocess.run(f"{diff_os}adb shell wm size",cwd=windows, shell=True, capture_output=True, text=True)
-    command = f"adb shell wm size"
+    set_cwd()
+    command = f"{adb_serial_cmd} shell wm size"
     size_result = run_subprocess_from_path(command)
     print(size_result)
     size = size_result.strip()

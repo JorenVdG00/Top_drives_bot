@@ -60,7 +60,7 @@ try:
     # Output unique track names
     print("Unique Track Names:")
     # Save the set of track names to a CSV file
-    with open('track_names.csv', mode='w', newline='') as file:
+    with open('../track_names.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
         for name in sorted(track_names):
             writer.writerow([name.upper()])

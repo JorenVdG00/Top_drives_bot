@@ -4,7 +4,7 @@ import random
 from datetime import datetime
 import time
 import subprocess
-from .general_functions import capture_screenshot, remove_screenshot, swipe, tap
+from .general_functions import capture_screenshot, remove_screenshot, swipe, tap, color_almost_same
 from .resize_functions import resize_coordinate, resize_coordinates, resize_ranges, resize_same_factor, \
     calculate_screen_size
 from .general_game_functions import check_cannot_play
@@ -85,18 +85,21 @@ def check_event_available(event_number: int = 1):
     remove_screenshot(img_path)
     return is_available
 
+
 def event_requirements_met(img_path):
-    x, y = resize_coordinates(640, 293, resize_values)
-    not_met_color = (91,91,91,255)
+    x, y = resize_coordinates(645, 288, resize_values)
+    not_met_color = (67, 67, 67, 255)
 
     with Image.open(img_path) as img:
         color = img.getpixel((x, y))
-        if color == not_met_color:
+        print(color)
+        if color_almost_same(color, not_met_color, tolerance=5):
             print("event requirements not met")
             return False
         else:
             print("event requirements met")
             return True
+
 
 def tap_play_event():
     print("tapping play event")
@@ -325,7 +328,6 @@ def collect_prizecards(number_of_prizes, img_path):
     remove_screenshot(img_path)
 
 
-
 def tap_home():
     print("tapping home")
     x1, x2, y1, y2 = resize_ranges(940, 1030, 20, 115, resize_values)
@@ -419,6 +421,7 @@ def full_event_V2(stop_event):
 
                     # Tap go button
                     tap_go_button_event()
+
                     if check_cannot_play(resize_values):
                         print("cannot play found")
                         event_number += 1

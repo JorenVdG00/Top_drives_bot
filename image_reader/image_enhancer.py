@@ -103,33 +103,6 @@ def enhance_sharpness(image_path, output_path):
     enhanced_image.save(output_path)
 
 
-
-# def full_image_enhancer(image_path, output_path, contrast:bool = False, grayscale:bool = False, binarize:bool = False, denoise:bool = False, deskew:bool = False):
-#     if contrast:
-#         enhance_contrast(image_path, output_path)
-#     else:
-#         if grayscale:
-#             convert_to_grayscale(image_path, output_path)
-#         else:
-#             if binarize:
-#                 binarize_image(image_path, output_path)
-#             else:
-#                 if denoise:
-#                     remove_noise(image_path, output_path)
-#                 else:
-#                     if deskew:
-#                         deskew_image(image_path, output_path)
-#                     else:
-#                         print("No enhancer selected")
-#     if grayscale:
-#         convert_to_grayscale(output_path, output_path)
-#     if binarize:
-#         binarize_image(output_path, output_path)
-#     if denoise:
-#         remove_noise(output_path, output_path)
-#     if deskew:
-#         deskew_image(output_path, output_path)
-
 def full_image_enhancer(image_path, output_path, denoise: bool = False, deskew: bool = False, grayscale: bool = False,
                         binarize: bool = False, contrast: bool = False, sharpness: bool = False):
     if denoise:

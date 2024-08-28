@@ -29,9 +29,11 @@ def stop_waydroid_session():
     #     print(f"Exception occurred: {e}")
     #     return None
 
+
 def connect_adb_to_bluestacks():
     ip_address = "127.0.0.1"
     adb_connect(ip_address)
+
 
 def get_waydroid_status():
     return True
@@ -64,6 +66,15 @@ def extract_ip_address(status_output):
     # else:
     #     print("IP address not found in waydroid status output.")
     #     return None
+
+
+def check_device_connected(serial):
+    adb_devices_cmd = "adb devices"
+    output = run_subprocess_from_path(adb_devices_cmd)
+    if output:
+        return serial in output
+    else:
+        return False
 
 
 def adb_connect(ip_address):
@@ -119,7 +130,6 @@ def check_adb_connection():
     #         return False
     # else:
     #     return False
-
 
 # if __name__ == '__main__':
 #     connect_adb_to_waydroid()

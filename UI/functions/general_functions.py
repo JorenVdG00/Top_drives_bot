@@ -1,16 +1,17 @@
 import os
+import math
 from datetime import datetime
 import subprocess
 from config import BOT_SCREENSHOTS_DIR
-# import dotenv
+from dotenv import load_dotenv
 
-WINDOWS_ADB_PATH = "/Users/joren/Desktop/adb/platform-tools-latest-windows/platform-tools/"
-DIFF_OS = "./"
+load_dotenv()
+
+WINDOWS_ADB_PATH = os.getenv('ADB_PATH')
+ADB_SERIAL_CMD = os.getenv('ADB_SERIAL_COMMAND')
 
 
-
-
-def set_cwd():
+def set_cwd(adb_path=WINDOWS_ADB_PATH):
     # Print the current working directory
     print("Current working directory:", os.getcwd())
 
@@ -19,20 +20,22 @@ def set_cwd():
     print("Changed to home directory:", os.getcwd())
 
     # Change to a specific directory (e.g., WINDOWS_ADB_PATH)
-    os.chdir(WINDOWS_ADB_PATH)
+    os.chdir(adb_path)
     print("Changed to ADB directory:", os.getcwd())
 
-    return WINDOWS_ADB_PATH, DIFF_OS
+    return adb_path
 
-# Call the function
-set_cwd()
+
+# # Call the function
+# set_cwd()
+
 
 def tap(x, y):
-    os.system(f"adb shell input tap {x} {y}")
+    os.system(f"{ADB_SERIAL_CMD} shell input tap {x} {y}")
 
 
 def swipe(x1, y1, x2, y2):
-    os.system(f"adb shell input swipe {x1} {y1} {x2} {y2}")
+    os.system(f"{ADB_SERIAL_CMD} shell input swipe {x1} {y1} {x2} {y2}")
 
 
 def capture_screenshot():
@@ -41,9 +44,9 @@ def capture_screenshot():
     # Construct the screenshot filename
     filename = f"{BOT_SCREENSHOTS_DIR}/screenshot_{timestamp}.png"
     # Take the screenshot
-    os.system(f"adb shell screencap -p /sdcard/screenshot.png")
-    os.system(f"adb pull /sdcard/screenshot.png " + filename)
-    os.system(f"adb shell rm /sdcard/screenshot.png")
+    os.system(f"{ADB_SERIAL_CMD} shell screencap -p /sdcard/screenshot.png")
+    os.system(f"{ADB_SERIAL_CMD} pull /sdcard/screenshot.png " + filename)
+    os.system(f"{ADB_SERIAL_CMD} shell rm /sdcard/screenshot.png")
     print(f"Screenshot saved to {filename}")
     return filename
 
@@ -69,3 +72,13 @@ def run_subprocess_from_path(command, path=WINDOWS_ADB_PATH):
             print("Errors:\n", stderr)
     except Exception as e:
         print("An error occurred:", e)
+    return None
+
+
+def color_distance(c1, c2):
+    return math.sqrt(sum((a - b) ** 2 for a, b in zip(c1[:3], c2[:3])))  # Ignore the alpha channel
+
+
+def color_almost_same(color, matching_color, tolerance=10):
+    print(color_distance(color, matching_color))
+    return color_distance(color, matching_color) < tolerance

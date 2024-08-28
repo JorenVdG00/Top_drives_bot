@@ -21,11 +21,12 @@ To get a local copy up and running, follow these steps:
 
 - Python 3.10 or higher
 - pip (Python package installer)
-- Waydroid (android_emulator)
+- Waydroid (LINUX)/ Bluestacks(Windows)  #ANDROID EMULATOR#
 - adb (android debug bridge)
-- Working Top Drives – Car Cards Racing (Aptoide)
+- Working Top Drives – Car Cards Racing
 - OpenCV-Python
 - PIL
+- pytesseract
 
 ### Game-Setup
 

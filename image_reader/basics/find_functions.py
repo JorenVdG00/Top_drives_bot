@@ -10,13 +10,13 @@ coords = []
 color_coords = []
 cropping = False
 
-# Define standard sizes
-standard_size_screen = (2210, 1248)
-standard_size_cars = (557, 343)  # (cars)
-standard_size_events = (330, 220)  # (events)
-standard_size_conditions = (315, 85)  # conditions
-
-standard_size = standard_size_screen  # Choose the standard size you're working with
+# # Define standard sizes
+# standard_size_screen = (2210, 1248)
+# standard_size_cars = (557, 343)  # (cars)
+# standard_size_events = (330, 220)  # (events)
+# standard_size_conditions = (315, 85)  # conditions
+#
+# standard_size = standard_size_screen  # Choose the standard size you're working with
 
 
 def get_pixel_color(img_path, x, y, standard_size):
@@ -57,7 +57,7 @@ def click_and_get_coords(event, x, y, flags, param):
         param: Tuple containing the image and lists to store coordinates and colors.
     """
     global coords, color_coords, cropping
-    img, img_path, list_coords, list_color_coords = param
+    img, img_path, list_coords, list_color_coords, standard_size = param
 
     if event == cv2.EVENT_LBUTTONDOWN:
         coords = [(x, y)]
@@ -107,7 +107,7 @@ def get_all_coords(img_path: str, standard_size: tuple[int, int]):
     list_color_coords = []  # Reset the color coordinates list
 
     cv2.namedWindow('image')
-    cv2.setMouseCallback('image', click_and_get_coords, (resized_img, img_path, list_coords, list_color_coords))
+    cv2.setMouseCallback('image', click_and_get_coords, (resized_img, img_path, list_coords, list_color_coords, standard_size))
 
     while True:
         cv2.imshow("image", resized_img)

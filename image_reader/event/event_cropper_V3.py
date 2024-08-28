@@ -1,9 +1,14 @@
-from unicodedata import category
-
 from PIL import Image
 import pytesseract
 import re
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
+
+# Set the tesseract executable path
+pytesseract.pytesseract.tesseract_cmd = os.getenv('TESSERACT_PATH')
+
 
 standard_size = (2210, 1248)
 STANDARD_EVENT_IMG_SIZE = (330, 220)
@@ -62,7 +67,7 @@ def resize_image(image, standard_size=(2210, 1248)):
 
 
 def crop_and_save_event_type_images(event_type_img_dir, save_dir):
-    cats = []
+    cats = [] #Categories
     swap = False
     for filename in os.listdir(event_type_img_dir):
         category = classify_filename(filename)
@@ -70,7 +75,7 @@ def crop_and_save_event_type_images(event_type_img_dir, save_dir):
 
     print(len(cats))
     if ('1' in cats and '3' in cats) and (len(cats) == 2):
-        print("Both 1 and 3 found or ingame found")
+        print("Both 1 and 3 found found")
         if '1' in cats[0]:
             print('correct')
         else:
@@ -148,8 +153,6 @@ def extract_name_event(image, save_dir):
     cleaned_event_name = clean_string(event_name)
     final_event_name = cleaned_event_name.replace(' ', '_')
     create_dir_if_not_exists(save_dir, final_event_name)
-    # NOT USEFULL
-    # cropped_image.save(f"{save_dir}/{event_name}/name.png")
     return final_event_name
 
 
@@ -179,6 +182,4 @@ def clean_string(input_string):
     return cleaned_string
 
 
-# crop_and_save_event_type_images('./event_test/In_game', './event_test/In_game_cropped')
-crop_and_save_event_type_images('../ZZZZZ-TEST-IIIIIIIIMG/event_type_names/SUNSHINE_SHOWDOWN',
-                                '../ZZZZZ-TEST-IIIIIIIIMG/event_test_V2_cropped')
+crop_and_save_event_type_images('../tests/test_granD_c', '../tests/test_granD_c_cropped/bl')

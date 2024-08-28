@@ -9,7 +9,7 @@ image_reader/basics/bot_screenshots/*
 image_reader/basics/tests/*
 image_reader/basics/tests/find_color.py
 image_reader/basics/tests/find_coords_ss.py
-
+image_reader/tests/*
 
 
 

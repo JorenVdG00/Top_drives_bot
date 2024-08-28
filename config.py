@@ -12,3 +12,6 @@ BASIC_WIDTH = 2210
 BASIC_HEIGHT = 1248
 
 resize_values = None
+
+
+TRACK_NAMES_PATH = os.path.join(BASE_DIR, 'track_names.csv')

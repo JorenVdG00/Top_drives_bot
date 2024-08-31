@@ -1,10 +1,11 @@
 from PIL import Image
+from config import resize_values
 from .resize_functions import resize_coordinate, resize_coordinates
 from .general_functions import capture_screenshot, remove_screenshot, tap, color_almost_same
 import time
 
 
-def check_cannot_play(resize_values):
+def check_cannot_play():
     print("checking cannot play")
     cannot_play_coords = (720, 750)
     cannot_play_color = (51, 51, 51, 255)

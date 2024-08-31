@@ -2,13 +2,13 @@ from PIL import Image
 import os
 import random
 from datetime import datetime
+from config import resize_values
 import time
 import subprocess
 from .general_functions import capture_screenshot, remove_screenshot, swipe, tap
 from .resize_functions import resize_coordinate, resize_coordinates, resize_ranges, resize_same_factor, \
     calculate_screen_size
 
-resize_values = calculate_screen_size()
 
 
 # TODO: add tap_home to generalgamefunc

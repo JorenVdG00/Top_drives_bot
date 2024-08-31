@@ -1,8 +1,12 @@
 import re
-from .general_functions import run_subprocess_from_path
-
+import os
+from .general_functions import run_subprocess_from_path, set_cwd
+from dotenv import load_dotenv
+load_dotenv()
 # Change this to the port your adb is listening on
-ADB_PORT = 5555
+
+
+ADB_PORT = os.getenv('ADB_PORT')
 
 
 def start_waydroid_session():
@@ -31,7 +35,7 @@ def stop_waydroid_session():
 
 
 def connect_adb_to_bluestacks():
-    ip_address = "127.0.0.1"
+    ip_address = os.getenv('ADB_IP')
     adb_connect(ip_address)
 
 
@@ -78,6 +82,7 @@ def check_device_connected(serial):
 
 
 def adb_connect(ip_address):
+    set_cwd()
     adb_cmd = f"adb connect {ip_address}:{ADB_PORT}"
     run_subprocess_from_path(adb_cmd)
     # try:
@@ -101,7 +106,10 @@ def connect_adb_to_waydroid():
 
 
 def adb_devices():
-    return True
+    adb_devices_cmd = "adb devices"
+    output = run_subprocess_from_path(adb_devices_cmd)
+    return output
+
     # try:
     #     adb_command = ['adb', 'devices']
     #     result = subprocess.run(adb_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -117,7 +125,13 @@ def adb_devices():
 
 
 def check_adb_connection():
-    return True
+    output = adb_devices()
+    if ADB_PORT in output:
+        return True
+    else:
+        print("ADB connection failed")
+        return False
+
     # status = adb_devices()
     # ip_address = extract_ip_address(get_waydroid_status())
     # if ip_address:

@@ -4,21 +4,21 @@ import numpy as np
 
 
 def enhance_contrast(image_path, output_path):
-    image = Image.open(image_path)
-    enhancer = ImageEnhance.Contrast(image)
-    enhanced_image = enhancer.enhance(2)  # Adjust factor as needed
-    enhanced_image.save(output_path)
+    with Image.open(image_path) as image:
+        enhancer = ImageEnhance.Contrast(image)
+        enhanced_image = enhancer.enhance(2)  # Adjust factor as needed
+        enhanced_image.save(output_path)
 
 
 def convert_to_grayscale(image_path, output_path):
-    image = Image.open(image_path).convert('L')
-    image.save(output_path)
+    with Image.open(image_path).convert('L') as image:
+        image.save(output_path)
 
 
 def binarize_image(image_path, output_path, threshold=128):
-    image = Image.open(image_path).convert('L')
-    binary_image = image.point(lambda p: p > threshold and 255)
-    binary_image.save(output_path)
+    with Image.open(image_path).convert('L') as image:
+        binary_image = image.point(lambda p: p > threshold and 255)
+        binary_image.save(output_path)
 
 
 def remove_noise(image_path, output_path):
@@ -28,32 +28,33 @@ def remove_noise(image_path, output_path):
     cv2.imwrite(output_path, denoised_image)
 
 
+
 def correct_orientation(image_path):
     # Open the image using PIL to access EXIF data
-    image = Image.open(image_path)
+    with Image.open(image_path) as image:
 
-    # Correct the orientation based on EXIF tags, if present
-    try:
-        for orientation in ExifTags.TAGS.keys():
-            if ExifTags.TAGS[orientation] == 'Orientation':
-                break
+        # Correct the orientation based on EXIF tags, if present
+        try:
+            for orientation in ExifTags.TAGS.keys():
+                if ExifTags.TAGS[orientation] == 'Orientation':
+                    break
 
-        exif = image._getexif()
+            exif = image._getexif()
 
-        if exif is not None:
-            orientation = exif.get(orientation, None)
-            if orientation == 3:
-                image = image.rotate(180, expand=True)
-            elif orientation == 6:
-                image = image.rotate(270, expand=True)
-            elif orientation == 8:
-                image = image.rotate(90, expand=True)
-    except (AttributeError, KeyError, IndexError):
-        # No EXIF information found
-        pass
+            if exif is not None:
+                orientation = exif.get(orientation, None)
+                if orientation == 3:
+                    image = image.rotate(180, expand=True)
+                elif orientation == 6:
+                    image = image.rotate(270, expand=True)
+                elif orientation == 8:
+                    image = image.rotate(90, expand=True)
+        except (AttributeError, KeyError, IndexError):
+            # No EXIF information found
+            pass
 
-    # Save the corrected image
-    image.save(image_path)
+        # Save the corrected image
+        image.save(image_path)
 
 
 def deskew_image(image_path, output_path, angle_threshold=2):
@@ -97,10 +98,10 @@ def deskew_image(image_path, output_path, angle_threshold=2):
 
 
 def enhance_sharpness(image_path, output_path):
-    image = Image.open(image_path)
-    enhancer = ImageEnhance.Sharpness(image)
-    enhanced_image = enhancer.enhance(2)  # Adjust factor as needed
-    enhanced_image.save(output_path)
+    with Image.open(image_path) as image:
+        enhancer = ImageEnhance.Sharpness(image)
+        enhanced_image = enhancer.enhance(2)  # Adjust factor as needed
+        enhanced_image.save(output_path)
 
 
 def full_image_enhancer(image_path, output_path, denoise: bool = False, deskew: bool = False, grayscale: bool = False,

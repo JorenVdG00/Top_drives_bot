@@ -1,13 +1,13 @@
 import os
-from config import BASIC_WIDTH, BASIC_HEIGHT
+from config import BASIC_WIDTH, BASIC_HEIGHT, ADB_SERIAL_CMD, resize_values
 from .general_functions import set_cwd, run_subprocess_from_path
+from .windows_terminal_functions import connect_adb_to_bluestacks
 from dotenv import load_dotenv
+
 load_dotenv()
+
+
 # import config
-adb_serial_cmd = os.getenv('ADB_SERIAL_COMMAND')
-global resize_values
-
-
 def resize_coordinate(value, resize_factor):
     return int(value * resize_factor)
 
@@ -28,9 +28,12 @@ def resize_ranges(x1: int, x2: int, y1: int, y2: int, resize_factor: list):
 def calculate_screen_size():
     global resize_values
     set_cwd()
-    command = f"{adb_serial_cmd} shell wm size"
+    command = f"{ADB_SERIAL_CMD} shell wm size"
     size_result = run_subprocess_from_path(command)
     print(size_result)
+    if size_result == None:
+        connect_adb_to_bluestacks()
+        return calculate_screen_size()
     size = size_result.strip()
     print("size: " + size)
     print("size_result: " + str(size_result))
@@ -40,5 +43,7 @@ def calculate_screen_size():
         width, height = map(int, size.split("x"))
         print(f"Width: {width}, Height: {height}")
         resize_value = [width / BASIC_WIDTH, height / BASIC_HEIGHT]
-        # config.resize_values = resize_values
+        print(resize_value*20)
+        resize_values[:] = resize_value
+        print(resize_values*20)
         return resize_value

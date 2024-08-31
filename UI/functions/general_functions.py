@@ -2,13 +2,14 @@ import os
 import math
 from datetime import datetime
 import subprocess
-from config import BOT_SCREENSHOTS_DIR
+from config import BOT_SCREENSHOTS_DIR, ADB_SERIAL_CMD
 from dotenv import load_dotenv
 
 load_dotenv()
 
 WINDOWS_ADB_PATH = os.getenv('ADB_PATH')
-ADB_SERIAL_CMD = os.getenv('ADB_SERIAL_COMMAND')
+
+
 
 
 def set_cwd(adb_path=WINDOWS_ADB_PATH):
@@ -38,11 +39,20 @@ def swipe(x1, y1, x2, y2):
     os.system(f"{ADB_SERIAL_CMD} shell input swipe {x1} {y1} {x2} {y2}")
 
 
-def capture_screenshot():
-    # Get the current timestamp
-    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    # Construct the screenshot filename
-    filename = f"{BOT_SCREENSHOTS_DIR}/screenshot_{timestamp}.png"
+def capture_screenshot(parent_dir=None, sub_dir=None, name=None):
+    enough_args = False
+    if parent_dir is None or sub_dir is None or name is None:
+        enough_args = False
+    else:
+        enough_args = True
+        create_dir_if_not_exists(parent_dir, sub_dir)
+    if not enough_args:
+        # Get the current timestamp
+        timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        # Construct the screenshot filename
+        filename = f"{BOT_SCREENSHOTS_DIR}/screenshot_{timestamp}.png"
+    else:
+        filename = f"{parent_dir}/{sub_dir}/{name}.png"
     # Take the screenshot
     os.system(f"{ADB_SERIAL_CMD} shell screencap -p /sdcard/screenshot.png")
     os.system(f"{ADB_SERIAL_CMD} pull /sdcard/screenshot.png " + filename)
@@ -82,3 +92,15 @@ def color_distance(c1, c2):
 def color_almost_same(color, matching_color, tolerance=10):
     print(color_distance(color, matching_color))
     return color_distance(color, matching_color) < tolerance
+
+
+def create_dir_if_not_exists(parent_dir, sub_dir):
+    # Create the full path for the subdirectory
+    full_path = os.path.join(parent_dir, sub_dir)
+
+    # Check if the directory already exists
+    if not os.path.exists(full_path):
+        os.makedirs(full_path)
+        print(f"Directory '{full_path}' created.")
+    else:
+        print(f"Directory '{full_path}' already exists.")

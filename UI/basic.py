@@ -9,6 +9,9 @@ from functions.windows_terminal_functions import start_waydroid_session, stop_wa
     check_adb_connection, is_waydroid_running, connect_adb_to_bluestacks
 from functions.event_functions import full_event_V2 as full_event, capture_screenshot, swipe
 from functions.ad_functions import watch_ads
+from functions.resize_functions import calculate_screen_size
+from database.read_event_to_db import full_event_reader
+
 
 def start_bot():
     print("Bot started!")
@@ -191,8 +194,7 @@ class BotUI(QMainWindow):
 
     def watch_ads_event(self):
         self.log("Watching ads event...")
-        watch_ads()
-
+        full_event_reader()
     def swipe_right_event(self):
         self.log("Swiping right event...")
         swipe(2000, 400, 1100, 400)

@@ -19,7 +19,6 @@ pytesseract.pytesseract.tesseract_cmd = os.getenv('TESSERACT_PATH')
 
 with open(track_names_path, mode='r', newline='') as file:
     csv_reader = csv.reader(file)
-    next(csv_reader)  # Skip the header row if there's one
     for row in csv_reader:
         track_names.add(row[0].strip())
 
@@ -142,16 +141,53 @@ def get_directories(directory):
 
 
 def clean_data(extract_data):
-    for dir, races in extract_data.items():
-        for race_id, race_info in races.items():
-            # Split and clean the 'race_type' and 'road_type' values
-            race_info['race_type'] = race_info['race_type'].split('\n')[0].strip()
-            race_info['road_type'] = race_info['road_type'].split('\n')[0].strip()
+    for dir, race_info in extract_data.items():
+        # Split and clean the 'race_type' and 'road_type' values
+        race_info['race_type'] = race_info['race_type'].split('\n')[0].strip()
+        circuit = race_info['race_type'].split('\n')[0].strip()
+
+        if 'MPH' in circuit:
+            circuit = replace_o_with_zero(circuit)
+
+        for road in road_type_possibilities:
+            if road in race_info['road_type']:
+                race_info['road_type'] = road
+        for track in track_names:
+            if track in circuit:
+                race_info['race_type'] = track
     return extract_data
+
+def replace_o_with_zero(race_str):
+    """Replace 0 with O in the string to handle confusion."""
+    return race_str.replace('O', '0')
+
+def fix_missing_space(race_str, possibilities):
+    """Attempts to fix missing spaces in a race string based on known possibilities."""
+
+    # Remove spaces to simulate the input with missing spaces
+    condensed_race_str = race_str.replace(" ", "")
+
+    for possibility in possibilities:
+        if not "MPH" in possibility:
+            print(f"Possible missing space in {possibility}")
+            continue
+        condensed_possibility = possibility.replace(" ", "")
+        print(condensed_possibility)
+        possibility_0 = replace_o_with_zero(condensed_possibility)
+        race_str_0 = replace_o_with_zero(condensed_race_str)
+        print("race_str_O", race_str_0)
+        if "0-100" in possibility_0:
+            print("possibility_O", possibility_0)
+        # Check if the condensed race string matches the condensed possibility
+        if possibility_0 == race_str_0:
+            return possibility  # Return the correctly formatted possibility
+
+    # If no match is found, return the original string
+    return None
 
 
 def extract_event_types(dirs, used_img_dir, enhanced_dir, denoise=False, deskew=False, grayscale=False, binarize=False, contrast=False,
-                        sharpness=False):
+                        sharpness=False, double_lines=False):
     extract_data = {}
     for dir in dirs:
         if dir not in extract_data:
@@ -171,8 +207,23 @@ def extract_event_types(dirs, used_img_dir, enhanced_dir, denoise=False, deskew=
             fname = file.split('.')[0]
             extracted_text = pytesseract.image_to_string(img, config=custom_config)
             clean_text = extracted_text.split('\n')[0].strip()
-            # print(extracted_text)
-            extract_data[dir][fname] = clean_text
+            if 'LUMBER MILL FOREST' in extracted_text:
+                print(extracted_text)
+                print(extracted_text)
+                # print("head: " + head)
+                # print("tail: " + tail)
+                # print("merge_text: " + merge_text)
+                words = extracted_text.replace('\n', ' ').split(' ')
+                # Remove empty strings
+                filtered_words = [word for word in words if word]
+
+                # Join the words with a space
+                result = ' '.join(filtered_words)
+                print(result)
+                extract_data[dir][fname] = result
+            else:
+                extract_data[dir][fname] = clean_text
+
     return extract_data
 
 
@@ -183,7 +234,7 @@ def get_faulty_dirs(faults):
     return faulty_dirs
 
 
-def solve_faults(preprocessing_options, faulty_dirs, is_race=True):
+def solve_faults(preprocessing_options, faulty_dirs, used_img_dir, enhanced_dir, is_race=True):
     # Initialize variables
     if is_race:
         type = 'race_type'
@@ -206,21 +257,22 @@ def solve_faults(preprocessing_options, faulty_dirs, is_race=True):
         print(f"Testing with options: {options}")
 
         # Run extraction with the current options
-        extracted_data = run_extraction_with_options(options, faulty_dirs)
-        print(extracted_data)
+        extracted_data = run_extraction_with_options(options, faulty_dirs, used_img_dir, enhanced_dir)
+        cleaned_data = clean_data(extracted_data)
         # Calculate percentage and faults
-        percentage, faults = calculate_percentage_correct(extracted_data, is_race)
+        percentage, faults = calculate_percentage_correct(cleaned_data, is_race)
         print(faults)
         # Delete the correct ones out Faulty Dirs
         if faults is None:
             print('No faults detected')
+            break
         else:
             print('Faults:')
             for key, fault in faults.items():
                 print(f'{key}: {fault}')
         if not faults:
             for key in faulty_dirs:
-                correct_results[key] = extracted_data[key][type]
+                correct_results[key] = cleaned_data[key][type]
                 faulty_dirs.remove(key)
         else:
             for key in faulty_dirs:
@@ -228,9 +280,26 @@ def solve_faults(preprocessing_options, faulty_dirs, is_race=True):
                 if key not in faults:
                     print(f'{key}')
                     print(extracted_data[key])
-                    correct_results[key] = extracted_data[key][type]
+                    correct_results[key] = cleaned_data[key][type]
                     faulty_dirs.remove(key)
                 else:
+                    if is_race:
+                        if type == 'race_type':
+                            # print('B\n'*10)
+                            # print(extracted_data[key][type])
+                            # correct_str = fix_missing_space(extracted_data[key][type], track_names)
+                            # print(correct_str)
+                            # if correct_str:
+                            #     print('correct:', correct_str)
+                            #     correct_results[key] = correct_str
+                            #     faulty_dirs.remove(key)
+                            #     break
+                            track_name = contains_track_name(cleaned_data[key][type])
+                            if track_name:
+                                correct_results[key] = track_name
+                                faulty_dirs.remove(key)
+                                break
+
                     for possible in possibilities:
                         if possible in faults[key]:
                             correct_results[key] = possible
@@ -240,6 +309,7 @@ def solve_faults(preprocessing_options, faulty_dirs, is_race=True):
         # Store the results
         results[str(options)] = {'percentage': percentage, 'faults': faults}
     return correct_results
+
 
 
 def change_data_to_correct_results(extract_data, correct_results, is_race=True):
@@ -252,12 +322,12 @@ def change_data_to_correct_results(extract_data, correct_results, is_race=True):
     return extract_data
 
 
-def complete_extraction(preprocessing_options, extract_data, is_race=True):
+def complete_extraction(preprocessing_options, extract_data, used_img_dir, enhanced_img_dir, is_race=True):
     percentage, faults = calculate_percentage_correct(extract_data, is_race)
     print(faults)
     if faults:
         faulty_dir = get_faulty_dirs(faults)
-        correct_results = solve_faults(preprocessing_options, faulty_dir, is_race)
+        correct_results = solve_faults(preprocessing_options, faulty_dir,used_img_dir,enhanced_img_dir, is_race)
         extract_data = change_data_to_correct_results(extract_data, correct_results, is_race)
     else:
         print("No faults found")
@@ -276,21 +346,17 @@ def contains_color(image_path, target_rgb, tolerance=5):
     return False
 
 
-def get_conditions(image_path, second_try=False):
+def get_conditions(image_path):
     condition_dict = {}
-    # if second_try:
-        # condition_colors = {
-        #     'SUN': (255, 232, 147, 255),
-        #     'ROLLING': (255, 114, 85, 255),
-        #     'WET': (109, 206, 245, 255)
-        # }
     for condition, color_code in condition_colors.items():
-        if condition == 'ROLLING':
+        if condition == 'HIGH':
             if contains_color(image_path, color_code):
                 if check_consecutive_pixels(image_path, color_code, required_consecutive=30):
                     condition_dict['HIGH'] = True
+                    condition_dict['ROLLING'] = False
                 else:
                     condition_dict['ROLLING'] = True
+                    condition_dict['HIGH'] = False
         else:
             condition_dict[condition] = contains_color(image_path, color_code)
 
@@ -320,37 +386,31 @@ def check_consecutive_pixels(image_path, filter_color, tolerance=10, required_co
     return False  # No matching sequence found
 
 def get_full_event_type_list(events_dir):
+    extract_data = {}
     base_dir, name = split_path(events_dir)
     enhanced_dir = create_dir_if_not_exists(base_dir, (name + '_enhanced/'))
     used_img_dir = events_dir
 
     dirs = get_directories(used_img_dir)
     sorted_dirs = sorted(dirs)
+    print(used_img_dir*20)
     extract_data = extract_event_types(sorted_dirs, used_img_dir, enhanced_dir, sharpness=True)
+    cleaned_data = clean_data(extract_data)
 
-    race_type_complete_data = complete_extraction(preprocessing_options, extract_data)
-    # all_type_complete_data = complete_extraction(preprocessing_options, race_type_complete_data, is_race=False)
+    race_type_complete_data = complete_extraction(preprocessing_options, cleaned_data, used_img_dir, enhanced_dir)
+    all_type_complete_data = complete_extraction(preprocessing_options, race_type_complete_data, used_img_dir, enhanced_dir, is_race=False)
 
     perc, faults = calculate_percentage_correct(race_type_complete_data)
     print('Race Type Percentage correct: ', perc)
-    for key, data in extract_data.items():
-        print(f'{key}: {data}')
-    perc, faults = calculate_percentage_correct(race_type_complete_data, is_race=False)
+
+    perc, faults = calculate_percentage_correct(all_type_complete_data, is_race=False)
     print('Road Type Percentage correct: ', perc)
 
     for dir in dirs:
         condition_dict = get_conditions(used_img_dir + dir + '/conditions.png')
-        extract_data[dir]['conditions'] = []
-        for key, value in condition_dict.items():
-            if value:
-                extract_data[dir]['conditions'].append(key)
+        extract_data[dir]['conditions'] = condition_dict
 
-    for dir in extract_data.keys():
-        if not extract_data[dir]['conditions']:
-            condition_dict = get_conditions(used_img_dir + dir + '/conditions.png')
-
-    for key, value in extract_data.items():
-        print(f'{key}: {value}')
+    return extract_data
 
 
-get_full_event_type_list('../tests/test_granD_c_cropped/GRAND_CANYON/')
+# get_full_event_type_list('../tests/test_granD_c_cropped/GRAND_CANYON/')

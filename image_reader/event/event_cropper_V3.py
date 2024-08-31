@@ -1,20 +1,21 @@
 from PIL import Image
 import pytesseract
 import re
+from datetime import timedelta, datetime
 import os
 from dotenv import load_dotenv
-load_dotenv()
+from UI.functions.general_functions import create_dir_if_not_exists
 
+load_dotenv()
 
 # Set the tesseract executable path
 pytesseract.pytesseract.tesseract_cmd = os.getenv('TESSERACT_PATH')
-
 
 standard_size = (2210, 1248)
 STANDARD_EVENT_IMG_SIZE = (330, 220)
 
 event_coordinates = {
-    "name": (650, 270, 1550, 350),
+    "name": (700, 200, 1400, 260),
     "event_x": {
         "event_x_1": (170, 500),
         "event_x_2": (555, 885),
@@ -39,7 +40,7 @@ event_coordinates = {
 }
 
 event_img_coords = {
-    "race_type": (0, 5, 330, 50),
+    "race_type": (0, 5, 330, 80),
     "conditions": (5, 60, 320, 145),
     "event_number": (0, 150, 65, 215),
     "road_type": (75, 150, 330, 215)
@@ -66,8 +67,36 @@ def resize_image(image, standard_size=(2210, 1248)):
     return image.resize(standard_size, Image.Resampling.LANCZOS)
 
 
+def get_event_name(image_path):
+    name_coords = event_coordinates['name']
+    with Image.open(image_path) as image:
+        resized_image = resize_image(image)
+        cropped_image = resized_image.crop(name_coords)
+        extract_name = pytesseract.image_to_string(cropped_image)
+        print("extract: " + extract_name)
+        event_name = extract_name[:-1]
+        print("event: " + event_name)
+        cleaned_event_name = clean_string(event_name)
+        print("cleaned: " + cleaned_event_name)
+        final_event_name = cleaned_event_name.replace(' ', '_')
+        print("final: " + final_event_name)
+        return final_event_name
+
+
+def extract_name_event(image, save_dir):
+    name_coords = event_coordinates['name']
+    cropped_image = image.crop(name_coords)
+    extract_name = pytesseract.image_to_string(cropped_image)
+    event_name = extract_name[:-1]
+    cleaned_event_name = clean_string(event_name)
+    final_event_name = cleaned_event_name.replace(' ', '_')
+    create_dir_if_not_exists(save_dir, final_event_name)
+    return final_event_name
+
+
+
 def crop_and_save_event_type_images(event_type_img_dir, save_dir):
-    cats = [] #Categories
+    cats = []  # Categories
     swap = False
     for filename in os.listdir(event_type_img_dir):
         category = classify_filename(filename)
@@ -96,39 +125,27 @@ def crop_and_save_event_type_images(event_type_img_dir, save_dir):
         img_path = os.path.join(event_type_img_dir, filename)
         category = classify_filename(img_path)
         print(category)
-        image = Image.open(img_path)
-        image = resize_image(image, standard_size)
+        with Image.open(img_path) as image:
+            image = resize_image(image, standard_size)
 
-        if category == 'No match':
-            print(f"No match found for {img_path}")
-            break
-        if category == 'in_game':
-            crops_ingame_event_types(image, save_dir)
-        elif category == '1':
-            event_number = int(category[-1])
-            name = extract_name_event(image, save_dir)
-            create_dir_if_not_exists(save_dir, name)
-            crop_event_types(image, save_dir, name, event_number)
-            event_number += 1
-            crop_event_types(image, save_dir, name, event_number)
+            if category == 'No match':
+                print(f"No match found for {img_path}")
+                break
+            if category == 'in_game':
+                crops_ingame_event_types(image, save_dir)
+            elif category == '1':
+                event_number = int(category[-1])
+                name = extract_name_event(image, save_dir)
+                create_dir_if_not_exists(save_dir, name)
+                crop_event_types(image, save_dir, name, event_number)
+                event_number += 1
+                crop_event_types(image, save_dir, name, event_number)
 
-        elif category == '3':
-            event_number = int(category[-1])
-            crop_event_types(image, save_dir, name, event_number)
-            event_number += 1
-            crop_event_types(image, save_dir, name, event_number)
-
-
-def create_dir_if_not_exists(parent_dir, sub_dir):
-    # Create the full path for the subdirectory
-    full_path = os.path.join(parent_dir, sub_dir)
-
-    # Check if the directory already exists
-    if not os.path.exists(full_path):
-        os.makedirs(full_path)
-        print(f"Directory '{full_path}' created.")
-    else:
-        print(f"Directory '{full_path}' already exists.")
+            elif category == '3':
+                event_number = int(category[-1])
+                crop_event_types(image, save_dir, name, event_number)
+                event_number += 1
+                crop_event_types(image, save_dir, name, event_number)
 
 
 def crops_ingame_event_types(image, save_dir, name=None):
@@ -143,17 +160,6 @@ def crops_ingame_event_types(image, save_dir, name=None):
         else:
             cropped_image.save(f"{save_dir}/In_game_cropped-{i}.png")
         i += 1
-
-
-def extract_name_event(image, save_dir):
-    name_coords = event_coordinates['name']
-    cropped_image = image.crop(name_coords)
-    extract_name = pytesseract.image_to_string(cropped_image)
-    event_name = extract_name[:-1]
-    cleaned_event_name = clean_string(event_name)
-    final_event_name = cleaned_event_name.replace(' ', '_')
-    create_dir_if_not_exists(save_dir, final_event_name)
-    return final_event_name
 
 
 def crop_event_types(image, save_dir, name, event_number):
@@ -182,4 +188,4 @@ def clean_string(input_string):
     return cleaned_string
 
 
-crop_and_save_event_type_images('../tests/test_granD_c', '../tests/test_granD_c_cropped/bl')
+

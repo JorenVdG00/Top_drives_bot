@@ -4,6 +4,7 @@ import random
 from datetime import datetime
 import time
 import subprocess
+from config import resize_values
 from .general_functions import capture_screenshot, remove_screenshot, swipe, tap, color_almost_same
 from .resize_functions import resize_coordinate, resize_coordinates, resize_ranges, resize_same_factor, \
     calculate_screen_size
@@ -67,21 +68,32 @@ def tap_event(event_number: int = 1):
 
 
 def check_event_available(event_number: int = 1):
+    tap_home()
+    tap_events()
+    if event_number > 3:
+        swipe_coords = resize_ranges(1320, 700, 330, 330, resize_values)
+        for i in range(event_number-3):
+            swipe(swipe_coords[0], swipe_coords[2], swipe_coords[1], swipe_coords[3])
+        x, y = resize_coordinates(2180, 266, resize_values)
+    else:
+        if event_number == 1:
+            x, y = resize_coordinates(1080, 266, resize_values)
+        if event_number == 2:
+            x, y = resize_coordinates(1700, 266, resize_values)
+        if event_number == 3:
+            x, y = resize_coordinates(2180, 266, resize_values)
+
     unavailable_color = (112, 112, 112, 255)
     img_path = capture_screenshot()
     with Image.open(img_path) as img:
-        if event_number == 4 or event_number == 5:
-            x, y = resize_coordinates(1978, 285, resize_values)
-            color = img.getpixel((x, y))
-            if color == unavailable_color:
-                print("event not available")
-                is_available = False
-            else:
-                print("event available")
-                is_available = True
+        color = img.getpixel((x, y))
+        if color == unavailable_color:
+            print("event not available")
+            is_available = False
         else:
             print("event available")
             is_available = True
+
     remove_screenshot(img_path)
     return is_available
 
@@ -379,8 +391,7 @@ def tap_home():
 
 
 def full_event_V2(stop_event):
-    global resize_values
-    resize_values = calculate_screen_size()
+    calculate_screen_size()
     event_number = 1
     while event_number <= 5:
         if stop_event.is_set():

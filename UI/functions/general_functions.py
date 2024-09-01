@@ -40,6 +40,7 @@ def swipe(x1, y1, x2, y2):
 
 
 def capture_screenshot(parent_dir=None, sub_dir=None, name=None):
+    set_cwd()
     enough_args = False
     if parent_dir is None or sub_dir is None or name is None:
         enough_args = False

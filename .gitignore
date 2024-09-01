@@ -11,7 +11,7 @@ image_reader/basics/tests/find_color.py
 image_reader/basics/tests/find_coords_ss.py
 image_reader/tests/*
 database/temp/*
-
+practice/*
 
 **__pycache__/
 .idea

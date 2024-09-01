@@ -188,4 +188,10 @@ def clean_string(input_string):
     return cleaned_string
 
 
+def crop_event_img(image_path, save_dir, name):
+    img = Image.open(image_path)
+    resized_img = resize_image(img)
+    x1, y1, x2, y2 = 710,260,1300,915
+    cropped_image = resized_img.crop((x1, y1, x2, y2))
+    cropped_image.save(f"{save_dir}/{name}.png")
 

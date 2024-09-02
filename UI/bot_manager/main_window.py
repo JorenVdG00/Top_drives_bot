@@ -1,8 +1,14 @@
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QTabWidget, QLabel, QTextEdit
+from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QTabWidget, QLabel, QTextEdit, QAction
 from terminal_tab import TerminalTab
 from event_tab import EventTab
-from car_assignment_tab import CarAssignmentTab
+from car_assignment_tab_v2 import CarAssignmentTab
+from config_check import ConfigDialog
 from worker import Worker
+from dotenv import load_dotenv
+from config import adb_ip, adb_port, ADB_SERIAL_CMD
+import os
+load_dotenv()
+
 
 
 class MainWindow(QMainWindow):
@@ -19,6 +25,20 @@ class MainWindow(QMainWindow):
         # Main layout
         main_layout = QVBoxLayout()
         tabs = QTabWidget()
+        menubar = self.menuBar()
+
+        # Add a Settings menu
+        settings_menu = menubar.addMenu('Settings')
+        test_menu = menubar.addMenu('Test')
+
+        # Add an action to open the configDialog
+        config_action = QAction('Configure ADB', self)
+        config_action.triggered.connect(self.open_config_dialog)
+        settings_menu.addAction(config_action)
+
+        test_action = QAction('Test ADB', self)
+        test_action.triggered.connect(self.show_test_dialog)
+        test_menu.addAction(test_action)
 
         # Add tabs
         terminal_tab = TerminalTab(self.worker, self)
@@ -59,3 +79,14 @@ class MainWindow(QMainWindow):
     def log(self, message):
         # Log messages to the log area
         self.log_area.append(message)
+
+    def open_config_dialog(self):
+        config_dialog = ConfigDialog()
+        config_dialog.exec_()
+
+    def show_test_dialog(self):
+        adb_ip_env = os.getenv('ADB_IP')
+        adb_port_env = os.getenv('ADB_PORT')
+        adb_path_env = os.getenv('ADB_PATH')
+        self.log(f"Connecting to {adb_ip_env}:{adb_port_env}\n{adb_path_env}")
+        self.log(f"2.0. Connecting to {adb_ip}:{adb_port}\n{ADB_SERIAL_CMD}")

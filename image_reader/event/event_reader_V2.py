@@ -83,14 +83,21 @@ def calculate_percentage_correct(extract_data, is_race=True):
     else:
         type = 'road_type'
         possibilities = road_type_possibilities
-    print(extract_data)
     for dir, races in extract_data.items():
-        print(dir)
         if races[type]:
             race_type = races[type]
             total += 1
             if race_type in possibilities:
-                correct += 1
+                is_correct = True
+                for possibility in possibilities:
+                    if possibility not in race_type and race_type in possibility:
+                        if dir not in faults:
+                            faults[dir] = race_type
+                            is_correct = False
+                            continue
+                if is_correct:
+                    correct += 1
+
             else:
                 if dir not in faults:
                     faults[dir] = {}
@@ -103,6 +110,10 @@ def calculate_percentage_correct(extract_data, is_race=True):
     if faults == {}:
         print("No faults detected")
         return 1, None
+    for dir, fault in faults.items():
+        print("Fault detected")
+        if fault:
+            print(f'{dir}: {fault}')
     return correct / total, faults
 
 
@@ -196,7 +207,7 @@ def extract_event_types(dirs, used_img_dir, enhanced_dir, denoise=False, deskew=
         sorted_files = sorted(files)
         create_dir_if_not_exists(enhanced_dir, dir)
         for file in sorted_files:
-            if file in ('conditions.png', 'event_number.png'):
+            if file in ('conditions.png', 'event_number.png', 'full_race.png'):
                 continue
             full_image_enhancer(used_img_dir + dir + '/' + file, enhanced_dir + dir + '/' + file, denoise=denoise,
                                 deskew=deskew, grayscale=grayscale,
@@ -206,23 +217,31 @@ def extract_event_types(dirs, used_img_dir, enhanced_dir, denoise=False, deskew=
             img = Image.open(enhanced_dir + dir + '/' + file)
             fname = file.split('.')[0]
             extracted_text = pytesseract.image_to_string(img, config=custom_config)
-            clean_text = extracted_text.split('\n')[0].strip()
-            if 'LUMBER MILL FOREST' in extracted_text:
-                print(extracted_text)
-                print(extracted_text)
-                # print("head: " + head)
-                # print("tail: " + tail)
-                # print("merge_text: " + merge_text)
-                words = extracted_text.replace('\n', ' ').split(' ')
-                # Remove empty strings
-                filtered_words = [word for word in words if word]
+            # clean_text = extracted_text.split('\n')[0].strip()
+            words = extracted_text.replace('\n', ' ').split(' ')
+            # Remove empty strings
+            filtered_words = [word for word in words if word]
 
-                # Join the words with a space
-                result = ' '.join(filtered_words)
-                print(result)
-                extract_data[dir][fname] = result
-            else:
-                extract_data[dir][fname] = clean_text
+            # Join the words with a space
+            result = ' '.join(filtered_words)
+            print(result)
+            extract_data[dir][fname] = result
+            # if 'LUMBER MILL FOREST' in extracted_text:
+            #     print(extracted_text)
+            #     print(extracted_text)
+            #     # print("head: " + head)
+            #     # print("tail: " + tail)
+            #     # print("merge_text: " + merge_text)
+            #     words = extracted_text.replace('\n', ' ').split(' ')
+            #     # Remove empty strings
+            #     filtered_words = [word for word in words if word]
+            #
+            #     # Join the words with a space
+            #     result = ' '.join(filtered_words)
+            #     print(result)
+            #     extract_data[dir][fname] = result
+            # else:
+            #     extract_data[dir][fname] = clean_text
 
     return extract_data
 
@@ -388,7 +407,7 @@ def check_consecutive_pixels(image_path, filter_color, tolerance=10, required_co
 def get_full_event_type_list(events_dir):
     extract_data = {}
     base_dir, name = split_path(events_dir)
-    enhanced_dir = create_dir_if_not_exists(base_dir, (name + '_enhanced/'))
+    enhanced_dir = create_dir_if_not_exists(base_dir, 'enhanced/')
     used_img_dir = events_dir
 
     dirs = get_directories(used_img_dir)
@@ -400,17 +419,26 @@ def get_full_event_type_list(events_dir):
     race_type_complete_data = complete_extraction(preprocessing_options, cleaned_data, used_img_dir, enhanced_dir)
     all_type_complete_data = complete_extraction(preprocessing_options, race_type_complete_data, used_img_dir, enhanced_dir, is_race=False)
 
-    perc, faults = calculate_percentage_correct(race_type_complete_data)
-    print('Race Type Percentage correct: ', perc)
-
-    perc, faults = calculate_percentage_correct(all_type_complete_data, is_race=False)
-    print('Road Type Percentage correct: ', perc)
-
     for dir in dirs:
         condition_dict = get_conditions(used_img_dir + dir + '/conditions.png')
         extract_data[dir]['conditions'] = condition_dict
 
     return extract_data
+
+
+def get_ingame_race_tracks(dir):
+    extract_data = {}
+    used_img_dir = dir
+    base_dir, name = split_path(dir)
+    enhanced_dir = create_dir_if_not_exists(base_dir, 'enhanced/')
+    dirs = get_directories(used_img_dir)
+    sorted_dirs = sorted(dirs)
+    extract_data = extract_event_types(sorted_dirs, used_img_dir, enhanced_dir, sharpness=True)
+    cleaned_data = clean_data(extract_data)
+
+    race_type_complete_data = complete_extraction(preprocessing_options, cleaned_data, used_img_dir, enhanced_dir)
+    return race_type_complete_data
+
 
 
 # get_full_event_type_list('../tests/test_granD_c_cropped/GRAND_CANYON/')

@@ -14,6 +14,7 @@ def create_tables():
             event_id SERIAL PRIMARY KEY,
             event_name VARCHAR(255) NOT NULL,
             end_time TIMESTAMP NOT NULL,
+            event_dir VARCHAR(255) NOT NULL,
             ended BOOLEAN DEFAULT FALSE);
         """)
 
@@ -21,6 +22,7 @@ def create_tables():
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS series (
             series_id SERIAL PRIMARY KEY,
+            serie_number INTEGER NOT NULL,
             event_id INTEGER REFERENCES events(event_id))
         """)
 
@@ -69,10 +71,10 @@ def drop_tables():
 
     try:
         cursor.execute("""
+        DROP TABLE IF EXISTS car_assignments;
         DROP TABLE IF EXISTS races;
         DROP TABLE IF EXISTS series;
         DROP TABLE IF EXISTS events;
-        DROP TABLE IF EXISTS car_assignments;
         """)
 
         conn.commit()

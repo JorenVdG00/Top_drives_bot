@@ -36,7 +36,7 @@ class EventTab(QWidget):
         self.swipe_right_button.clicked.connect(self.swipe_right_event)
         self.swipe_up_button.clicked.connect(self.swipe_up_event)
         self.full_event_button.clicked.connect(self.full_event_bot)
-        self.stop_full_event_button.clicked.connect(self.stop_full_event_bot)
+        # self.stop_full_event_button.clicked.connect(self.stop_full_event_bot)
 
     def capture_screenshot(self):
         self.main_window.log("Capturing screenshot...")
@@ -57,17 +57,17 @@ class EventTab(QWidget):
 
     def full_event_bot(self):
         self.main_window.log("Starting full event bot...")
-        self.stop_event.clear()
+        # self.stop_event.clear()
         self.bot_thread = threading.Thread(target=self.run_full_event)
         self.bot_thread.start()
 
     def stop_full_event_bot(self):
         self.main_window.log("Stopping full event bot...")
-        self.stop_event.set()
+        # self.stop_event.set()
         if self.bot_thread is not None:
             self.bot_thread.join()
             self.bot_thread = None
         self.main_window.log("Full event bot stopped.")
 
     def run_full_event(self):
-        full_event(self.stop_event)
+        full_event() #ADD self.stop_event

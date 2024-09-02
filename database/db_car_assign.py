@@ -1,4 +1,4 @@
-from db_general import get_db_connection
+from database.db_general import get_db_connection
 
 
 def assign_car_to_race(race_id, car_number):
@@ -7,6 +7,11 @@ def assign_car_to_race(race_id, car_number):
     cursor = conn.cursor()
 
     try:
+        # First, delete any existing assignments for this race_id
+        cursor.execute("""
+            DELETE FROM car_assignments WHERE race_id = %s;
+        """, (race_id,))
+
         cursor.execute("""
             INSERT INTO car_assignments (race_id, car_number)
             VALUES (%s, %s)

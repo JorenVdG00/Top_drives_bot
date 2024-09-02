@@ -83,7 +83,7 @@ def get_event_name(image_path):
         return final_event_name
 
 
-def extract_name_event(image, save_dir):
+def extract_name_event(image, save_dir=None):
     name_coords = event_coordinates['name']
     cropped_image = image.crop(name_coords)
     extract_name = pytesseract.image_to_string(cropped_image)
@@ -92,7 +92,6 @@ def extract_name_event(image, save_dir):
     final_event_name = cleaned_event_name.replace(' ', '_')
     create_dir_if_not_exists(save_dir, final_event_name)
     return final_event_name
-
 
 
 def crop_and_save_event_type_images(event_type_img_dir, save_dir):
@@ -131,9 +130,7 @@ def crop_and_save_event_type_images(event_type_img_dir, save_dir):
             if category == 'No match':
                 print(f"No match found for {img_path}")
                 break
-            if category == 'in_game':
-                crops_ingame_event_types(image, save_dir)
-            elif category == '1':
+            if category == '1':
                 event_number = int(category[-1])
                 name = extract_name_event(image, save_dir)
                 create_dir_if_not_exists(save_dir, name)
@@ -148,18 +145,25 @@ def crop_and_save_event_type_images(event_type_img_dir, save_dir):
                 crop_event_types(image, save_dir, name, event_number)
 
 
-def crops_ingame_event_types(image, save_dir, name=None):
+def crops_ingame_event_types(image_path, save_dir, name=None):
+    if name:
+        img_dir = f"{save_dir}/{name}/"
+        create_dir_if_not_exists(save_dir, name)
+    else:
+        img_dir = f"{save_dir}/"
+        create_dir_if_not_exists(save_dir)
+
     y1, y2 = event_coordinates['in_game_event_y']
     print(y1, y2)
     i = 1
     for xcoords in event_coordinates['in_game_event_x'].values():
         x1, x2 = xcoords
-        cropped_image = image.crop((x1, y1, x2, y2))
-        if name:
-            cropped_image.save(f"{save_dir}/{name}/{i}.png")
-        else:
-            cropped_image.save(f"{save_dir}/In_game_cropped-{i}.png")
-        i += 1
+        with Image.open(image_path) as image:
+            resized_image = resize_image(image)
+            cropped_image = resized_image.crop((x1, y1, x2, y2))
+            cropped_image.save(f"{img_dir}/{i}.png")
+            crop_event_imgs(cropped_image, f"{img_dir}/{i}/")
+            i += 1
 
 
 def crop_event_types(image, save_dir, name, event_number):
@@ -171,11 +175,13 @@ def crop_event_types(image, save_dir, name, event_number):
         event_img_dir = f"{save_dir}/{name}"
         create_dir_if_not_exists(event_img_dir, f'{event_number}-{i}')
         img_dir = f"{event_img_dir}/{event_number}-{i}"
+        cropped_image.save(img_dir + '/full_race.png')
         crop_event_imgs(cropped_image, img_dir)
         i += 1
 
 
 def crop_event_imgs(img, save_dir):
+    create_dir_if_not_exists(save_dir)
     for key, coords in event_img_coords.items():
         cropped_image = img.crop(coords)
         cropped_image.save(f"{save_dir}/{key}.png")
@@ -188,10 +194,28 @@ def clean_string(input_string):
     return cleaned_string
 
 
-def crop_event_img(image_path, save_dir, name):
-    img = Image.open(image_path)
-    resized_img = resize_image(img)
-    x1, y1, x2, y2 = 710,260,1300,915
-    cropped_image = resized_img.crop((x1, y1, x2, y2))
-    cropped_image.save(f"{save_dir}/{name}.png")
+def crop_event_display_img(image_path, save_dir, name):
+    # img = Image.open(image_path)
+    with Image.open(image_path) as img:
+        resized_img = resize_image(img)
+        x1, y1, x2, y2 = 710, 260, 1300, 915
+        cropped_image = resized_img.crop((x1, y1, x2, y2))
+        create_dir_if_not_exists(save_dir)
+        cropped_image.save(f"{save_dir}/{name}.png")
+    display_img_path = f"{save_dir}/{name}.png"
+    return display_img_path
+
+def crop_all_cars_img(image_path, save_dir):
+    with Image.open(image_path) as img:
+        resized_img = resize_image(img)
+        std_x1, y1, x2, y2 = 70, 1010, 390, 1215
+        width = x2 - std_x1
+        skip_step = 31
+        for i in range(1, 6):
+            x1 = std_x1 + ((i-1) * (width+skip_step))
+            # x1 = (x1 * i) + (skip_step*(i-1))
+            x2 = x1 + width
+            cropped_image = resized_img.crop((x1, y1, x2, y2))
+            create_dir_if_not_exists(save_dir)
+            cropped_image.save(f"{save_dir}/car{i}.png")
 

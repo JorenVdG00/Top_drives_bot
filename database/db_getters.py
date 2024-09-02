@@ -73,7 +73,7 @@ def get_series_by_event_id(event_id):
 
     try:
         cursor.execute("""
-            SELECT serie_id
+            SELECT series_id
             FROM series
             WHERE event_id = %s;
             """, (event_id,))

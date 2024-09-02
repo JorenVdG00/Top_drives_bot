@@ -23,3 +23,16 @@ adb_serial = os.getenv('ADB_SERIAL')
 ADB_SERIAL_CMD = f"{adb_serial} {adb_ip}:{adb_port} "
 
 TRACK_NAMES_PATH = os.path.join(BASE_DIR, 'track_names.csv')
+
+
+def reload_env():
+    load_dotenv(override=True)  # Reload and override existing environment variables
+
+    global adb_ip, adb_port, adb_serial, ADB_SERIAL_CMD
+
+    adb_ip = os.getenv('ADB_IP')
+    adb_port = os.getenv('ADB_PORT')
+    adb_serial = os.getenv('ADB_SERIAL')
+
+    # Recreate the command with updated variables
+    ADB_SERIAL_CMD = f"{adb_serial} {adb_ip}:{adb_port} "

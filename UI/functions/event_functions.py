@@ -6,9 +6,12 @@ import time
 import subprocess
 from config import resize_values
 from .general_functions import capture_screenshot, remove_screenshot, swipe, tap, color_almost_same
+from UI.bot_manager.db_assign import get_corresponding_assignees
 from .resize_functions import resize_coordinate, resize_coordinates, resize_ranges, resize_same_factor, \
     calculate_screen_size
 from .general_game_functions import check_cannot_play
+from image_reader.event.event_cropper_V3 import get_event_name
+from database.methods.db_events import get_event_id_by_name
 
 
 def check_ticket(img_path):
@@ -72,7 +75,7 @@ def check_event_available(event_number: int = 1):
     tap_events()
     if event_number > 3:
         swipe_coords = resize_ranges(1320, 700, 330, 330, resize_values)
-        for i in range(event_number-3):
+        for i in range(event_number - 3):
             swipe(swipe_coords[0], swipe_coords[2], swipe_coords[1], swipe_coords[3])
         x, y = resize_coordinates(2180, 266, resize_values)
     else:
@@ -84,8 +87,8 @@ def check_event_available(event_number: int = 1):
             x, y = resize_coordinates(2180, 266, resize_values)
 
     unavailable_color = (112, 112, 112, 255)
-    img_path = capture_screenshot()
-    with Image.open(img_path) as img:
+    display_img_path = capture_screenshot()
+    with Image.open(display_img_path) as img:
         color = img.getpixel((x, y))
         if color == unavailable_color:
             print("event not available")
@@ -94,8 +97,53 @@ def check_event_available(event_number: int = 1):
             print("event available")
             is_available = True
 
-    remove_screenshot(img_path)
-    return is_available
+    return is_available, display_img_path
+
+
+def swipe_left_one_event():
+    x1_swipe, x2_swipe, y1, y2 = resize_ranges(1335, 700, 400, 400, resize_values)
+    x_step = (x1_swipe - x2_swipe) // 2
+    # swipe slow
+    swipe(x1_swipe - x_step, y1, x2_swipe, y1)  # Dont know how but this is perfect
+    time.sleep(1)
+
+
+def get_event_number_inactive(save_display=False):
+    unavailable_x1, unavailable_y1 = resize_coordinates(1120, 290, resize_values)
+    unavailable_color = (112, 112, 112, 255)
+    event_number = 0
+    open_events_img_paths = []
+    event_unavailable = False
+
+    tap_home()
+    tap_events()
+    while not event_unavailable:
+        if event_number > 0:
+            swipe_left_one_event()
+
+        display_img_path = capture_screenshot()
+        time.sleep(0.5)
+        with Image.open(display_img_path) as img:
+            color = img.getpixel((unavailable_x1, unavailable_y1))
+            print(color)
+            if color_almost_same(color, unavailable_color, tolerance=10):
+                print("event not available")
+                event_unavailable = True
+            else:
+                print("event available")
+                event_unavailable = False
+                open_events_img_paths.append(display_img_path)
+        event_number += 1
+        time.sleep(0.5)
+    inactive_event_number = event_number
+    tap_home()
+    tap_events()
+    if save_display:
+        return inactive_event_number, open_events_img_paths,
+    else:
+        for img_path in open_events_img_paths:
+            remove_screenshot(img_path)
+        return inactive_event_number
 
 
 def event_requirements_met(img_path):
@@ -170,7 +218,7 @@ def tap_in_event_play():
     time.sleep(5)
 
 
-def swipe_cars_to_slots():
+def swipe_cars_to_slots(assignees):
     print("swiping cars to slots")
     y1, y2 = resize_same_factor(1110, 1150, resize_values[1])
     y_car = random.randint(y1, y2)
@@ -179,6 +227,7 @@ def swipe_cars_to_slots():
     car3 = random.randint(int(1280 * resize_values[0]), int(1300 * resize_values[0]))
     car4 = random.randint(int(1560 * resize_values[0]), int(1600 * resize_values[0]))
     car5 = random.randint(int(1900 * resize_values[0]), int(1930 * resize_values[0]))
+    carlist = [car1, car2, car3, car4, car5]
 
     race_slot_y = random.randint(int(700 * resize_values[1]), int(800 * resize_values[1]))
     race_slot1 = random.randint(int(200 * resize_values[0]), int(300 * resize_values[0]))
@@ -186,19 +235,24 @@ def swipe_cars_to_slots():
     race_slot3 = random.randint(int(1050 * resize_values[0]), int(1150 * resize_values[0]))
     race_slot4 = random.randint(int(1460 * resize_values[0]), int(1570 * resize_values[0]))
     race_slot5 = random.randint(int(1880 * resize_values[0]), int(2000 * resize_values[0]))
+    slot_list = [race_slot1, race_slot2, race_slot3, race_slot4, race_slot5]
 
-    # TODO: add logic for race slots
-
-    swipe(car1, y_car, race_slot1, race_slot_y)
-    time.sleep(0.5)
-    swipe(car2, y_car, race_slot2, race_slot_y)
-    time.sleep(0.5)
-    swipe(car3, y_car, race_slot3, race_slot_y)
-    time.sleep(0.5)
-    swipe(car4, y_car, race_slot4, race_slot_y)
-    time.sleep(0.5)
-    swipe(car5, y_car, race_slot5, race_slot_y)
-    time.sleep(0.5)
+    if assignees:
+        for assignee in assignees:
+            print(assignee)
+            swipe(carlist[assignee[1] - 1], y_car, slot_list[assignee[0] - 1], race_slot_y)
+            time.sleep(0.5)
+    else:
+        swipe(car1, y_car, race_slot1, race_slot_y)
+        time.sleep(0.5)
+        swipe(car2, y_car, race_slot2, race_slot_y)
+        time.sleep(0.5)
+        swipe(car3, y_car, race_slot3, race_slot_y)
+        time.sleep(0.5)
+        swipe(car4, y_car, race_slot4, race_slot_y)
+        time.sleep(0.5)
+        swipe(car5, y_car, race_slot5, race_slot_y)
+        time.sleep(0.5)
 
 
 def skip_ingame():
@@ -390,39 +444,30 @@ def tap_home():
 #             remove_screenshot(screenshot)
 
 
-def full_event_V2(stop_event):
-    calculate_screen_size()
-    event_number = 1
-    while event_number <= 5:
-        if stop_event.is_set():
-            print("Stopping full event bot...")
-            break
-        ticket = True
+def get_assignees(event_id):
+    print("getting assignees")
 
+
+def full_event_V2():  # ADD STOP_event
+    calculate_screen_size()
+    inactive_nr = get_event_number_inactive(False)
+    for event_number in range(1, inactive_nr):
         # Tap home
         tap_home()
 
         # Tap events
         tap_events()
 
-        # Swipe right on events if more than 3
-        if event_number >= 3:
-            swipe_right_event()
-
-        # TODO: Optimize this
-        if not check_event_available(event_number):
-            print("event not available")
-            print("last event done")
-            break
-
-        # Tap event (event_number)
-        tap_event(event_number)
+        if event_number != 1:
+            for i in range(event_number - 1):
+                swipe_left_one_event()
+                print(inactive_nr)
+        tap_event(1)
+        ticket = True
 
         # While ticket stay in this event
         while ticket:
-            if stop_event.is_set():
-                print("Stopping full event bot...")
-                break
+
             screenshot = capture_screenshot()
             ticket_str = check_ticket(screenshot)
             if event_requirements_met(screenshot):
@@ -430,16 +475,20 @@ def full_event_V2(stop_event):
                     # Tap play
                     tap_play_event()
 
+                    event_id = get_event_id_by_name(get_event_name(screenshot))
+
                     # Tap go button
                     tap_go_button_event()
 
-                    if check_cannot_play(resize_values):
+                    if check_cannot_play():
                         print("cannot play found")
                         event_number += 1
                         remove_screenshot(screenshot)
                         break
+                    racetypes_screenshot = capture_screenshot()
+                    assignees = get_corresponding_assignees(event_id, racetypes_screenshot)
                     tap_in_event_play()
-                    swipe_cars_to_slots()
+                    swipe_cars_to_slots(assignees)
 
                     skip_ingame()
                     can_ad_upgrade, img_path = get_upgrade_after_match()

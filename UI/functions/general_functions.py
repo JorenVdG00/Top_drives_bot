@@ -91,14 +91,16 @@ def color_distance(c1, c2):
 
 
 def color_almost_same(color, matching_color, tolerance=10):
-    print(color_distance(color, matching_color))
+    # print(color_distance(color, matching_color))
     return color_distance(color, matching_color) < tolerance
 
 
-def create_dir_if_not_exists(parent_dir, sub_dir):
+def create_dir_if_not_exists(parent_dir, sub_dir=None):
     # Create the full path for the subdirectory
-    full_path = os.path.join(parent_dir, sub_dir)
-
+    if sub_dir:
+        full_path = os.path.join(parent_dir, sub_dir)
+    else:
+        full_path = parent_dir
     # Check if the directory already exists
     if not os.path.exists(full_path):
         os.makedirs(full_path)

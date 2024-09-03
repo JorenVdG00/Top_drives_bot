@@ -8,10 +8,8 @@ from image_reader.image_enhancer import full_image_enhancer
 import csv
 from config import TRACK_NAMES_PATH
 from dotenv import load_dotenv
+
 load_dotenv()
-
-
-
 
 track_names = set()
 track_names_path = TRACK_NAMES_PATH
@@ -47,7 +45,6 @@ condition_colors = {
     'HIGH': (255, 114, 85, 255),
     'WET': (109, 208, 247, 255)
 }
-
 
 custom_config = r'--oem 3 --psm 6'
 
@@ -168,9 +165,11 @@ def clean_data(extract_data):
                 race_info['race_type'] = track
     return extract_data
 
+
 def replace_o_with_zero(race_str):
     """Replace 0 with O in the string to handle confusion."""
     return race_str.replace('O', '0')
+
 
 def fix_missing_space(race_str, possibilities):
     """Attempts to fix missing spaces in a race string based on known possibilities."""
@@ -197,7 +196,8 @@ def fix_missing_space(race_str, possibilities):
     return None
 
 
-def extract_event_types(dirs, used_img_dir, enhanced_dir, denoise=False, deskew=False, grayscale=False, binarize=False, contrast=False,
+def extract_event_types(dirs, used_img_dir, enhanced_dir, denoise=False, deskew=False, grayscale=False, binarize=False,
+                        contrast=False,
                         sharpness=False, double_lines=False):
     extract_data = {}
     for dir in dirs:
@@ -330,7 +330,6 @@ def solve_faults(preprocessing_options, faulty_dirs, used_img_dir, enhanced_dir,
     return correct_results
 
 
-
 def change_data_to_correct_results(extract_data, correct_results, is_race=True):
     if is_race:
         type = 'race_type'
@@ -346,7 +345,7 @@ def complete_extraction(preprocessing_options, extract_data, used_img_dir, enhan
     print(faults)
     if faults:
         faulty_dir = get_faulty_dirs(faults)
-        correct_results = solve_faults(preprocessing_options, faulty_dir,used_img_dir,enhanced_img_dir, is_race)
+        correct_results = solve_faults(preprocessing_options, faulty_dir, used_img_dir, enhanced_img_dir, is_race)
         extract_data = change_data_to_correct_results(extract_data, correct_results, is_race)
     else:
         print("No faults found")
@@ -404,6 +403,7 @@ def check_consecutive_pixels(image_path, filter_color, tolerance=10, required_co
 
     return False  # No matching sequence found
 
+
 def get_full_event_type_list(events_dir):
     extract_data = {}
     base_dir, name = split_path(events_dir)
@@ -412,12 +412,13 @@ def get_full_event_type_list(events_dir):
 
     dirs = get_directories(used_img_dir)
     sorted_dirs = sorted(dirs)
-    print(used_img_dir*20)
+    print(used_img_dir * 20)
     extract_data = extract_event_types(sorted_dirs, used_img_dir, enhanced_dir, sharpness=True)
     cleaned_data = clean_data(extract_data)
 
     race_type_complete_data = complete_extraction(preprocessing_options, cleaned_data, used_img_dir, enhanced_dir)
-    all_type_complete_data = complete_extraction(preprocessing_options, race_type_complete_data, used_img_dir, enhanced_dir, is_race=False)
+    all_type_complete_data = complete_extraction(preprocessing_options, race_type_complete_data, used_img_dir,
+                                                 enhanced_dir, is_race=False)
 
     for dir in dirs:
         condition_dict = get_conditions(used_img_dir + dir + '/conditions.png')
@@ -438,7 +439,5 @@ def get_ingame_race_tracks(dir):
 
     race_type_complete_data = complete_extraction(preprocessing_options, cleaned_data, used_img_dir, enhanced_dir)
     return race_type_complete_data
-
-
 
 # get_full_event_type_list('../tests/test_granD_c_cropped/GRAND_CANYON/')

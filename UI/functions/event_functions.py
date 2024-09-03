@@ -11,7 +11,7 @@ from .resize_functions import resize_coordinate, resize_coordinates, resize_rang
     calculate_screen_size
 from .general_game_functions import check_cannot_play
 from image_reader.event.event_cropper_V3 import get_event_name
-from database.methods.db_events import get_event_id_by_name
+from database.methods.db_events import get_event_id_by_name, get_all_active_events
 
 
 def check_ticket(img_path):
@@ -101,11 +101,12 @@ def check_event_available(event_number: int = 1):
 
 
 def swipe_left_one_event():
-    x1_swipe, x2_swipe, y1, y2 = resize_ranges(1335, 700, 400, 400, resize_values)
-    x_step = (x1_swipe - x2_swipe) // 2
-    # swipe slow
-    swipe(x1_swipe - x_step, y1, x2_swipe, y1)  # Dont know how but this is perfect
-    time.sleep(1)
+    x1_swipe, x2_swipe, y1, y2 = resize_ranges(1335, 700, 300, 400, resize_values)
+    x_step = int((x1_swipe - x2_swipe)*0.25)
+
+    swipe(x1_swipe-x_step, y1, x2_swipe, y1)  # Dont know how but this is perfect
+    swipe(x1_swipe, y1, x1_swipe+5, y2) #stop the movements Y-Changes otherwise counts as a tap
+    time.sleep(0.2)
 
 
 def get_event_number_inactive(save_display=False):
@@ -122,7 +123,7 @@ def get_event_number_inactive(save_display=False):
             swipe_left_one_event()
 
         display_img_path = capture_screenshot()
-        time.sleep(0.5)
+        time.sleep(1)
         with Image.open(display_img_path) as img:
             color = img.getpixel((unavailable_x1, unavailable_y1))
             print(color)
@@ -280,7 +281,7 @@ def skip_ingame():
     tap(x + 10, y + 10)
     time.sleep(2)
     tap(x, y)
-    time.sleep(2)
+    time.sleep(3)
 
 
 def check_accept_skip():
@@ -374,12 +375,13 @@ def collect_prizecards(number_of_prizes, img_path):
         remove_screenshot(img_path)
         return
     prize_card_color = (239, 90, 36, 255)
-    x_start, x_plus, y_start, y_plus = resize_ranges(195, 414, 413, 264, resize_values)
+    x_start, x_plus, y_start, y_plus = resize_ranges(195, 415, 413, 264, resize_values)
 
     with Image.open(img_path) as img:
         for y in range(y_start, int(1000 * resize_values[1]), y_plus):
             for x in range(x_start, int(1900 * resize_values[0]), x_plus):
                 color = img.getpixel((x, y))
+                print(f'for {x}, {y}: color({color})')
                 if color == prize_card_color:
                     tap(x, y)
                     time.sleep(1)
@@ -444,26 +446,31 @@ def tap_home():
 #             remove_screenshot(screenshot)
 
 
-def get_assignees(event_id):
-    print("getting assignees")
-
 
 def full_event_V2():  # ADD STOP_event
     calculate_screen_size()
-    inactive_nr = get_event_number_inactive(False)
-    for event_number in range(1, inactive_nr):
+    len_active_events = len(get_all_active_events())
+    for event_number in range(len_active_events):
         # Tap home
         tap_home()
 
         # Tap events
         tap_events()
-
-        if event_number != 1:
-            for i in range(event_number - 1):
+        print(f'Event number: {event_number}')
+        if event_number:
+            print(f'Event number: {event_number}')
+            for i in range(event_number):
                 swipe_left_one_event()
-                print(inactive_nr)
         tap_event(1)
         ticket = True
+        screenshot = capture_screenshot()
+        event_name = get_event_name(screenshot)
+        event_id = get_event_id_by_name(event_name)
+        if not event_id:
+            print('Retrying event_id')
+            new_event_name = event_name[:-6]
+            event_id = get_event_id_by_name(new_event_name)
+        remove_screenshot(screenshot)
 
         # While ticket stay in this event
         while ticket:
@@ -472,10 +479,17 @@ def full_event_V2():  # ADD STOP_event
             ticket_str = check_ticket(screenshot)
             if event_requirements_met(screenshot):
                 if ticket_str == "Ticket":
+                    if not event_id:
+                        event_name = get_event_name(screenshot)
+                        event_id = get_event_id_by_name(event_name)
+                        if not event_id:
+                            print('Retrying event_id')
+                            new_event_name = event_name[:-10]
+                            event_id = get_event_id_by_name(new_event_name)
                     # Tap play
                     tap_play_event()
 
-                    event_id = get_event_id_by_name(get_event_name(screenshot))
+
 
                     # Tap go button
                     tap_go_button_event()
@@ -487,6 +501,7 @@ def full_event_V2():  # ADD STOP_event
                         break
                     racetypes_screenshot = capture_screenshot()
                     assignees = get_corresponding_assignees(event_id, racetypes_screenshot)
+                    remove_screenshot(racetypes_screenshot)
                     tap_in_event_play()
                     swipe_cars_to_slots(assignees)
 

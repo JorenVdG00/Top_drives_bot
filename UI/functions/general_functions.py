@@ -10,19 +10,18 @@ load_dotenv()
 WINDOWS_ADB_PATH = os.getenv('ADB_PATH')
 
 
-
-
-def set_cwd(adb_path=WINDOWS_ADB_PATH):
+def set_cwd(adb_path=WINDOWS_ADB_PATH, debug=False):
     # Print the current working directory
-    print("Current working directory:", os.getcwd())
+
+    print("Current working directory:", os.getcwd()) if debug else None
 
     # Change to the user's home directory
     os.chdir(os.path.expanduser("~"))
-    print("Changed to home directory:", os.getcwd())
+    print("Changed to home directory:", os.getcwd()) if debug else None
 
     # Change to a specific directory (e.g., WINDOWS_ADB_PATH)
     os.chdir(adb_path)
-    print("Changed to ADB directory:", os.getcwd())
+    print("Changed to ADB directory:", os.getcwd()) if debug else None
 
     return adb_path
 
@@ -36,6 +35,7 @@ def tap(x, y):
 
 
 def swipe(x1, y1, x2, y2):
+    set_cwd()
     os.system(f"{ADB_SERIAL_CMD} shell input swipe {x1} {y1} {x2} {y2}")
 
 

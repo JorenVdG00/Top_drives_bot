@@ -93,7 +93,8 @@ class CarAssignmentTab(QWidget):
             event_label.setPixmap(event_pixmap)
             event_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
             event_label.setAlignment(Qt.AlignCenter)
-            event_label.mousePressEvent = lambda _, e=event: self.select_event(e['event_id'])
+            # event_label.mousePressEvent = lambda _, e=event: self.select_event(e['event_id'])
+            event_label.mousePressEvent = lambda _, e=event: self.open_car_assignment_dialog(e['event_id'])
 
             self.event_image_layout.addWidget(event_label)
             self.event_images.append(event_pixmap)
@@ -102,18 +103,18 @@ class CarAssignmentTab(QWidget):
         main_layout.addLayout(self.event_image_layout)
 
         # Series Selection (hidden initially)
-        self.series_label = QLabel('Select Series:', self)
-        self.series_dropdown = QComboBox(self)
-        main_layout.addWidget(self.series_label)
-        main_layout.addWidget(self.series_dropdown)
-        self.series_label.hide()
-        self.series_dropdown.hide()
+        # self.series_label = QLabel('Select Series:', self)
+        # self.series_dropdown = QComboBox(self)
+        # main_layout.addWidget(self.series_label)
+        # main_layout.addWidget(self.series_dropdown)
+        # self.series_label.hide()
+        # self.series_dropdown.hide()
 
         # Set layout for the widget
         self.setLayout(main_layout)
 
         # Signal-slot connections
-        self.series_dropdown.currentIndexChanged.connect(self.open_car_assignment_dialog)
+        # self.series_dropdown.currentIndexChanged.connect(self.open_car_assignment_dialog)
 
     def get_events_from_db(self):
         events = []
@@ -137,20 +138,11 @@ class CarAssignmentTab(QWidget):
         # Placeholder: Fetch series names based on the selected event from the database
         return series
 
-    def select_event(self, event_id):
-        print(f"Selected event: {event_id}")
-        print(f"Selected series: {event_id}")
-        series_list = self.get_series_from_db(event_id)
-        print(f"Selected series: {series_list}")
-        self.series_dropdown.clear()
-        self.series_dropdown.addItems(series_list)
+    # def select_event(self, event_id):
+    #     print(f"Selected event: {event_id}")
+    #     self.open_car_assignment_dialog(event_id)
 
-        # Show series label and dropdown
-        self.series_label.show()
-        self.series_dropdown.show()
-
-    def open_car_assignment_dialog(self):
-        event_id = get_event_from_serie_id(self.series_dropdown.currentText())
+    def open_car_assignment_dialog(self, event_id):
         selected_series = self.get_series_from_db(event_id)
         assignments = {}
         if selected_series:
@@ -169,7 +161,6 @@ class CarAssignmentDialog(QDialog):
 
     def initUI(self):
         self.event_id, self.event_dir, self.serie_number = self.get_event_info_from_serie_id()
-
 
         print("serie_id", self.serie_id)
         print("serie_number: ", self.serie_number)
@@ -271,6 +262,7 @@ class CarAssignmentDialog(QDialog):
 
         self.save_car_assignments_to_db(assignments)
         self.load_next_series()
+
     # def save_car_assignments_to_db(self, car_assignments):
     #     races = get_races(self.serie_id)
     #     race_dict = {}
@@ -298,6 +290,7 @@ class CarAssignmentDialog(QDialog):
             print(f'Saving Car {car_number} assignment for Race {race_number} in Series {self.serie_id} to DB')
 
         self.accept()  #
+
     def load_next_series(self):
         self.series_index += 1
         if self.series_index < len(self.series_list):

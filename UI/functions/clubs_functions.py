@@ -1,8 +1,35 @@
+from PIL import Image
 from general_functions import tap, swipe
-from config import BOT_SCREENSHOTS_DIR
+from config import BOT_SCREENSHOTS_DIR, resize_values
 from .resize_functions import resize_coordinate, resize_coordinates, resize_ranges, resize_same_factor, \
     calculate_screen_size
 import os
 import threading
 import time
 import random
+
+
+def tap_clubs():
+    x1, x2, y1, y2 = resize_ranges(260, 520, 500, 750, resize_values)
+    x, y = random.randint(x1, x2), random.randint(y1, y2)
+    tap(x, y)
+    time.sleep(1)
+
+
+def claim_club_reward():
+    x1, x2, y1, y2 = resize_ranges(1000, 770, 1050, 780, resize_values)
+    x, y = random.randint(x1, x2), random.randint(y1, y2)
+    tap(x, y)
+    time.sleep(1)
+
+
+def check_club_rewards(img_path):
+    x, y = resize_coordinates(1030, 770, resize_values)
+    club_reward_color = (25, 200, 212, 255)
+    with Image.open(img_path) as img:
+        color = img.getpixel((x, y))
+        if color == club_reward_color:
+            return True
+        else:
+            return False
+

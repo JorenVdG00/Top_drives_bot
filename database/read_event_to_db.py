@@ -47,7 +47,6 @@ def full_event_reader():
     inactive_number, display_img_paths = get_event_number_inactive(True)
 
     for event_number in range(1, inactive_number):
-        print(f'{len(display_img_paths)} "\n"'*10000)
         event_display_img = display_img_paths[(event_number-1)]
         if event_number != 1:
             for i in range(event_number-1):
@@ -57,7 +56,6 @@ def full_event_reader():
         print("try tapping tap_event")
 
         tap_event(1)
-        print(f'{inactive_number}\n'*30)
         event_name, end_time = get_event_info()
         event_dir = f'{PARENT_DIR}/{event_name}/'
         event_screens_dir = f'{event_dir}/screens/'

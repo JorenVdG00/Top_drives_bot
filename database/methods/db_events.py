@@ -99,11 +99,12 @@ def get_event_id_by_name(event_name):
         else:
             print(f"No event found with name '{event_name}'.")
             if event_name:
-                similar_event_name = get_similar_event_names(event_name)
+                similar_event_name = get_similar_event_names(event_name.upper())
                 if similar_event_name:
                     event_id = get_event_id_by_name(similar_event_name)
                     if event_id:
                         return event_id
+
 
         return None
     except Exception as e:

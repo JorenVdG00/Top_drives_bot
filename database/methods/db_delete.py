@@ -8,6 +8,15 @@ def remove_event_series(event_id):
 
     try:
         print(f"Removing all series for event_id: {event_id}")
+        # First, delete from the car_assignments table based on race_ids
+        cursor.execute("""
+            DELETE FROM car_assignments
+            WHERE race_id IN (
+                SELECT race_id FROM races WHERE series_id IN (
+                    SELECT series_id FROM series WHERE event_id = %s
+                )
+            );
+        """, (str(event_id),))
 
         # Assuming you have foreign key constraints, you may need to delete from child tables first.
         # For example, if there's a 'sub_series' table related to 'series':

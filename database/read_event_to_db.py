@@ -3,13 +3,18 @@ import os
 from UI.functions.general_functions import capture_screenshot, tap, swipe, remove_screenshot, create_dir_if_not_exists
 from UI.functions.resize_functions import resize_coordinates, calculate_screen_size, set_cwd, resize_ranges
 from UI.functions.event_functions import tap_event, tap_events, tap_home, get_event_number_inactive, tap_play_event, swipe_left_one_event
-from image_reader.event.event_cropper_V3 import get_event_name, crop_and_save_event_type_images, crop_event_display_img, crop_all_cars_img
-from image_reader.event.event_reader_V2 import get_full_event_type_list
+# from image_reader.event.event_cropper_V3 import get_event_name, crop_and_save_event_type_images, crop_event_display_img, crop_all_cars_img
+# from image_reader.event.event_reader_V2 import get_full_event_type_list
 from image_reader.event.event_time import get_time_left_event, calculate_event_end_time
 from database.methods.db_adder import add_event, add_series, add_race
 from database.methods.db_delete import remove_event_series
 from database.methods.db_events import get_event_id_by_name
 from database.db_getters import get_event_id_by_name
+
+from ImageTools.Events.event_reader import get_full_correct_list
+from ImageTools.cropper.cars import crop_all_hand_cars
+from ImageTools.cropper.classify import get_event_name
+from ImageTools.Events.event_cropper import crop_event_display_img, crop_and_save_event_type_images
 from config import resize_values, BASE_DIR
 import random
 import time
@@ -71,7 +76,7 @@ def full_event_reader():
 
         # Get Cars Pictures
         cars_screenshot = capture_screenshot(event_dir, 'cars', 'all_cars')
-        crop_all_cars_img(cars_screenshot, cars_dir)
+        crop_all_hand_cars(cars_screenshot, cars_dir)
         remove_screenshot(cars_screenshot)
 
         tap_match_info()
@@ -88,7 +93,7 @@ def full_event_reader():
         # time.sleep(2)
 
 
-        extract_data = get_full_event_type_list(event_type_cropped_dir)
+        extract_data = get_full_correct_list(event_type_cropped_dir)
         serie_numbers = []
         serie_id = 0
         remove_event_series(event_id)

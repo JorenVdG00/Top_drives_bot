@@ -3,11 +3,13 @@ import shutil
 from database.methods.db_events import get_series, get_races, get_assignees
 from image_reader.event.event_reader_V2 import get_ingame_race_tracks
 from image_reader.event.event_cropper_V3 import crops_ingame_event_types
+
+from ImageTools.Events.event_reader import get_only_race_tracks
 from config import BASE_DIR
 def find_matching_serie(event_id, image_path, save_dir=f'{BASE_DIR}/TEMP/'):
     race_dict = {}
     crops_ingame_event_types(image_path, save_dir)
-    extracted_races = get_ingame_race_tracks(save_dir)
+    extracted_races = get_only_race_tracks(save_dir)
     serie_ids = get_series(event_id)
 
 

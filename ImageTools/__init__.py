@@ -22,3 +22,5 @@ road_type_possibilities = [
     'ASPHALT', 'SNOW', 'DIRT', 'MIXED', 'GRASS', 'SAND', 'ICE', 'GRAVEL'
 ]
 
+STANDARD_SIZE = (2210, 1248)
+STANDARD_EVENT_IMG_SIZE = (330, 220)

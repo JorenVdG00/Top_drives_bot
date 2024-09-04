@@ -3,17 +3,15 @@ import pytesseract
 import re
 import os
 from datetime import timedelta, datetime
+from ImageTools import pytesseract
+from ImageTools.cropper.coords import time_left_coords
 from ImageTools.utils.image_utils import resize_image
 from dotenv import load_dotenv
 
 load_dotenv()
-time_left = (200, 1100, 650, 1200)
-
-pytesseract.pytesseract.tesseract_cmd = os.getenv('TESSERACT_PATH')
 
 
 def get_time_left_event(image_path):
-    time_left_coords = time_left
     with Image.open(image_path) as image:
         resized_image = resize_image(image)
         cropped_image = resized_image.crop(time_left_coords)

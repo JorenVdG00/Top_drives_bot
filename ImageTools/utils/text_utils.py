@@ -1,5 +1,5 @@
 from ImageTools import track_names, road_type_possibilities
-
+import re
 
 def clean_race_data(extract_data):
     for dir, race_info in extract_data.items():
@@ -47,3 +47,9 @@ def fix_missing_space(race_str, possibilities):
 
     # If no match is found, return the original string
     return None
+
+def remove_excessive_spaces(input_string):
+    # This regex replaces multiple spaces between words with a single space
+    # and removes trailing spaces at the end of the string
+    cleaned_string = re.sub(r'\s+', ' ', input_string).strip()
+    return cleaned_string

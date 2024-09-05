@@ -1,22 +1,29 @@
 #Test Directories
-
+enhanced
 ZZZZZZ-ProjectsTests/*
 ZZZZZZ-FIND_COORDS&COLORS/*
 ZZZZZ-TEST-IIIIIIIIMG/*
 
+ImageTools/utils/IMG/*
+ImageTools/Clubs/tst/*
+ImageTools/Clubs/tst
+
+
+
 UI/bot_screenshots/*
-image_reader/bot_screenshots/*
+ZZZZpractice/bot_screenshots/*
 image_reader/basics/tests/*
 image_reader/basics/tests/find_color.py
 image_reader/basics/tests/find_coords_ss.py
 image_reader/tests/*
 database/temp/*
-practice/*
+ZZZZpractice/*
+ZZZZpractice
+
 
 **__pycache__/
 .idea
 venv/
 .env
-
 !ZZZZZZ-FIND_COORDS&COLORS/bot_screenshots/.gitkeep
 !UI/bot_screenshots/.gitkeep

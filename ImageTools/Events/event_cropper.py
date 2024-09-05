@@ -1,7 +1,7 @@
 import os
 from PIL import Image
 from ImageTools.cropper.classify import get_event_name, classify_filename
-from ImageTools.cropper.coords import event_coordinates,event_img_coords, display_img_coords
+from ImageTools.cropper.coords import event_coordinates, event_img_coords, display_img_coords
 from ImageTools.utils.image_utils import resize_image
 from ImageTools.utils.file_utils import create_dir_if_not_exists
 from ImageTools.image_processing.cropper import crop_image
@@ -10,6 +10,7 @@ from ImageTools.image_processing.cropper import crop_image
 def crop_and_save_event_type_images(event_type_img_dir, save_dir):
     cats = []  # Categories
     swap = False
+    event_number = 0
     for filename in os.listdir(event_type_img_dir):
         category = classify_filename(filename)
         cats.append(category)
@@ -38,12 +39,10 @@ def crop_and_save_event_type_images(event_type_img_dir, save_dir):
             name = get_event_name(img_path)
             create_dir_if_not_exists(save_dir, name)
             event_number = int(category[-1])
-        with Image.open(img_path) as image:
-            image = resize_image(image)
-            crop_event_types(image, save_dir, name, event_number)
-            event_number += 1
-            crop_event_types(image, save_dir, name, event_number)
-
+        crop_event_types(img_path, save_dir, name, event_number)
+        event_number += 1
+        crop_event_types(img_path, save_dir, name, event_number)
+        event_number += 1
 
 def crop_event_types(image_path, save_dir, name, event_number):
     race_number = 1
@@ -53,10 +52,29 @@ def crop_event_types(image_path, save_dir, name, event_number):
         coords = (x1, y1, x2, y2)
         save_path = f'{save_dir}/{name}/{event_number}-{race_number}/'
         race_path = crop_image(image_path, save_path, 'full_race', coords)
-        crop_event_race(race_path, save_path)
+        crop_race_in_parts(race_path, save_path)
         race_number += 1
 
-def crop_event_race(img_path, save_dir):
+
+def crop_in_game_event_types(img_path, save_dir, name=None):
+    if name:
+        img_dir = f"{save_dir}/{name}/"
+        create_dir_if_not_exists(save_dir, name)
+    else:
+        img_dir = f"{save_dir}/"
+        create_dir_if_not_exists(save_dir)
+    race_number = 1
+    y1, y2 = event_coordinates['in_game_event_y']
+    for xcoords in event_coordinates['in_game_event_x'].values():
+        x1, x2 = xcoords
+        coords = (x1, y1, x2, y2)
+        save_dir = f'{img_dir}/{race_number}'
+        race_path = crop_image(img_path, save_dir, 'full_race', coords)
+        crop_race_in_parts(race_path, save_dir)
+        race_number += 1
+
+
+def crop_race_in_parts(img_path, save_dir):
     create_dir_if_not_exists(save_dir)
     with Image.open(img_path) as image:
         for key, coords in event_img_coords.items():
@@ -67,4 +85,3 @@ def crop_event_race(img_path, save_dir):
 def crop_event_display_img(img_path, save_dir, name):
     display_path = crop_image(img_path, save_dir, name, display_img_coords)
     return display_path
-

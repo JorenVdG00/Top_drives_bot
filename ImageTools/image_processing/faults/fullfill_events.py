@@ -105,10 +105,10 @@ def solve_faults(preprocessing_options, faulty_dirs, used_img_dir, enhanced_dir,
                             if track_name:
                                 correct_results[key] = track_name
                                 faulty_dirs.remove(key)
-                                break
+                                continue
 
                     for possible in possibilities:
-                        if possible in faults[key]:
+                        if faults[key] and possible in faults[key]:  # Ensure faults[key] is iterable
                             correct_results[key] = possible
                             faulty_dirs.remove(key)
                             break
@@ -134,6 +134,8 @@ def fix_extracted_data(extract_data, used_img_dir, enhanced_img_dir, is_race=Tru
     if faults:
         faulty_dir = get_faulty_dirs(faults)
         correct_results = solve_faults(preprocessing_options, faulty_dir, used_img_dir, enhanced_img_dir, is_race)
+        print(correct_results)
+        print("Changing faults data to correct results")
         extract_data = change_data_to_correct_results(extract_data, correct_results, is_race)
     else:
         print("No faults found")

@@ -10,7 +10,7 @@ from UI.bot_manager.db_assign import get_corresponding_assignees
 from .resize_functions import resize_coordinate, resize_coordinates, resize_ranges, resize_same_factor, \
     calculate_screen_size
 from .general_game_functions import check_cannot_play
-from image_reader.event.event_cropper_V3 import get_event_name
+from ImageTools.cropper.classify import get_event_name
 from database.methods.db_events import get_event_id_by_name, get_all_active_events
 
 
@@ -352,15 +352,18 @@ def count_prizecards(img_path=None):
         number_of_prizes = 0
         x, y = resize_coordinates(1910, 200, resize_values)
         color = img.getpixel((x, y))
+        print(color)
         if color == star_color:
             number_of_prizes += 1
             x = resize_coordinate(2000, resize_values[0])
             color = img.getpixel((x, y))
+            print(color)
             if color == star_color:
                 number_of_prizes += 1
                 x = resize_coordinate(2090, resize_values[0])
                 color = img.getpixel((x, y))
                 if color == star_color:
+                    print(color)
                     number_of_prizes += 1
         else:
             number_of_prizes = 0

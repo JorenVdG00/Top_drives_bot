@@ -53,3 +53,7 @@ def remove_excessive_spaces(input_string):
     # and removes trailing spaces at the end of the string
     cleaned_string = re.sub(r'\s+', ' ', input_string).strip()
     return cleaned_string
+
+def remove_newlines(input_string):
+    cleaned_string = re.sub(r'\n', ' ', input_string).strip()
+    return cleaned_string

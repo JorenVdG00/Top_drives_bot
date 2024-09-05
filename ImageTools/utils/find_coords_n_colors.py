@@ -6,6 +6,7 @@ STANDARD_SCREEN_SIZE = (BASIC_WIDTH, BASIC_HEIGHT)
 
 # STANDARD_sizes
 new_size = (1600, 900)
+new_size2 = (1400, 700)
 standard_size_screen = (2210, 1248)
 standard_size_cars = (557, 343)  # (cars)
 standard_size_events = (330, 220)  # (events)
@@ -134,11 +135,13 @@ def get_all_coords(img_path: str, size: tuple[int, int], retune_size: tuple[int,
 
     color_dict = {coord[0]: coord[1] for coord in list_color_coords}
 
-    print(f"List of selected coordinates: {list_coords}")
-    print(f"Coordinates with their colors: {color_dict}")
+
 
     retuned_coords = retune_coords(list_coords, size, retune_size)
     retuned_colors_dict = retune_coords(color_dict, size, retune_size, is_color=True)
+
+    print(f"List of selected coordinates: {retuned_coords}")
+    print(f"Coordinates with their colors: {retuned_colors_dict}")
     return retuned_coords, retuned_colors_dict
 
 
@@ -161,3 +164,9 @@ def retune_coords(coords, size, retune_size, is_color = False):
                 coords_temp_list.append((coord_x, coord_y))
             retuned_coords.append(coords_temp_list)
         return retuned_coords
+
+
+club_page_path = './IMG/reqs2.png'
+get_all_coords(club_page_path, new_size2, STANDARD_SCREEN_SIZE)
+#
+# print(get_pixel_color(club_page_path, 1700, 1160, STANDARD_SCREEN_SIZE))

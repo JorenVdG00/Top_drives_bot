@@ -3,6 +3,7 @@ from general_functions import tap, swipe
 from config import BOT_SCREENSHOTS_DIR, resize_values
 from .resize_functions import resize_coordinate, resize_coordinates, resize_ranges, resize_same_factor, \
     calculate_screen_size
+from ImageTools.utils.image_utils import color_almost_matches, resize_image
 import os
 import threading
 import time
@@ -28,7 +29,19 @@ def check_club_rewards(img_path):
     club_reward_color = (25, 200, 212, 255)
     with Image.open(img_path) as img:
         color = img.getpixel((x, y))
-        if color == club_reward_color:
+        if color_almost_matches(color, club_reward_color):
+            return True
+        else:
+            return False
+
+
+def has_joined_event(img_path):
+    x, y = resize_coordinates(1700, 1160, resize_values)
+    play_event_color = (255,196,79,255)
+
+    with Image.open(img_path) as img:
+        color = img.getpixel((x, y))
+        if color_almost_matches(color, play_event_color):
             return True
         else:
             return False

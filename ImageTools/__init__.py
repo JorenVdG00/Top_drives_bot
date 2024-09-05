@@ -2,6 +2,7 @@ import os
 import csv
 import pytesseract
 from dotenv import load_dotenv
+from config import TRACK_NAMES_PATH
 
 # Load environment variables
 load_dotenv()
@@ -10,7 +11,6 @@ load_dotenv()
 pytesseract.pytesseract.tesseract_cmd = os.getenv('TESSERACT_PATH')
 
 # Load track names and make them available throughout the package
-TRACK_NAMES_PATH = os.getenv('TRACK_NAMES_PATH')
 track_names = set()
 
 with open(TRACK_NAMES_PATH, mode='r', newline='') as file:

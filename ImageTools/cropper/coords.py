@@ -1,4 +1,3 @@
-
 event_coordinates = {
     "name": (700, 200, 1400, 260),
     "event_x": {
@@ -35,3 +34,20 @@ time_left_coords = (200, 1100, 650, 1200)
 display_img_coords = (710, 260, 1300, 915)
 
 car_coords = {'coords': (70, 1010, 390, 1215), 'step': 31}
+
+club_coordinates = {'club_events': {
+    'club_event_y': {'club_event_y1': [680, 825], 'club_event_y2': [845, 990], 'club_event_y3': [1010, 1155],
+                     'club_event_y4': [1175, 1310]},
+    'club_event_x': [1580, 2140]
+}}
+
+club_info_coords = {'name': (1710, 140, 2190, 210),
+                    'event_type': (1760, 210, 2190, 260),
+                    'time_left': (1850, 260, 2180, 300),
+                    'rq': (1930, 360, 2180, 400),
+                    'reqs1': (1850, 400, 2180, 450),
+                    'reqs2': (1850, 450, 2180, 500),
+                    'player_amount': {'y': (560, 610), 'left_x': (1580, 1650), 'right_x': (2025, 2095)},
+                    'score': {'y': (780, 830), 'left_x': (1770, 1870), 'right_x': (1900, 2000)},
+                    'weight': (1800, 940, 2000, 1040)}
+

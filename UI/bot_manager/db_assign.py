@@ -1,14 +1,17 @@
 import os
 import shutil
 from database.methods.db_events import get_series, get_races, get_assignees
-from image_reader.event.event_reader_V2 import get_ingame_race_tracks
-from image_reader.event.event_cropper_V3 import crops_ingame_event_types
+# from image_reader.event.event_reader_V2 import get_ingame_race_tracks
+# from image_reader.event.event_cropper_V3 import crops_ingame_event_types
+from ImageTools.Events.event_cropper import crop_event_types
+from ImageTools.utils.file_utils import remove_all_files_in_dir, cleanup_dir
 
 from ImageTools.Events.event_reader import get_only_race_tracks
+from ImageTools.Events.event_cropper import crop_in_game_event_types
 from config import BASE_DIR
 def find_matching_serie(event_id, image_path, save_dir=f'{BASE_DIR}/TEMP/'):
     race_dict = {}
-    crops_ingame_event_types(image_path, save_dir)
+    crop_in_game_event_types(image_path, save_dir)
     extracted_races = get_only_race_tracks(save_dir)
     serie_ids = get_series(event_id)
 
@@ -28,19 +31,17 @@ def find_matching_serie(event_id, image_path, save_dir=f'{BASE_DIR}/TEMP/'):
         if match_count > highest_match_count:
             best_match = serie_id
             highest_match_count = match_count
-    if os.path.exists(save_dir):
-        shutil.rmtree(save_dir)
-        os.mkdir(save_dir)
     if best_match:
         print(f"The best matching serie is {best_match} with {highest_match_count} matching races.")
     else:
         print("No matching series found.")
-
+    cleanup_dir(save_dir)
     return best_match
 
 def compare_races(extracted_races, series_races):
     matches = 0
     for race_number, extracted_race in extracted_races.items():
+        print(race_number, extracted_race)
         for race_id, race_info in series_races.items():
             if (extracted_race['race_type'] == race_info['name'] and
                     extracted_race['road_type'] == race_info['road_type'] and

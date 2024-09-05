@@ -5,14 +5,22 @@ from PIL import Image
 def resize_image(image, standard_size=(2210, 1248)):
     return image.resize(standard_size, Image.Resampling.LANCZOS)
 
+
 def contains_color(image_path, target_rgb, tolerance=5):
     image = Image.open(image_path)
     pixels = image.load()
+    print(target_rgb)
     for x in range(image.width):
         for y in range(image.height):
             if color_distance(pixels[x, y], target_rgb) <= tolerance:
+                print(pixels[x, y])
+                print(target_rgb)
                 return True
     return False
+
+
+def color_almost_matches(color, target_rgb, tolerance=10):
+    return color_distance(color, target_rgb) <= tolerance
 
 
 def color_distance(c1, c2):

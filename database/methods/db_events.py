@@ -1,12 +1,24 @@
+import os
 from database.db_general import get_db_connection
+from ImageTools.utils.file_utils import delete_dir
 from datetime import datetime
-
+from config import BASE_DIR
 
 def reload_events():
     conn = get_db_connection()
     cursor = conn.cursor()
-
+    EVENT_IMG_DIR = os.path.join(BASE_DIR, 'database', 'temp')
     try:
+        # Get All events that expired
+        cursor.execute("""
+        SELECT event_name FROM events
+        WHERE end_time < %s AND ended = FALSE;
+        """)
+        event_names = cursor.fetchall()
+        for event_name in event_names:
+            event_dir_path = os.path.join(EVENT_IMG_DIR, event_name)
+            delete_dir(event_dir_path)
+
         # Update events where the end_time has passed and ended is False
         cursor.execute("""
             UPDATE events
@@ -194,7 +206,7 @@ def get_event_from_serie_id(series_id):
         conn.close()
 
 
-def get_races(series_id):
+def get_races(track_set_id):
     std_condition_dict = {'SUN': False, 'WET': False, 'HIGH': False, 'ROLLING': False}
 
     conn = get_db_connection()
@@ -203,9 +215,9 @@ def get_races(series_id):
     try:
         cursor.execute("""
              SELECT race_id, race_name, road_type, conditions, race_number From races
-             WHERE series_id = %s
+             WHERE track_set_id = %s
              ORDER BY race_number ASC;
-        """, (series_id,))
+        """, (track_set_id,))
 
         races = cursor.fetchall()
 
@@ -239,7 +251,8 @@ def get_serie_number(series_id):
     try:
         cursor.execute("""
         SELECT serie_number From series
-        WHERE series_id = %s;""", (series_id,))
+        WHERE series_id = %s;
+        """, (series_id,))
 
         serie_number = cursor.fetchone()
         if serie_number:
@@ -252,17 +265,65 @@ def get_serie_number(series_id):
         cursor.close()
         conn.close()
 
-
-def get_assignees(series_id):
+def get_serie_id_from_track_set_id(track_set_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
         cursor.execute("""
+        SELECT serie_id From series
+        WHERE track_set_id = %s;
+        """, (track_set_id,))
+
+        serie_id = cursor.fetchone()
+        if serie_id:
+            return serie_id[0]
+        else:
+            return None
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_track_set_from_serie(serie_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+        SELECT track_set_id From series
+        WHERE serie_id = %s;""", (serie_id,))
+
+        track_set_id = cursor.fetchone()
+        if track_set_id:
+            return track_set_id[0]
+        else:
+            return None
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_assignees(series_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    track_set_id = get_track_set_from_serie(series_id)
+    if not track_set_id:
+        return None
+    try:
+        cursor.execute("""
         SELECT r.race_number, ca.car_number FROM races r 
         JOIN car_assignments ca ON r.race_id = ca.race_id
-        WHERE r.series_id = %s
-        ORDER BY r.race_number ASC;""", (series_id,))
+        WHERE r.track_set_id = %s
+        ORDER BY r.race_number ASC;""", (track_set_id,))
 
         assignees = cursor.fetchall()
         print(assignees)
@@ -279,6 +340,8 @@ def get_assignees(series_id):
     finally:
         cursor.close()
         conn.close()
+
+
 
 
 if __name__ == '__main__':

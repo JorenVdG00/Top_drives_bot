@@ -1,6 +1,7 @@
 import os
 import shutil
 
+
 def create_dir_if_not_exists(parent_dir, sub_dir=None):
     if sub_dir:
         full_path = os.path.join(parent_dir, sub_dir)
@@ -14,6 +15,7 @@ def create_dir_if_not_exists(parent_dir, sub_dir=None):
 def get_directories(directory):
     return [item for item in os.listdir(directory) if os.path.isdir(os.path.join(directory, item))]
 
+
 def get_files(directory):
     real_files = []
     files = os.listdir(directory)
@@ -23,6 +25,7 @@ def get_files(directory):
         real_files.append(file)
     sorted_files = sorted(real_files)
     return sorted_files
+
 
 def split_path(path):
     return os.path.split(path.rstrip('/'))
@@ -45,6 +48,13 @@ def cleanup_dir(dir):
     if os.path.exists(dir):
         shutil.rmtree(dir)
         os.mkdir(dir)
+
+
+def delete_dir(dir):
+    if os.path.exists(dir):
+        shutil.rmtree(dir)
+        print(f'successfully deleted dir: {dir}')
+
 
 def get_head(file):
     head = file.split('.')[0]

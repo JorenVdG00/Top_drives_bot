@@ -6,7 +6,7 @@ from UI.functions.event_functions import tap_event, tap_events, tap_home, get_ev
 # from image_reader.event.event_cropper_V3 import get_event_name, crop_and_save_event_type_images, crop_event_display_img, crop_all_cars_img
 # from image_reader.event.event_reader_V2 import get_full_event_type_list
 # from image_reader.event.event_time import get_time_left_event, calculate_event_end_time
-from database.methods.db_adder import add_event, add_series, add_race
+from database.methods.db_adder import add_event, add_series, add_race, add_track_set
 from database.methods.db_delete import remove_event_series
 from database.methods.db_events import get_event_id_by_name
 from database.db_getters import get_event_id_by_name
@@ -96,21 +96,24 @@ def full_event_reader():
 
 
         extract_data = get_full_correct_list(event_type_cropped_dir)
-        serie_numbers = []
-        serie_id = 0
+        serie_track_dict = {}
+        track_set_id = None
         remove_event_series(event_id)
         for key, value in extract_data.items():
             # print(f'{key}: {value}')
             serie_number = key.split('-')[0]
             race_number = key.split('-')[1]
-            if serie_number not in serie_numbers:
-                serie_numbers.append(serie_number)
-                serie_id = add_series(event_id, serie_number)
+            if serie_number not in serie_track_dict:
+                track_set_id = add_track_set()
+                serie_track_dict[serie_number] = track_set_id
+                # serie_id = add_series(event_id, serie_number)
 
             race_type = value['race_type']
             road_type = value['road_type']
             conditions_json = value['conditions']
-            add_race(race_type, road_type, conditions_json, race_number, serie_id)
+            add_race(race_type, road_type, conditions_json, race_number, track_set_id)
+        for serie_number, track_set_id in serie_track_dict.values():
+            add_series(event_id, serie_number, track_set_id)
         tap_home()
         print("tap_events()")
         tap_events()

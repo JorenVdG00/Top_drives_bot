@@ -4,7 +4,7 @@ from PyQt5.QtGui import QPixmap, QDrag
 from PyQt5.QtCore import Qt, QMimeData, pyqtSignal
 import sys
 from database.methods.db_events import get_all_active_events, get_active_event, get_series, get_event_from_serie_id, \
-    get_serie_number, get_races
+    get_serie_number, get_races, get_track_set_from_serie
 from database.db_car_assign import assign_car_to_race
 from config import BASE_DIR
 
@@ -282,7 +282,7 @@ class CarAssignmentDialog(QDialog):
     #     self.accept()  # Close the dialog after saving
 
     def save_car_assignments_to_db(self, car_assignments):
-        races = get_races(self.serie_id)
+        races = get_races(get_track_set_from_serie(self.serie_id))
         race_dict = {race['number']: race_id for race_id, race in races.items()}
         for race_number, car_number in car_assignments.items():
             race_id = race_dict[race_number]

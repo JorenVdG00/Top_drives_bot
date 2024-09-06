@@ -26,19 +26,19 @@ def add_event(event_name, event_dir, end_time):
         conn.close()
 
 
-def add_series(event_id, serie_number):
+def add_series(event_id, serie_number, track_set_id):
     """Inserts a new series into the database."""
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        print("series: "+ str(event_id))
+        print("series: " + str(event_id))
 
         cursor.execute("""
-            INSERT INTO series (event_id, serie_number)
-            VALUES (%s, %s)
+            INSERT INTO series (event_id, serie_number, track_set_id)
+            VALUES (%s, %s, %s)
             RETURNING series_id;
-            """, (str(event_id), serie_number))
+            """, (str(event_id), serie_number, track_set_id))
         series_id = cursor.fetchone()[0]
         conn.commit()
         print(f"Serie '{series_id}' added with FK_ID {event_id}.")
@@ -51,7 +51,31 @@ def add_series(event_id, serie_number):
         conn.close()
 
 
-def add_race(race_name, road_type, conditions, race_number, series_id):
+def add_track_set():
+    """Inserts a new race into the database."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+
+        cursor.execute("""
+            INSERT INTO track_set DEFAULT VALUES RETURNING track_set_id;
+        """)
+        track_set_id = cursor.fetchone()[0]
+
+        conn.commit()
+
+        return track_set_id
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        conn.rollback()
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def add_race(race_name, road_type, conditions, race_number, track_set_id):
     """Inserts a new race into the database."""
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -60,10 +84,10 @@ def add_race(race_name, road_type, conditions, race_number, series_id):
 
         conditions_json = json.dumps(conditions)
         cursor.execute("""
-            INSERT INTO races (race_name, road_type, conditions, race_number, series_id)
+            INSERT INTO races (race_name, road_type, conditions, race_number, track_set_id)
             VALUES (%s, %s, %s, %s, %s)
             RETURNING race_id;
-            """, (race_name, road_type, conditions_json, race_number, series_id))
+            """, (race_name, road_type, conditions_json, race_number, track_set_id))
 
         race_id = cursor.fetchone()[0]
         conn.commit()

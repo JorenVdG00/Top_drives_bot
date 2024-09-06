@@ -1,6 +1,6 @@
 import os
 import shutil
-from database.methods.db_events import get_series, get_races, get_assignees
+from database.methods.db_events import get_series, get_races, get_assignees, get_track_set_from_serie
 # from image_reader.event.event_reader_V2 import get_ingame_race_tracks
 # from image_reader.event.event_cropper_V3 import crops_ingame_event_types
 from ImageTools.Events.event_cropper import crop_event_types
@@ -9,18 +9,19 @@ from ImageTools.utils.file_utils import remove_all_files_in_dir, cleanup_dir
 from ImageTools.Events.event_reader import get_only_race_tracks
 from ImageTools.Events.event_cropper import crop_in_game_event_types
 from config import BASE_DIR
+
+
 def find_matching_serie(event_id, image_path, save_dir=f'{BASE_DIR}/TEMP/'):
     race_dict = {}
     crop_in_game_event_types(image_path, save_dir)
     extracted_races = get_only_race_tracks(save_dir)
     serie_ids = get_series(event_id)
 
-
     best_match = None
     highest_match_count = 0
 
     for serie_id in serie_ids:
-        races = get_races(serie_id)
+        races = get_races(get_track_set_from_serie(serie_id))
         race_dict[serie_id] = races
 
         # Compare extracted races with the current series races
@@ -37,6 +38,7 @@ def find_matching_serie(event_id, image_path, save_dir=f'{BASE_DIR}/TEMP/'):
         print("No matching series found.")
     cleanup_dir(save_dir)
     return best_match
+
 
 def compare_races(extracted_races, series_races):
     matches = 0
@@ -62,6 +64,8 @@ def check_event_has_assignees(event_id):
             return False
         assignees_dict[serie_id] = assignees
     return assignees_dict
+
+
 def get_corresponding_assignees(event_id, image_path):
     assignees_dict = check_event_has_assignees(event_id)
     if assignees_dict:

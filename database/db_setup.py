@@ -8,38 +8,42 @@ def create_tables():
 
     try:
 
-
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS events (
             event_id SERIAL PRIMARY KEY,
             event_name VARCHAR(255) NOT NULL,
             end_time TIMESTAMP NOT NULL,
             event_dir VARCHAR(255) NOT NULL,
-            ended BOOLEAN DEFAULT FALSE);
+            ended BOOLEAN DEFAULT FALSE
+            );
         """)
 
 
+
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS track_set (
+        track_set_id INTEGER PRIMARY KEY
+        );
+        """)
+        cursor.execute("""
+           CREATE TABLE IF NOT EXISTS races (
+               race_id SERIAL PRIMARY KEY,
+               race_name VARCHAR(255) NOT NULL,
+               road_type VARCHAR(255) NOT NULL,
+               conditions JSONB,  -- JSONB column to store conditions as key-value pairs
+               race_number INTEGER NOT NULL,
+               track_set_id INTEGER REFERENCES track_set(track_set_id)
+
+           );
+           """)
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS series (
             series_id SERIAL PRIMARY KEY,
             serie_number INTEGER NOT NULL,
-            event_id INTEGER REFERENCES events(event_id))
+            event_id INTEGER REFERENCES events(event_id),
+            track_set_id INTEGER REFERENCES track_set(track_set_id)
+            );
         """)
-
-
-
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS races (
-            race_id SERIAL PRIMARY KEY,
-            race_name VARCHAR(255) NOT NULL,
-            road_type VARCHAR(255) NOT NULL,
-            conditions JSONB,  -- JSONB column to store conditions as key-value pairs
-            race_number INTEGER NOT NULL,
-            series_id INTEGER REFERENCES series(series_id)
-        );
-
-        """)
-
 
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS car_assignments (
@@ -51,7 +55,31 @@ def create_tables():
 
         """)
 
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS club_reqs (
+        club_req_id SERIAL PRIMARY KEY,
+        req1 VARCHAR(255) NOT NULL,
+        req2 VARCHAR(255) NOT NULL
+        );
+        """)
 
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS club_event (
+            club_id SERIAL PRIMARY KEY,
+            club_name VARCHAR(255) NOT NULL,
+            played_matches INTEGER default 0,
+            ended BOOLEAN DEFAULT FALSE,       
+            rq INTEGER NOT NULL,
+            club_req_id INTEGER REFERENCES club_reqs(club_req_id)
+        );
+        """)
+
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS club_track_set (
+        club_track_id SERIAL PRIMARY KEY,
+        track_set_name VARCHAR(255) NOT NULL,
+        track_set_id INTEGER REFERENCES track_set(track_set_id)
+        );""")
 
         # Commit the changes
         conn.commit()
@@ -64,21 +92,25 @@ def create_tables():
         conn.close()
 
 
-def drop_tables():
-    """Drops tables from the database."""
+def delete_tables():
+    """Deletes specific tables from the database."""
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
         cursor.execute("""
-        DROP TABLE IF EXISTS car_assignments;
-        DROP TABLE IF EXISTS races;
-        DROP TABLE IF EXISTS series;
-        DROP TABLE IF EXISTS events;
+        DROP TABLE IF EXISTS car_assignments CASCADE;
+        DROP TABLE IF EXISTS races CASCADE;
+        DROP TABLE IF EXISTS series CASCADE;
+        DROP TABLE IF EXISTS events CASCADE;
+        DROP TABLE IF EXISTS track_set CASCADE;
+        DROP TABLE IF EXISTS club_track_set CASCADE;
+        DROP TABLE IF EXISTS club_event CASCADE;
+        DROP TABLE IF EXISTS club_reqs CASCADE;
         """)
 
         conn.commit()
-        print("Tables dropped successfully.")
+        print("Tables deleted successfully.")
     except Exception as e:
         print(f"An error occurred: {e}")
         conn.rollback()
@@ -89,7 +121,7 @@ def drop_tables():
 
 def main():
     # Optionally, drop existing tables before creating new ones
-    drop_tables()
+    delete_tables()
 
     # Create tables
     create_tables()

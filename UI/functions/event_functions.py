@@ -50,6 +50,32 @@ def check_empty_ticket(img_path):
             return False
 
 
+def check_event_ended(image_path):
+    print("checking event ended")
+    claim_color = (28, 207, 215, 255)
+    claim_x, claim_y = resize_coordinates(840, 1000, resize_values)
+    double_check_color = (255, 255, 255, 255)
+    double_check_x, double_check_y = resize_coordinates(1650, 300, resize_values)
+    with (Image.open(image_path) as img):
+        check_claim_color = img.getpixel((claim_x, claim_y))
+        check_white_color = img.getpixel((double_check_x, double_check_y))
+        if color_almost_same(claim_color, check_claim_color, tolerance=15) and \
+                (double_check_color == check_white_color):
+            return True
+        else:
+            return False
+
+def claim_event():
+    print("claim events")
+    claim_x, claim_y = resize_coordinates(840, 1000, resize_values)
+    tap(claim_x, claim_y)
+    time.sleep(2)
+    for i in range(10):
+        tap(claim_x+i, claim_y-i)
+        time.sleep(1)
+    time.sleep(5)
+
+
 def tap_event(event_number: int = 1):
     print("tapping event")
     y1, y2 = resize_coordinate(400, resize_values[1]), resize_coordinate(800, resize_values[1])
@@ -102,10 +128,10 @@ def check_event_available(event_number: int = 1):
 
 def swipe_left_one_event():
     x1_swipe, x2_swipe, y1, y2 = resize_ranges(1335, 700, 300, 400, resize_values)
-    x_step = int((x1_swipe - x2_swipe)*0.25)
+    x_step = int((x1_swipe - x2_swipe) * 0.25)
 
-    swipe(x1_swipe-x_step, y1, x2_swipe, y1)  # Dont know how but this is perfect
-    swipe(x1_swipe, y1, x1_swipe+5, y2) #stop the movements Y-Changes otherwise counts as a tap
+    swipe(x1_swipe - x_step, y1, x2_swipe, y1)  # Dont know how but this is perfect
+    swipe(x1_swipe, y1, x1_swipe + 5, y2)  # stop the movements Y-Changes otherwise counts as a tap
     time.sleep(0.2)
 
 
@@ -449,10 +475,20 @@ def tap_home():
 #             remove_screenshot(screenshot)
 
 
-
 def full_event_V2():  # ADD STOP_event
     calculate_screen_size()
     len_active_events = len(get_all_active_events())
+
+    # Tap home
+    tap_home()
+    # Tap events
+    tap_events()
+    event_ended = True
+    while event_ended:
+        screenshot = capture_screenshot()
+        event_ended = check_event_ended(screenshot)
+        if event_ended:
+            claim_event()
     for event_number in range(len_active_events):
         # Tap home
         tap_home()
@@ -491,8 +527,6 @@ def full_event_V2():  # ADD STOP_event
                             event_id = get_event_id_by_name(new_event_name)
                     # Tap play
                     tap_play_event()
-
-
 
                     # Tap go button
                     tap_go_button_event()

@@ -5,6 +5,7 @@ from ImageTools.utils.text_utils import remove_newlines
 from ImageTools.utils.image_utils import contains_color
 from ImageTools.Clubs.club_cropper import get_club_name
 from ImageTools.image_processing.extractor import extract_text_from_image
+from database.db_getters import get_club_reqs
 import os
 import re
 from config import BASE_DIR
@@ -19,7 +20,7 @@ from config import BASE_DIR
 #             'time_left_pattern': r'^\d+h\s\d+m\s\d+s$',
 #             'weight_pattern': r'^\d{2,4}$'}
 
-path = f'{BASE_DIR}/ImageTools/Clubs/tst/LEGACY_65'
+path = f'{BASE_DIR}/ImageTools/Clubs/tst/clubInfo/LEGACY_65'
 
 
 # def clean_input(input_string, pattern):
@@ -49,7 +50,6 @@ extracted_dict = extract_club_info(path)
 for key, value in extracted_dict.items():
     print(f'{key}: {value}')
 
-
 def req_met(club_dir):
     has_req_color = (251, 251, 251, 255)
     met_req_color = (0, 237, 1, 255)
@@ -64,3 +64,7 @@ def req_met(club_dir):
                     return False
     return True
 
+
+
+reqs = get_club_reqs()
+print(reqs)

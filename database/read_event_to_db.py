@@ -104,6 +104,7 @@ def full_event_reader():
             serie_number = key.split('-')[0]
             race_number = key.split('-')[1]
             if serie_number not in serie_track_dict:
+                print('add track_set')
                 track_set_id = add_track_set()
                 serie_track_dict[serie_number] = track_set_id
                 # serie_id = add_series(event_id, serie_number)
@@ -112,8 +113,8 @@ def full_event_reader():
             road_type = value['road_type']
             conditions_json = value['conditions']
             add_race(race_type, road_type, conditions_json, race_number, track_set_id)
-        for serie_number, track_set_id in serie_track_dict.values():
-            add_series(event_id, serie_number, track_set_id)
+        for key, value in serie_track_dict.items():
+            add_series(event_id, key, value)
         tap_home()
         print("tap_events()")
         tap_events()

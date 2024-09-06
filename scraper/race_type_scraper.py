@@ -55,6 +55,8 @@ try:
             track_name = track_name_div.get_text(strip=True)
             # Remove unnecessary tags or characters
             track_name = track_name.split('<')[0].strip()  # Remove any HTML comments or extra tags
+            if track_name.upper() in ('TWISTY', 'DRAG', 'CITY'):
+                continue
             track_names.add(track_name)
 
     # Output unique track names

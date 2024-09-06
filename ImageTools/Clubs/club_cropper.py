@@ -65,10 +65,3 @@ def crop_club_info(image_path, save_dir, name):
                 print(f'image saved: {full_dir}/{key}.png')
 
 
-save_dir = 'tst'
-# test_img = 'clicked_event_2_req.png'
-test_img = 'clicked_event.png'
-
-event_name = get_club_name(test_img)
-new_save_dir = (f'./tst')
-crop_club_info(test_img, new_save_dir, event_name)

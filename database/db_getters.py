@@ -1,10 +1,6 @@
 from database.db_general import get_db_connection
 
 
-
-
-
-
 def get_event_id_by_name(event_name):
     """Retrieves the event_id from the database given an event_name."""
     conn = get_db_connection()
@@ -29,7 +25,6 @@ def get_event_id_by_name(event_name):
     finally:
         cursor.close()
         conn.close()
-
 
 
 def get_races_by_series_id(series_id):
@@ -95,6 +90,7 @@ def get_series_by_event_id(event_id):
         cursor.close()
         conn.close()
 
+
 def get_event_by_id(event_id):
     """Retrieves an event from the database by its ID."""
     conn = get_db_connection()
@@ -117,6 +113,29 @@ def get_event_by_id(event_id):
         else:
             print(f"No event found with ID {event_id}.")
             return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_club_reqs():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+        SELECT req1, req1_number, req2, req2_number
+        FROM club_reqs
+        """)
+        club_reqs = cursor.fetchall()
+        if club_reqs:
+            return club_reqs
+        else:
+            return None
+
     except Exception as e:
         print(f"An error occurred: {e}")
         return None

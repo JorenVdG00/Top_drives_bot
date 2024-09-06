@@ -13,7 +13,7 @@ def reload_events():
         cursor.execute("""
         SELECT event_name FROM events
         WHERE end_time < %s AND ended = FALSE;
-        """)
+        """,(datetime.now(),))
         event_names = cursor.fetchall()
         for event_name in event_names:
             event_dir_path = os.path.join(EVENT_IMG_DIR, event_name)
@@ -289,14 +289,14 @@ def get_serie_id_from_track_set_id(track_set_id):
         conn.close()
 
 
-def get_track_set_from_serie(serie_id):
+def get_track_set_from_serie(series_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
         cursor.execute("""
         SELECT track_set_id From series
-        WHERE serie_id = %s;""", (serie_id,))
+        WHERE series_id = %s;""", (series_id,))
 
         track_set_id = cursor.fetchone()
         if track_set_id:
@@ -341,6 +341,48 @@ def get_assignees(series_id):
         cursor.close()
         conn.close()
 
+
+def get_track_set(track_set_name):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+        SELECT track_set_id From club_track_set
+        WHERE track_set_name = %s;
+        """,(track_set_name,))
+
+        track_set_id = cursor.fetchone()
+        if track_set_id:
+            return track_set_id[0]
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_club_from_name(club_name):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+        SELECT club_id From club_event
+        WHERE club_name = %s;
+        """,(club_name,))
+        club_id = cursor.fetchone()
+        if club_id:
+            return club_id[0]
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
 
 
 

@@ -168,16 +168,17 @@ def retune_coords(coords, size, retune_size, is_color = False):
 
 desc_path = './IMG/down.png'
 asc_path = './IMG/asc.png'
-sort_path = './IMG/sort.png'
+sort_path = 'IMG/3E.png'
+club_shit_path = '../Clubs/tst/club_shit.png'
 
-# get_all_coords(club_page_path, new_size, STANDARD_SCREEN_SIZE)
+get_all_coords(sort_path, new_size, STANDARD_SCREEN_SIZE)
 # 226, 226, 227, 255    1966, 162   ASC
 # 254, 254, 254, 255    1966, 180   DOWN
-# print(get_pixel_color(club_page_path, 1700, 1160, STANDARD_SCREEN_SIZE))
+# print(get_pixel_color(sort_path, 2195, 250, STANDARD_SCREEN_SIZE))
 
-print('ASC COLOR, ', get_pixel_color(asc_path, 1966, 163, STANDARD_SCREEN_SIZE))
-print('DESC COLOR, ', get_pixel_color(desc_path, 1966, 181, STANDARD_SCREEN_SIZE))
-
-print('ASC COLOR on sort, ', get_pixel_color(sort_path, 1966, 163, STANDARD_SCREEN_SIZE))
-print('DESC COLOR on sort, ', get_pixel_color(sort_path, 1966, 181, STANDARD_SCREEN_SIZE))
+# print('ASC COLOR, ', get_pixel_color(asc_path, 1966, 163, STANDARD_SCREEN_SIZE))
+# print('DESC COLOR, ', get_pixel_color(desc_path, 1966, 181, STANDARD_SCREEN_SIZE))
+#
+# print('ASC COLOR on sort, ', get_pixel_color(sort_path, 1966, 163, STANDARD_SCREEN_SIZE))
+# print('DESC COLOR on sort, ', get_pixel_color(sort_path, 1966, 181, STANDARD_SCREEN_SIZE))
 

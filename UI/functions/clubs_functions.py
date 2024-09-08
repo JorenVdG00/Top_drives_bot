@@ -1,5 +1,5 @@
 from PIL import Image
-from general_functions import tap, swipe
+from .general_functions import tap, swipe, swipe_and_hold
 from config import BOT_SCREENSHOTS_DIR, resize_values
 from .resize_functions import resize_coordinate, resize_coordinates, resize_ranges, resize_same_factor, \
     calculate_screen_size
@@ -46,3 +46,7 @@ def has_joined_event(img_path):
         else:
             return False
 
+def swipe_clubs_3_up():
+    x1, x2, y1, y2 = resize_ranges(1600, 1600, 1160, 670, resize_values)
+    swipe_and_hold(x1, y1, x2, y2, 3000, False)
+    time.sleep(0.2)

@@ -134,7 +134,7 @@ class CarAssignmentTab(QWidget):
         serie_ids = get_series(event_id)
         series = []
         for serie_id in serie_ids:
-            series.append(str(serie_id))
+            series.append((serie_id))
         # Placeholder: Fetch series names based on the selected event from the database
         return series
 

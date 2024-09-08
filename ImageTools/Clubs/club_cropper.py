@@ -13,7 +13,7 @@ def get_club_event_names(image_path):
     print(x1, x2)
     with Image.open(image_path) as image:
         resized_image = resize_image(image)
-        for i in range(1, 5):
+        for i in range(1, 4):
             y1, y2 = club_coordinates['club_events']['club_event_y'][f'club_event_y{i}']
             print(y1, y2)
             crop_coords = (int(x1), int(y1), int(x2), int(y2))
@@ -22,7 +22,6 @@ def get_club_event_names(image_path):
             extract_name = pytesseract.image_to_string(cropped_image)
             split_name = extract_name.split('\n')[0]
             names.append(split_name)
-
     return names
 
 def get_club_name(image_path):
@@ -66,5 +65,5 @@ def crop_club_info(image_path, save_dir):
                 cropped_image = resized_image.crop(crop_box)
                 cropped_image.save(f'{full_dir}/{key}.png')
                 print(f'image saved: {full_dir}/{key}.png')
-
+    return full_dir
 

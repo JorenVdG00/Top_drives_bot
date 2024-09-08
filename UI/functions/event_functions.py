@@ -11,7 +11,11 @@ from .resize_functions import resize_coordinate, resize_coordinates, resize_rang
     calculate_screen_size
 from .general_game_functions import check_cannot_play
 from ImageTools.cropper.classify import get_event_name
+from ImageTools.Events.event_cropper import crop_event_display_img
 from database.methods.db_events import get_event_id_by_name, get_all_active_events
+from ImageTools.utils.image_utils import resize_image
+
+this_dir = os.getcwd()
 
 
 def check_ticket(img_path):
@@ -65,13 +69,14 @@ def check_event_ended(image_path):
         else:
             return False
 
+
 def claim_event():
     print("claim events")
     claim_x, claim_y = resize_coordinates(840, 1000, resize_values)
     tap(claim_x, claim_y)
     time.sleep(2)
     for i in range(10):
-        tap(claim_x+i, claim_y-i)
+        tap(claim_x + i, claim_y - i)
         time.sleep(1)
     time.sleep(5)
 
@@ -138,19 +143,24 @@ def swipe_left_one_event():
     # time.sleep(0.2)
     #
 
+
 def get_event_number_inactive(save_display=False):
     unavailable_x1, unavailable_y1 = resize_coordinates(1120, 290, resize_values)
     last_visible_x1, last_visible_y1 = resize_coordinates(2195, 250, resize_values)
     unavailable_color = (112, 112, 112, 255)
-    event_number = 0
     open_events_img_paths = []
-    event_unavailable = False
 
     tap_home()
     tap_events()
+
+    event_number = 0
+    third_available = True
+    event_unavailable = False
     while not event_unavailable:
-        if event_number > 0:
-            swipe_left_one_event()
+        if third_available:
+            if event_number > 0:
+                swipe_left_one_event()
+        third_available = is_third_visible_available()
 
         display_img_path = capture_screenshot()
         time.sleep(1)
@@ -182,6 +192,80 @@ def get_event_number_inactive(save_display=False):
         for img_path in open_events_img_paths:
             remove_screenshot(img_path)
         return inactive_event_number
+
+
+def get_display_img_paths(nr_available_events):
+    display_paths = []
+    event_number = 0
+    while event_number < nr_available_events:
+        print(event_number)
+        one_screen = False
+        if is_third_visible_available() or event_number == 0:
+            one_screen = capture_screenshot()
+        if one_screen:
+            screenshot_path = one_screen
+        else:
+            screenshot_path = capture_screenshot()
+        if one_screen:
+            print('printing i after onescreen', event_number)
+            display_paths.append(crop_event_display_img(screenshot_path, f'{this_dir}/temp', f'display{event_number}'))
+            event_number += 1
+        display_paths.append(crop_event_display_img(screenshot_path, f'{this_dir}/temp', f'display{event_number}', last=True))
+        event_number += 1
+        remove_screenshot(screenshot_path)
+        swipe_left_one_event()
+
+    print(display_paths)
+    return display_paths
+
+
+def is_third_visible_available():
+    last_visible_x1, last_visible_y1 = resize_coordinates(2195, 250, resize_values)
+    unavailable_color = (112, 112, 112, 255)
+    no_event_color = (89, 147, 180, 255)
+    screenshot = capture_screenshot()
+    with Image.open(screenshot) as img:
+
+        color = img.getpixel((last_visible_x1, last_visible_y1))
+        if color_almost_same(color, unavailable_color, tolerance=10) or color_almost_same(color, no_event_color,
+                                                                                          tolerance=10):
+            print("event not available")
+            available = False
+        else:
+            available = True
+    remove_screenshot(screenshot)
+    return available
+
+
+def get_nr_available_events():
+    event_number = 0
+    available_color = (24, 24, 24, 255)
+    y = 250
+    x_list = [1060, 1675, 2160]
+    event_list = []
+    screenshot = capture_screenshot()
+    with Image.open(screenshot) as img:
+        resized_img = resize_image(img)
+        for x in x_list:
+            color = resized_img.getpixel((x, y))
+            event_list.append(color_almost_same(color, available_color, tolerance=10))
+    remove_screenshot(screenshot)
+    print('event_list:', event_list)
+    for event in event_list:
+        if event:
+            print('event: ', event)
+            event_number += 1
+        else:
+            print('no event')
+            return event_number
+    print('going further to is_third_visible_available')
+    available = True
+    while available:
+        swipe_left_one_event()
+        available = is_third_visible_available()
+        if available:
+            event_number += 1
+    return event_number
 
 
 def event_requirements_met(img_path):
@@ -500,7 +584,11 @@ def full_event_V2():  # ADD STOP_event
         event_ended = check_event_ended(screenshot)
         if event_ended:
             claim_event()
+    last_event = False
     for event_number in range(len_active_events):
+        if event_number == len_active_events - 1:
+            last_event = True
+            event_number -= 1
         # Tap home
         tap_home()
 
@@ -511,7 +599,10 @@ def full_event_V2():  # ADD STOP_event
             print(f'Event number: {event_number}')
             for i in range(event_number):
                 swipe_left_one_event()
-        tap_event(1)
+        if last_event:
+            tap_event(2)
+        else:
+            tap_event(1)
         ticket = True
         screenshot = capture_screenshot()
         event_name = get_event_name(screenshot)
@@ -566,10 +657,21 @@ def full_event_V2():  # ADD STOP_event
                 else:
                     if ticket_str == "Empty Ticket":
                         print("empty Ticket found")
+                        ticket = False
                         event_number += 1
                     else:
                         print("no Ticket found")
-                    ticket = False
+                        tap_home()
+                        tap_events()
+                        print(f'Event number: {event_number}')
+                        if event_number:
+                            print(f'Event number: {event_number}')
+                            for i in range(event_number):
+                                swipe_left_one_event()
+                        if last_event:
+                            tap_event(2)
+                        else:
+                            tap_event(1)
             else:
                 print("event requirements not met")
                 event_number += 1

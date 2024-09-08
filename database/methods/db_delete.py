@@ -1,7 +1,7 @@
 from database.db_general import get_db_connection
 
 
-def remove_event_series(event_id):
+def remove_event(event_id):
     """Removes all series related to the given event_id from the database."""
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -20,7 +20,7 @@ def remove_event_series(event_id):
 
         # Now delete from the 'series' table
         cursor.execute("""
-            DELETE FROM track_set
+            DELETE FROM events
             WHERE event_id = %s;
         """, (str(event_id),))
 
@@ -35,7 +35,6 @@ def remove_event_series(event_id):
 
 
 def remove_event(event_id):
-    remove_event_series(event_id)
     print(f"Removing all events for event_id: {event_id}")
     conn = get_db_connection()
     cursor = conn.cursor()

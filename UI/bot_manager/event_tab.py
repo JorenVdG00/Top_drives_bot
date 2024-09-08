@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton
 from UI.functions.event_functions import full_event_V2 as full_event, capture_screenshot, swipe, swipe_left_one_event
+from UI.functions.clubs_functions import swipe_clubs_3_up
 from UI.functions.resize_functions import calculate_screen_size
 from database.read_event_to_db import full_event_reader
 import threading
@@ -54,7 +55,7 @@ class EventTab(QWidget):
 
     def swipe_up_event(self):
         self.main_window.log("Swiping up event...")
-        swipe(2000, 1000, 2000, 300)
+        swipe_clubs_3_up()
 
     def full_event_bot(self):
         self.main_window.log("Starting full event bot...")

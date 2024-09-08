@@ -9,13 +9,15 @@ def reload_events():
     cursor = conn.cursor()
     EVENT_IMG_DIR = os.path.join(BASE_DIR, 'database', 'temp')
     try:
+        print('RELOADING EVENTS')
         # Get All events that expired
         cursor.execute("""
         SELECT event_name FROM events
         WHERE end_time < %s AND ended = FALSE;
         """,(datetime.now(),))
         event_names = cursor.fetchall()
-        for event_name in event_names:
+        for event_tuple in event_names:
+            event_name = event_tuple[0]  # Extract the event name from the tuple
             event_dir_path = os.path.join(EVENT_IMG_DIR, event_name)
             delete_dir(event_dir_path)
 
@@ -102,7 +104,7 @@ def get_event_id_by_name(event_name):
         cursor.execute("""
             SELECT event_id
             FROM events
-            WHERE event_name = %s and ended = FALSE;
+            WHERE event_name = %s AND ended = FALSE;
             """, (event_name,))
 
         event_id = cursor.fetchone()
@@ -133,7 +135,7 @@ def get_active_event(event_id):
 
     try:
         cursor.execute("""
-            SELECT event_name, event_dir, end_time From events
+            SELECT event_name, event_dir, end_time FROM events
             WHERE event_id = %s;
         """, (event_id,))
 
@@ -159,8 +161,9 @@ def get_series(event_id):
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            SELECT series_id From series
-            WHERE event_id = %s;
+            SELECT track_serie_id FROM track_serie
+            WHERE track_set_id IN (SELECT track_set_id FROM track_set
+            WHERE event_id = %s);
    """, (event_id,))
 
         series = cursor.fetchall()
@@ -186,8 +189,9 @@ def get_event_from_serie_id(series_id):
 
     try:
         cursor.execute("""
-            SELECT event_id From series
-            WHERE series_id = %s;
+            SELECT event_id FROM track_set
+            WHERE track_set_id IN (SELECT track_set_id FROM track_serie
+            WHERE track_serie_id = '%s');
    """, (series_id,))
 
         event = cursor.fetchone()
@@ -214,8 +218,9 @@ def get_races(track_set_id):
 
     try:
         cursor.execute("""
-             SELECT race_id, race_name, road_type, conditions, race_number From races
-             WHERE track_set_id = %s
+             SELECT race_id, race_name, road_type, conditions, race_number FROM races
+             WHERE track_serie_id IN (SELECT track_serie_id FROM track_serie
+                                        WHERE track_set_id = '%s')
              ORDER BY race_number ASC;
         """, (track_set_id,))
 
@@ -250,8 +255,8 @@ def get_serie_number(series_id):
 
     try:
         cursor.execute("""
-        SELECT serie_number From series
-        WHERE series_id = %s;
+        SELECT serie_number FROM track_serie
+        WHERE track_serie_id = %s;
         """, (series_id,))
 
         serie_number = cursor.fetchone()
@@ -271,7 +276,7 @@ def get_serie_id_from_track_set_id(track_set_id):
 
     try:
         cursor.execute("""
-        SELECT serie_id From series
+        SELECT track_serie_id From track_serie
         WHERE track_set_id = %s;
         """, (track_set_id,))
 
@@ -295,8 +300,8 @@ def get_track_set_from_serie(series_id):
 
     try:
         cursor.execute("""
-        SELECT track_set_id From series
-        WHERE series_id = %s;""", (series_id,))
+        SELECT track_set_id From track_serie
+        WHERE track_serie_id = %s;""", (series_id,))
 
         track_set_id = cursor.fetchone()
         if track_set_id:
@@ -311,22 +316,20 @@ def get_track_set_from_serie(series_id):
         cursor.close()
         conn.close()
 
-def get_assignees(series_id):
+def get_assignees(track_serie_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    track_set_id = get_track_set_from_serie(series_id)
-    if not track_set_id:
+    if not track_serie_id:
         return None
     try:
         cursor.execute("""
         SELECT r.race_number, ca.car_number FROM races r 
         JOIN car_assignments ca ON r.race_id = ca.race_id
-        WHERE r.track_set_id = %s
-        ORDER BY r.race_number ASC;""", (track_set_id,))
+        WHERE r.track_serie_id = %s
+        ORDER BY r.race_number ASC;""", (track_serie_id,))
 
         assignees = cursor.fetchall()
-        print(assignees)
         assignees_dict = {}
         if assignees:
             for r in assignees:
@@ -348,7 +351,7 @@ def get_track_set(track_set_name):
 
     try:
         cursor.execute("""
-        SELECT track_set_id From club_track_set
+        SELECT club_set_id From club_track_set
         WHERE track_set_name = %s;
         """,(track_set_name,))
 

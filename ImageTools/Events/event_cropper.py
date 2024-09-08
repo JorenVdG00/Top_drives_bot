@@ -44,6 +44,7 @@ def crop_and_save_event_type_images(event_type_img_dir, save_dir):
         crop_event_types(img_path, save_dir, name, event_number)
         event_number += 1
 
+
 def crop_event_types(image_path, save_dir, name, event_number):
     race_number = 1
     y1, y2 = event_coordinates['event_y'][f'event_y_{event_number}']
@@ -82,7 +83,7 @@ def crop_race_in_parts(img_path, save_dir):
             cropped_image.save(f"{save_dir}/{key}.png")
 
 
-def crop_event_display_img(img_path, save_dir, name, last= False):
+def crop_event_display_img(img_path, save_dir, name, last=False):
     if last:
         display_path = crop_image(img_path, save_dir, name, last_display_img_coords)
     else:

@@ -24,9 +24,12 @@ def weight_to_team(image_path):
     return None
 
 
-def correct_weight_value(str):
-    str_value = str[1:]
-    return int(str_value)
+def correct_weight_value(s):
+    value = extract_integers(s)
+    if value is None:
+        return None
+    fixed_value = str(value)[1:]
+    return int(fixed_value)
 
 
 def fix_rq_value(extracted_data):
@@ -45,6 +48,8 @@ def fix_score_value(extracted_data):
 
 
 def fix_reqs(extracted_data, club_dir_path):
+    extracted_data['req_status'] = 'NULL'
+
     db_reqs = get_club_reqs()
     for i in range(1, 3):
         req_img = os.path.join(club_dir_path, f'reqs{i}.png')
@@ -62,6 +67,11 @@ def fix_reqs(extracted_data, club_dir_path):
                 else:
                     if db_req[2] and db_req[2] in req_name:
                         extracted_data[f'reqs{i}']['name'], extracted_data[f'reqs{i}']['number'] = db_req[2], db_req[3]
+        else:
+            if extracted_data['req_status'] in ('NONE', 'MET'):
+                extracted_data['req_status'] = 'MET'
+            elif extracted_data['req_status'] == 'NOT_MET':
+                extracted_data['req_status'] = 'NOT_MET'
     return extracted_data
 
 
@@ -79,9 +89,11 @@ def has_req_met(img_path):
 def extract_integers(s):
     # Find all digits in the string
     digit_strings = re.findall(r'\d', s)
-    # Join them together and convert to a single integer
-    combined_integer = int(''.join(digit_strings))
-    return combined_integer
+    if digit_strings:
+        # Join them together and convert to a single integer
+        combined_integer = int(''.join(digit_strings))
+        return combined_integer
+    return None
 
 
 

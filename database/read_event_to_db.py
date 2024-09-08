@@ -3,12 +3,12 @@ import os
 from UI.functions.general_functions import capture_screenshot, tap, swipe, remove_screenshot, create_dir_if_not_exists
 from UI.functions.resize_functions import resize_coordinates, calculate_screen_size, set_cwd, resize_ranges
 from UI.functions.event_functions import tap_event, tap_events, tap_home, get_event_number_inactive, tap_play_event, \
-    swipe_left_one_event
+    swipe_left_one_event, get_nr_available_events, get_display_img_paths
 # from image_reader.event.event_cropper_V3 import get_event_name, crop_and_save_event_type_images, crop_event_display_img, crop_all_cars_img
 # from image_reader.event.event_reader_V2 import get_full_event_type_list
 # from image_reader.event.event_time import get_time_left_event, calculate_event_end_time
 from database.methods.db_adder import add_event, add_race, add_track_set, add_track_serie
-from database.methods.db_delete import remove_event_series
+from database.methods.db_delete import remove_event
 from database.methods.db_events import get_event_id_by_name
 from database.db_getters import get_event_id_by_name
 
@@ -17,7 +17,7 @@ from ImageTools.cropper.classify import get_event_name
 from ImageTools.Events.event_cropper import crop_event_display_img, crop_and_save_event_type_images
 from ImageTools.Events.event_reader import get_full_correct_list
 from ImageTools.Events.end_time import get_time_left_event, calculate_event_end_time
-from ImageTools.utils.file_utils import cleanup_dir
+from ImageTools.utils.file_utils import cleanup_dir, move_and_rename
 
 from config import resize_values, BASE_DIR
 import random
@@ -49,23 +49,23 @@ def tap_match_info():
 
 def full_event_reader():
     cleanup_dir(PARENT_DIR)
+    tap_home()
+    tap_events()
 
     calculate_screen_size()
-
-    inactive_number, display_img_paths = get_event_number_inactive(True)
-    print('inactive_number', inactive_number)
-    print('inactive_number', inactive_number)
-    print('inactive_number', inactive_number)
+    available_events = get_nr_available_events()
+    display_img_paths = get_display_img_paths(available_events)
+    # inactive_number, display_img_paths = get_event_number_inactive(True)
+    # print('inactive_number', inactive_number)
+    print('available', available_events)
+    # print('inactive_number', inactive_number)
     last_event = False
     event_number = 0
     while not last_event:
-        if inactive_number - 1 == event_number:
-            event_display_img = display_img_paths[(event_number - 2)]
+        if available_events - 1 == event_number:
             last_event = True
-            event_number = event_number - 1
-        else:
-            event_display_img = display_img_paths[(event_number - 1)]
-        if event_number != 0:
+
+        if event_number != 0 and not last_event:
             for i in range(event_number):
                 swipe_left_one_event()
         # while check_event_available(event_number):
@@ -80,14 +80,15 @@ def full_event_reader():
         event_screens_dir = f'{event_dir}/screens/'
         event_type_cropped_dir = f'{event_dir}/cropped_img/'
         cars_dir = f'{event_dir}/cars/'
-        crop_event_display_img(event_display_img, event_dir + 'display/', 'display', last_event)
+        move_and_rename(display_img_paths[event_number], f'{event_dir}display', 'display.png')
+        # crop_event_display_img(event_display_img, event_dir + 'display/', 'display', last=last_event)
 
         event_id = get_event_id_by_name(event_name)
         print(event_id)
-        if not event_id:
-            event_id = add_event(event_name, event_dir, end_time)
+        if event_id:
+            remove_event(event_id)
+        event_id = add_event(event_name, event_dir, end_time)
         print('event_id: ', event_id)
-        remove_event_series(event_id)
 
         tap_play_event()
 
@@ -132,7 +133,4 @@ def full_event_reader():
         tap_events()
         event_number += 1
         print(f'Finished with event-{event_number}')
-
-    for rest in display_img_paths:
-        remove_screenshot(rest)
     print('ended!!!!')

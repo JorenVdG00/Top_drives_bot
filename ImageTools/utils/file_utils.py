@@ -59,3 +59,36 @@ def delete_dir(dir):
 def get_head(file):
     head = file.split('.')[0]
     return head
+
+
+def move_and_rename(src, dest, new_name=None):
+    """
+    Moves a file or directory to a specified destination and optionally renames it.
+
+    Parameters:
+    - src: The source file or directory path.
+    - dest: The destination directory path where the file or directory should be moved.
+    - new_name: The new name for the file or directory (optional).
+
+    Returns:
+    - final_dest: The final destination path with the new name if the operation is successful.
+    - None: If the operation fails.
+    """
+    try:
+        # If a new name is provided, modify the destination path to include it
+        if new_name:
+            final_dest = os.path.join(dest, new_name)
+        else:
+            # Use the original name if no new name is provided
+            final_dest = os.path.join(dest, os.path.basename(src))
+
+        # Ensure the destination directory exists
+        create_dir_if_not_exists(dest)
+
+        # Move the file or directory
+        shutil.move(src, final_dest)
+        print(f"Successfully moved {src} to {final_dest}")
+        return final_dest
+    except Exception as e:
+        print(f"An error occurred while moving {src} to {final_dest}: {e}")
+        return None

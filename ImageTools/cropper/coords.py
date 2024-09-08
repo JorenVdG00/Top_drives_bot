@@ -37,8 +37,7 @@ last_display_img_coords = (1350, 260, 1940, 915)
 car_coords = {'coords': (70, 1010, 390, 1215), 'step': 31}
 
 club_coordinates = {'club_events': {
-    'club_event_y': {'club_event_y1': [680, 825], 'club_event_y2': [845, 990], 'club_event_y3': [1010, 1155],
-                     'club_event_y4': [1175, 1310]},
+    'club_event_y': {'club_event_y1': [680, 825], 'club_event_y2': [845, 990], 'club_event_y3': [1010, 1155]},
     'club_event_x': [1580, 2140]
 }}
 

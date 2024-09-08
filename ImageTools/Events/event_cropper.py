@@ -1,7 +1,7 @@
 import os
 from PIL import Image
 from ImageTools.cropper.classify import get_event_name, classify_filename
-from ImageTools.cropper.coords import event_coordinates, event_img_coords, display_img_coords
+from ImageTools.cropper.coords import event_coordinates, event_img_coords, display_img_coords, last_display_img_coords
 from ImageTools.utils.image_utils import resize_image
 from ImageTools.utils.file_utils import create_dir_if_not_exists
 from ImageTools.image_processing.cropper import crop_image
@@ -82,6 +82,9 @@ def crop_race_in_parts(img_path, save_dir):
             cropped_image.save(f"{save_dir}/{key}.png")
 
 
-def crop_event_display_img(img_path, save_dir, name):
-    display_path = crop_image(img_path, save_dir, name, display_img_coords)
+def crop_event_display_img(img_path, save_dir, name, last= False):
+    if last:
+        display_path = crop_image(img_path, save_dir, name, last_display_img_coords)
+    else:
+        display_path = crop_image(img_path, save_dir, name, display_img_coords)
     return display_path

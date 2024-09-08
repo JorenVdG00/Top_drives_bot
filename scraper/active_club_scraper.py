@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from database.methods.db_adder import add_club_reqs, add_track_set, add_race, add_club_track_set, add_track_serie
-from database.methods.db_delete import delete_club_track_sets,delete_club_reqs
+from database.methods.db_delete import delete_club_track_sets, delete_club_reqs
 from bs4 import BeautifulSoup
 import time
 
@@ -21,28 +21,21 @@ chrome_options.add_argument("--disable-gpu")
 # Set up WebDriver
 service = Service(chrome_driver_path)
 print("service opened")
-driver = webdriver.Chrome(service=service, options=chrome_options)
-print("driver opened")
-
-# Wait for the page to load (adjust if necessary)
-driver.implicitly_wait(10)  # waits up to 10 seconds
-driver.get("https://www.topdrivesrecords.com/clubs")
-
-wait = WebDriverWait(driver, 10)
 
 
-def get_track_names():
-    track_names = []
-    # Find all buttons within the first Clubs_SelectorBox (for track names)
-    track_buttons = driver.find_elements(By.CSS_SELECTOR,
-                                         "div.Clubs_Box > div.Clubs_SelectorBox:first-of-type button span.BaseChip_Text")
+# def get_track_names():
+#     track_names = []
+#     # Find all buttons within the first Clubs_SelectorBox (for track names)
+#     track_buttons = driver.find_elements(By.CSS_SELECTOR,
+#                                          "div.Clubs_Box > div.Clubs_SelectorBox:first-of-type button span.BaseChip_Text")
+#
+#     # Extract and print the track names
+#     print("Track Names:")
+#     for button in track_buttons:
+#         print(button.text)
+#         track_names.append(button.text)
+#     return track_names
 
-    # Extract and print the track names
-    print("Track Names:")
-    for button in track_buttons:
-        print(button.text)
-        track_names.append(button.text)
-    return track_names
 
 def fix_conditions(condition_spans):
     conditions = []
@@ -71,8 +64,11 @@ def check_icon(track, conditions):
             elif 'BaseIconSvg_Clearance' in svg.get('class', []):
                 conditions.append('HIGH')
     return conditions
-def get_race_tracks():
-    race_tracks = {}
+
+
+def get_race_tracks(driver):
+    wait = WebDriverWait(driver, 10)
+
     track_buttons = wait.until(EC.presence_of_all_elements_located(
         (By.CSS_SELECTOR, "div.Clubs_Box > div.Clubs_SelectorBox:nth-of-type(1) button span.BaseChip_Text")))
 
@@ -80,6 +76,7 @@ def get_race_tracks():
     for index, button in enumerate(track_buttons):
         club_event_name = button.text
         cleaned_club_event_name = club_event_name.upper().replace(' ', '_').strip()
+        club_set_id = add_club_track_set(cleaned_club_event_name)
         print(cleaned_club_event_name)
         print(f"Clicking on track {index + 1}: {button.text}")
         track_button = button.find_element(By.XPATH, '..')  # Find the parent button element
@@ -93,14 +90,15 @@ def get_race_tracks():
 
         track_boxes = soup.find_all('div', class_='Cg_Box BaseEventTrackbox_BoxRelative')
         count = 1
-        track_set_id = add_track_set()
+        track_set_id = add_track_set(club_set_id=club_set_id)
         for track_box in track_boxes:
-            track_serie = add_track_serie(track_set_id)
+            track_serie = add_track_serie(track_set_id, track_set_id)
             print(count)
             count += 1
-            race_number = 1
+            race_number = 0
             tracks = track_box.find_all('div', class_='Cg_Track EventTrack')
             for track in tracks:
+                race_number += 1
                 content = track.find('div', class_='Row_Content').text.strip().upper()
                 # Extract conditions
                 conditions_div = track.find('div', class_='Row_Conditions')
@@ -141,14 +139,14 @@ def get_race_tracks():
                 elif not road_types:
                     road_type = 'ASPHALT'
 
-
                 print(f'Content: {content}')
                 print(f'Conditions: {conditions_dict}')
                 print(f'Road type: {road_type}')
-                print('---'*5)
+                print('---' * 5)
                 add_race(content, road_type, conditions_dict, race_number, track_serie)
-        add_club_track_set(cleaned_club_event_name, track_set_id)
-def get_club_req_list():
+
+
+def get_club_req_list(driver):
     # Find all buttons within the second Clubs_SelectorBox (for requirements)
     requirement_buttons = driver.find_elements(By.CSS_SELECTOR,
                                                "div.Clubs_Box > div.Clubs_SelectorBox:nth-of-type(2) button span.BaseChip_Text")
@@ -201,14 +199,20 @@ def add_club_req_db(req_list):
 
 
 def refresh_club_info():
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+
+    # Set implicit wait
+    driver.implicitly_wait(10)  # Apply the implicit wait immediately after driver initialization
+
+    # Load the page
+    driver.get("https://www.topdrivesrecords.com/clubs")
+
     delete_club_track_sets()
     delete_club_reqs()
-    add_club_req_db(get_club_req_list())
-    get_race_tracks()
+    add_club_req_db(get_club_req_list(driver))
+    get_race_tracks(driver)
+    driver.quit()
 
 
-
-refresh_club_info()
-
-# Close the Selenium WebDriver
-driver.quit()
+if __name__ == '__main__':
+    refresh_club_info()

@@ -18,16 +18,25 @@ def create_tables():
             );
         """)
 
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS club_track_set (
+        club_set_id SERIAL PRIMARY KEY,
+        track_set_name VARCHAR(255) NOT NULL,
+        active BOOLEAN DEFAULT FALSE 
+        );""")
 
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS track_set (
-        track_set_id SERIAL PRIMARY KEY
+        track_set_id SERIAL PRIMARY KEY,
+        event_id INTEGER REFERENCES events(event_id) ON DELETE CASCADE DEFAULT NULL ,
+        club_set_id INTEGER REFERENCES club_track_set(club_set_id) ON DELETE CASCADE DEFAULT NULL 
         );
         """)
 
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS track_serie (
         track_serie_id SERIAL PRIMARY KEY,
+        serie_number INTEGER NOT NULL,
         track_set_id INTEGER REFERENCES track_set (track_set_id) ON DELETE CASCADE
         );
         """)
@@ -43,19 +52,19 @@ def create_tables():
 
            );
            """)
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS series (
-            series_id SERIAL PRIMARY KEY,
-            serie_number INTEGER NOT NULL,
-            event_id INTEGER REFERENCES events(event_id),
-            track_serie_id INTEGER REFERENCES track_serie(track_serie_id)
-            );
-        """)
+        # cursor.execute("""
+        # CREATE TABLE IF NOT EXISTS series (
+        #     series_id SERIAL PRIMARY KEY,
+        #     serie_number INTEGER NOT NULL,
+        #     event_id INTEGER REFERENCES events(event_id),
+        #     track_serie_id INTEGER REFERENCES track_serie(track_serie_id)
+        #     );
+        # """)
 
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS car_assignments (
             assignment_id SERIAL PRIMARY KEY,
-            race_id INTEGER REFERENCES races(race_id), 
+            race_id INTEGER REFERENCES races(race_id) ON DELETE CASCADE, 
             car_number INTEGER NOT NULL, -- This will store car numbers (1-5)
             UNIQUE(race_id, car_number)  -- Ensure each car can only be assigned to a race once
         );
@@ -72,15 +81,6 @@ def create_tables():
         );
         """)
 
-
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS club_track_set (
-        club_track_set_id SERIAL PRIMARY KEY,
-        track_set_name VARCHAR(255) NOT NULL,
-        track_set_id INTEGER REFERENCES track_set(track_set_id) ON DELETE CASCADE
-        );""")
-
-
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS club_event (
             club_id SERIAL PRIMARY KEY,
@@ -88,12 +88,10 @@ def create_tables():
             played_matches INTEGER default 0,
             ended BOOLEAN DEFAULT FALSE,       
             rq INTEGER NOT NULL,
-            club_track_set_id INTEGER REFERENCES club_track_set(club_track_set_id),
+            club_set_id INTEGER REFERENCES club_track_set(club_set_id),
             club_req_id INTEGER REFERENCES club_reqs(club_req_id)
         );
         """)
-
-
 
         # Commit the changes
         conn.commit()

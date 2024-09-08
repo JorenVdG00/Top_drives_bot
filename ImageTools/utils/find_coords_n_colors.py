@@ -166,7 +166,7 @@ def retune_coords(coords, size, retune_size, is_color = False):
         return retuned_coords
 
 
-club_page_path = './IMG/event_end.png'
+club_page_path = './IMG/nomore_event.png'
 get_all_coords(club_page_path, new_size, STANDARD_SCREEN_SIZE)
 #
 # print(get_pixel_color(club_page_path, 1700, 1160, STANDARD_SCREEN_SIZE))

@@ -6,7 +6,7 @@ from UI.functions.event_functions import tap_event, tap_events, tap_home, get_ev
 # from image_reader.event.event_cropper_V3 import get_event_name, crop_and_save_event_type_images, crop_event_display_img, crop_all_cars_img
 # from image_reader.event.event_reader_V2 import get_full_event_type_list
 # from image_reader.event.event_time import get_time_left_event, calculate_event_end_time
-from database.methods.db_adder import add_event, add_series, add_race, add_track_set
+from database.methods.db_adder import add_event, add_race, add_track_set, add_track_serie
 from database.methods.db_delete import remove_event_series
 from database.methods.db_events import get_event_id_by_name
 from database.db_getters import get_event_id_by_name
@@ -52,23 +52,30 @@ def full_event_reader():
     calculate_screen_size()
 
     inactive_number, display_img_paths = get_event_number_inactive(True)
-
+    last_event = False
     for event_number in range(1, inactive_number):
-        event_display_img = display_img_paths[(event_number-1)]
+        if inactive_number-1 == event_number:
+            event_display_img = display_img_paths[(event_number-2)]
+            last_event = True
+            event_number = event_number - 1
+        else:
+            event_display_img = display_img_paths[(event_number-1)]
         if event_number != 1:
             for i in range(event_number-1):
                 swipe_left_one_event()
     # while check_event_available(event_number):
         # print(resize_values*10)
         print("try tapping tap_event")
-
-        tap_event(1)
+        if last_event:
+            tap_event(2)
+        else:
+            tap_event(1)
         event_name, end_time = get_event_info()
         event_dir = f'{PARENT_DIR}/{event_name}/'
         event_screens_dir = f'{event_dir}/screens/'
         event_type_cropped_dir = f'{event_dir}/cropped_img/'
         cars_dir = f'{event_dir}/cars/'
-        crop_event_display_img(event_display_img, event_dir+'display/', 'display')
+        crop_event_display_img(event_display_img, event_dir+'display/', 'display', last_event)
 
         event_id = get_event_id_by_name(event_name)
         if not event_id:
@@ -105,7 +112,7 @@ def full_event_reader():
             race_number = key.split('-')[1]
             if serie_number not in serie_track_dict:
                 print('add track_set')
-                track_set_id = add_track_set()
+                track_set_id = add_track_set(event_id=event_id)
                 serie_track_dict[serie_number] = track_set_id
                 # serie_id = add_series(event_id, serie_number)
 
@@ -114,7 +121,7 @@ def full_event_reader():
             conditions_json = value['conditions']
             add_race(race_type, road_type, conditions_json, race_number, track_set_id)
         for key, value in serie_track_dict.items():
-            add_series(event_id, key, value)
+            add_track_serie(key, value)
         tap_home()
         print("tap_events()")
         tap_events()

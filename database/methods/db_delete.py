@@ -13,23 +13,14 @@ def remove_event_series(event_id):
             DELETE FROM car_assignments
             WHERE race_id IN (
                 SELECT race_id FROM races WHERE track_set_id IN (
-                    SELECT track_set_id FROM series WHERE event_id = %s
+                    SELECT track_set_id FROM track_set WHERE event_id = %s
                 )
-            );
-        """, (str(event_id),))
-
-        # Assuming you have foreign key constraints, you may need to delete from child tables first.
-        # For example, if there's a 'sub_series' table related to 'series':
-        cursor.execute("""
-            DELETE FROM races
-            WHERE track_set_id IN (
-                    SELECT track_set_id FROM series WHERE event_id = %s
             );
         """, (str(event_id),))
 
         # Now delete from the 'series' table
         cursor.execute("""
-            DELETE FROM series
+            DELETE FROM events
             WHERE event_id = %s;
         """, (str(event_id),))
 
@@ -88,14 +79,9 @@ def delete_club_track_sets():
     cursor = conn.cursor()
     try:
         cursor.execute("""
-                DELETE FROM track_set
-                WHERE track_set_id IN (
-                    SELECT track_set_id FROM club_track_set);
-            """)
-        cursor.execute("""
                 DELETE FROM club_track_set
-                WHERE track_set_id IN (
-                    SELECT track_set_id FROM track_set
+                WHERE club_set_id IN (
+                    SELECT club_set_id FROM track_set WHERE club_set_id IS NOT NULL
                 );
             """)
 

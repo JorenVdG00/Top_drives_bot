@@ -34,9 +34,17 @@ def tap(x, y):
     os.system(f"{ADB_SERIAL_CMD} shell input tap {x} {y}")
 
 
-def swipe(x1, y1, x2, y2):
+def swipe(x1, y1, x2, y2, duration=None):
     set_cwd()
     os.system(f"{ADB_SERIAL_CMD} shell input swipe {x1} {y1} {x2} {y2}")
+
+def swipe_and_hold(x1, y1, x2, y2, duration=3000, moves_horizontal=True):
+    set_cwd()
+    os.system(f"{ADB_SERIAL_CMD} shell input swipe {x1} {y1} {x2} {y2} {duration}")
+    if moves_horizontal:
+        os.system(f"{ADB_SERIAL_CMD} shell input swipe {x1} {y1} {x1} {y2+300} 50")
+    else:
+        os.system(f"{ADB_SERIAL_CMD} shell input swipe {x1} {y1} {x1+300} {y1} 50")
 
 
 def capture_screenshot(parent_dir=None, sub_dir=None, name=None):

@@ -1,3 +1,5 @@
+import os
+
 from PIL import Image
 from ImageTools import pytesseract
 from ImageTools.cropper.coords import club_coordinates, club_info_coords
@@ -35,9 +37,10 @@ def get_club_name(image_path):
     return final_event_name
 
 
-def crop_club_info(image_path, save_dir, name):
+def crop_club_info(image_path, save_dir):
+    club_event_name = get_club_name(image_path)
     # Set the full directory path
-    full_dir = f'{save_dir}/{name}' if name else save_dir
+    full_dir = f'{save_dir}/{club_event_name}'
     create_dir_if_not_exists(full_dir)
 
     # Open the image and resize it

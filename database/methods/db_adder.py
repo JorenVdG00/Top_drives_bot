@@ -26,41 +26,53 @@ def add_event(event_name, event_dir, end_time):
         conn.close()
 
 
-def add_series(event_id, serie_number, track_set_id):
-    """Inserts a new series into the database."""
-    conn = get_db_connection()
-    cursor = conn.cursor()
+# def add_series(event_id, serie_number, track_set_id):
+#     """Inserts a new series into the database."""
+#     conn = get_db_connection()
+#     cursor = conn.cursor()
+#
+#     try:
+#         print("series: " + str(event_id))
+#
+#         cursor.execute("""
+#             INSERT INTO series (event_id, serie_number, track_set_id)
+#             VALUES (%s, %s, %s)
+#             RETURNING series_id;
+#             """, (str(event_id), serie_number, track_set_id))
+#         series_id = cursor.fetchone()[0]
+#         conn.commit()
+#         print(f"Serie '{series_id}' added with FK_ID {event_id}.")
+#         return series_id
+#     except Exception as e:
+#         print(f"An error occurred in series: {e}")
+#         conn.rollback()
+#     finally:
+#         cursor.close()
+#         conn.close()
 
-    try:
-        print("series: " + str(event_id))
 
-        cursor.execute("""
-            INSERT INTO series (event_id, serie_number, track_set_id)
-            VALUES (%s, %s, %s)
-            RETURNING series_id;
-            """, (str(event_id), serie_number, track_set_id))
-        series_id = cursor.fetchone()[0]
-        conn.commit()
-        print(f"Serie '{series_id}' added with FK_ID {event_id}.")
-        return series_id
-    except Exception as e:
-        print(f"An error occurred in series: {e}")
-        conn.rollback()
-    finally:
-        cursor.close()
-        conn.close()
-
-
-def add_track_set():
+def add_track_set(event_id=None, club_set_id=None):
     """Inserts a new race into the database."""
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-
-        cursor.execute("""
-            INSERT INTO track_set DEFAULT VALUES RETURNING track_set_id;
-        """)
+        if event_id:
+            cursor.execute("""
+                INSERT INTO track_set (event_id)
+                VALUES (%s)
+                RETURNING track_set_id
+            """, (event_id,))
+        elif club_set_id:
+            cursor.execute("""
+                INSERT INTO track_set (club_set_id)
+                VALUES (%s)
+                RETURNING track_set_id
+            """, (club_set_id,))
+        else:
+            cursor.execute("""
+                INSERT INTO track_set DEFAULT VALUES RETURNING track_set_id;
+            """)
 
         conn.commit()
 
@@ -75,23 +87,22 @@ def add_track_set():
         cursor.close()
         conn.close()
 
-def add_track_serie(track_set_id):
+
+def add_track_serie(serie_number, track_set_id):
     """Inserts a new race into the database."""
     conn = get_db_connection()
     cursor = conn.cursor()
-
     try:
 
         cursor.execute("""
-            INSERT INTO track_serie (track_set_id)
-            VALUES (%s)
+            INSERT INTO track_serie (serie_number, track_set_id)
+            VALUES (%s, %s)
             RETURNING track_serie_id
-        """, str(track_set_id))
+        """, (serie_number, track_set_id))
 
         conn.commit()
 
         track_serie_id = cursor.fetchone()[0]
-        print(track_serie_id)
         return track_serie_id
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -151,17 +162,17 @@ def add_club_reqs(req1, req1_number, req2, req2_number):
         conn.close()
 
 
-def add_club_track_set(track_set_name, track_set_id):
+def add_club_track_set(track_set_name):
     """Inserts a new event into the database."""
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
         cursor.execute("""
-            INSERT INTO club_track_set (track_set_name, track_set_id)
-            VALUES (%s, %s)
-            RETURNING club_track_set_id;
-            """, (track_set_name, track_set_id))
+            INSERT INTO club_track_set (track_set_name)
+            VALUES (%s)
+            RETURNING club_set_id;
+            """, (track_set_name,))
 
         club_req = cursor.fetchone()[0]
         conn.commit()

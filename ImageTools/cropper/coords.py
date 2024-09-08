@@ -10,7 +10,7 @@ event_coordinates = {
     "event_y": {
         "event_y_1": (480, 700),
         "event_y_2": (840, 1060),
-        "event_y_3": (590, 810),
+        "event_y_3": (580, 800),
         "event_y_4": (940, 1160)
     },
     "in_game_event_x": {
@@ -32,6 +32,7 @@ event_img_coords = {
 
 time_left_coords = (200, 1100, 650, 1200)
 display_img_coords = (710, 260, 1300, 915)
+last_display_img_coords = (1350, 260, 1940, 915)
 
 car_coords = {'coords': (70, 1010, 390, 1215), 'step': 31}
 
@@ -41,13 +42,13 @@ club_coordinates = {'club_events': {
     'club_event_x': [1580, 2140]
 }}
 
-club_info_coords = {'name': (1710, 140, 2190, 210),
+club_info_coords = {'name': (1680, 140, 2180, 210),
                     'event_type': (1760, 210, 2190, 260),
                     'time_left': (1850, 260, 2180, 300),
-                    'rq': (1930, 360, 2180, 400),
-                    'reqs1': (1850, 400, 2180, 450),
-                    'reqs2': (1850, 450, 2180, 500),
-                    'player_amount': {'y': (560, 610), 'left_x': (1580, 1650), 'right_x': (2025, 2095)},
+                    'rq': (2000, 365, 2180, 405),
+                    'reqs1': (1850, 405, 2180, 455),
+                    'reqs2': (1850, 455, 2180, 505),
+                    'player_amount': {'y': (575, 610), 'left_x': (1581, 1650), 'right_x': (2025, 2095)},
                     'score': {'y': (780, 830), 'left_x': (1770, 1870), 'right_x': (1900, 2000)},
                     'weight': (1800, 940, 2000, 1040)}
 

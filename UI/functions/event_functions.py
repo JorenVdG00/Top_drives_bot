@@ -5,7 +5,7 @@ from datetime import datetime
 import time
 import subprocess
 from config import resize_values
-from .general_functions import capture_screenshot, remove_screenshot, swipe, tap, color_almost_same
+from .general_functions import capture_screenshot, remove_screenshot, swipe, tap, color_almost_same, swipe_and_hold
 from UI.bot_manager.db_assign import get_corresponding_assignees
 from .resize_functions import resize_coordinate, resize_coordinates, resize_ranges, resize_same_factor, \
     calculate_screen_size
@@ -128,15 +128,19 @@ def check_event_available(event_number: int = 1):
 
 def swipe_left_one_event():
     x1_swipe, x2_swipe, y1, y2 = resize_ranges(1335, 700, 300, 400, resize_values)
-    x_step = int((x1_swipe - x2_swipe) * 0.25)
-
-    swipe(x1_swipe - x_step, y1, x2_swipe, y1)  # Dont know how but this is perfect
-    swipe(x1_swipe, y1, x1_swipe + 5, y2)  # stop the movements Y-Changes otherwise counts as a tap
+    swipe_and_hold(x1_swipe, y1, x2_swipe, y1, 3000)
     time.sleep(0.2)
 
+    # x_step = int((x1_swipe - x2_swipe) * 0.25)
+    #
+    # swipe(x1_swipe - x_step, y1, x2_swipe, y1)  # Dont know how but this is perfect
+    # swipe(x1_swipe, y1, x1_swipe + 5, y2)  # stop the movements Y-Changes otherwise counts as a tap
+    # time.sleep(0.2)
+    #
 
 def get_event_number_inactive(save_display=False):
     unavailable_x1, unavailable_y1 = resize_coordinates(1120, 290, resize_values)
+    last_visible_x1, last_visible_y1 = resize_coordinates(2195, 250, resize_values)
     unavailable_color = (112, 112, 112, 255)
     event_number = 0
     open_events_img_paths = []
@@ -152,14 +156,21 @@ def get_event_number_inactive(save_display=False):
         time.sleep(1)
         with Image.open(display_img_path) as img:
             color = img.getpixel((unavailable_x1, unavailable_y1))
+            last_visible_color = img.getpixel((last_visible_x1, last_visible_y1))
             print(color)
             if color_almost_same(color, unavailable_color, tolerance=10):
                 print("event not available")
                 event_unavailable = True
             else:
-                print("event available")
-                event_unavailable = False
-                open_events_img_paths.append(display_img_path)
+                if color_almost_same(last_visible_color, unavailable_color, tolerance=10):
+                    print("event last event un_available")
+                    event_unavailable = True
+                    open_events_img_paths.append(display_img_path)
+                    event_number += 1
+                else:
+                    print("event available")
+                    event_unavailable = False
+                    open_events_img_paths.append(display_img_path)
         event_number += 1
         time.sleep(0.5)
     inactive_event_number = event_number

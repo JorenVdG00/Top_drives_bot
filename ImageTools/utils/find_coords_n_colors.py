@@ -20,7 +20,7 @@ color_coords = []
 cropping = False
 
 
-def get_pixel_color(img_path, x, y, standard_size):
+def get_pixel_color(img_path, x, y, standard_size=STANDARD_SCREEN_SIZE):
     """
     Get the color of a specific pixel in the image.
 
@@ -166,7 +166,18 @@ def retune_coords(coords, size, retune_size, is_color = False):
         return retuned_coords
 
 
-club_page_path = './IMG/nomore_event.png'
-get_all_coords(club_page_path, new_size, STANDARD_SCREEN_SIZE)
-#
+desc_path = './IMG/down.png'
+asc_path = './IMG/asc.png'
+sort_path = './IMG/sort.png'
+
+# get_all_coords(club_page_path, new_size, STANDARD_SCREEN_SIZE)
+# 226, 226, 227, 255    1966, 162   ASC
+# 254, 254, 254, 255    1966, 180   DOWN
 # print(get_pixel_color(club_page_path, 1700, 1160, STANDARD_SCREEN_SIZE))
+
+print('ASC COLOR, ', get_pixel_color(asc_path, 1966, 163, STANDARD_SCREEN_SIZE))
+print('DESC COLOR, ', get_pixel_color(desc_path, 1966, 181, STANDARD_SCREEN_SIZE))
+
+print('ASC COLOR on sort, ', get_pixel_color(sort_path, 1966, 163, STANDARD_SCREEN_SIZE))
+print('DESC COLOR on sort, ', get_pixel_color(sort_path, 1966, 181, STANDARD_SCREEN_SIZE))
+

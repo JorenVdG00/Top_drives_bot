@@ -24,7 +24,7 @@ event_coordinates = {
 }
 
 event_img_coords = {
-    "race_type": (0, 5, 330, 80),
+    "race_type": (0, 0, 330, 80),
     "conditions": (5, 60, 320, 145),
     "event_number": (0, 150, 65, 215),
     "road_type": (75, 150, 330, 215)

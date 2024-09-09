@@ -191,12 +191,10 @@ def add_club_req_db(req_list):
             type.append(key)
             amount.append(value)
         if len(type) == 2:
-            add_club_reqs(type[0], amount[0], type[1], amount[1])
+            add_club_reqs(type[0], amount[0])
+            add_club_reqs(type[1], amount[1])
         elif len(type) == 1:
-            add_club_reqs(type[0], amount[0], None, None)
-        else:
-            add_club_reqs(None, None, None, None)
-
+            add_club_reqs(type[0], amount[0])
 
 def refresh_club_info():
     driver = webdriver.Chrome(service=service, options=chrome_options)

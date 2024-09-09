@@ -4,6 +4,8 @@ from ImageTools.Clubs.club_cropper import crop_club_info, get_club_name
 from ImageTools.Clubs.club_reader import extract_club_info
 from ImageTools.utils.file_utils import get_files
 from ImageTools.utils.image_utils import contains_color
+from ImageTools.image_processing.enhancer import enhance_image
+from ImageTools.image_processing.extractor import extract_text_from_image, rerun_text_extraction
 from database.db_getters import get_club_reqs
 
 # TEAM_COLORS
@@ -27,7 +29,7 @@ def weight_to_team(image_path):
 def correct_weight_value(s):
     value = extract_integers(s)
     if value is None:
-        return None
+        return 5
     fixed_value = str(value)[1:]
     return int(fixed_value)
 
@@ -56,7 +58,9 @@ def fix_reqs(extracted_data, club_dir_path):
         has_req = has_req_met(req_img)
         extracted_data['req_status'] = has_req
         if has_req != 'NONE':
-            req_split = extracted_data[f'reqs{i}'].rsplit(' ', 1)
+            req_str = extracted_data[f'reqs{i}']
+            cutted_str = cut_until_integer(req_str)
+            req_split = cutted_str.rsplit(' ', 1)
             req_name, req_number = req_split[0], req_split[1][-1]
             print(req_name, req_number)
             extracted_data[f'reqs{i}'] = {'name': req_name, 'number': req_number}
@@ -95,9 +99,40 @@ def extract_integers(s):
         return combined_integer
     return None
 
+def cut_until_integer(s):
+    index = len(s)
+
+    # Iterate backward through the string
+    for i in range(len(s) - 1, -1, -1):
+        if s[i].isdigit():
+            index = i
+            break
+
+    # Slice the string up to and including the first integer
+    result = s[:index + 1]
+    return result
+
+def fix_players(extracted_data):
+    print(extracted_data)
+    side_list = ['left', 'right']
+    for side in side_list:
+        xamount = extracted_data[f'player_amount-{side}_x'].replace(" ", "")
+        if '/150' in xamount:
+            print(f'xamount == {xamount}')
+            extracted_data[f'player_amount-{side}_x'] = xamount.split('/')[0]
+            print(f'xamount == {extracted_data[f'player_amount-{side}_x']}')
+            continue
+        amount = cut_until_integer(xamount)
+        if len(amount) == 0:
+            extracted_data[f'player_amount-{side}_x'] = 10
+    return extracted_data
+
 
 
 def fix_extracted_data(extracted_data, club_dir_path):
+
+    # fix player_amounts
+    extracted_data = fix_players(extracted_data)
 
     # fix requirements
     extracted_data = fix_reqs(extracted_data, club_dir_path)
@@ -116,3 +151,6 @@ def fix_extracted_data(extracted_data, club_dir_path):
     extracted_data['weight_team'] = weight_team
 
     return extracted_data
+
+
+

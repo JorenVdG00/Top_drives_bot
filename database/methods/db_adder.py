@@ -139,17 +139,17 @@ def add_race(race_name, road_type, conditions, race_number, track_serie_id):
         conn.close()
 
 
-def add_club_reqs(req1, req1_number, req2, req2_number):
+def add_club_reqs(req, req_number):
     """Inserts a new event into the database."""
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
         cursor.execute("""
-            INSERT INTO club_reqs (req1, req1_number, req2, req2_number)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO club_reqs (req, req_number)
+            VALUES (%s, %s)
             RETURNING club_req_id;
-            """, (req1, req1_number, req2, req2_number))
+            """, (req, req_number))
 
         club_req = cursor.fetchone()[0]
         conn.commit()
@@ -177,6 +177,28 @@ def add_club_track_set(track_set_name):
         club_req = cursor.fetchone()[0]
         conn.commit()
         return club_req
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        conn.rollback()
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def add_club_event(club_name, rq, club_set_id, club_req1_id, club_req2_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            INSERT INTO club_event (club_name, rq, club_set_id, club_req1_id, club_req2_id)
+            VALUES (%s,%s,%s,%s,%s)
+            RETURNING club_set_id;
+            """, (club_name, rq, club_set_id, club_req1_id, club_req2_id))
+
+        club_id = cursor.fetchone()[0]
+        conn.commit()
+        return club_id
     except Exception as e:
         print(f"An error occurred: {e}")
         conn.rollback()

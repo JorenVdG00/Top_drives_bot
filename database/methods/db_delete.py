@@ -34,25 +34,25 @@ def remove_event(event_id):
         conn.close()
 
 
-def remove_event(event_id):
-    print(f"Removing all events for event_id: {event_id}")
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute("""
-                DELETE FROM events
-                WHERE event_id = %s;
-            """, (event_id,))
-
-        conn.commit()
-        print(f"All series related to event_id '{event_id}' have been removed.")
-    except Exception as e:
-        print(f"An error occurred while removing series: {e}")
-        conn.rollback()
-    finally:
-        cursor.close()
-        conn.close()
+# def remove_event(event_id):
+#     print(f"Removing all events for event_id: {event_id}")
+#     conn = get_db_connection()
+#     cursor = conn.cursor()
+#
+#     try:
+#         cursor.execute("""
+#                 DELETE FROM events
+#                 WHERE event_id = %s;
+#             """, (event_id,))
+#
+#         conn.commit()
+#         print(f"All series related to event_id '{event_id}' have been removed.")
+#     except Exception as e:
+#         print(f"An error occurred while removing series: {e}")
+#         conn.rollback()
+#     finally:
+#         cursor.close()
+#         conn.close()
 
 
 

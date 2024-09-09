@@ -2,8 +2,10 @@ import os
 from PIL import Image
 from ImageTools import pytesseract
 from ImageTools.image_processing.enhancer import enhance_image
-from ImageTools.utils.text_utils import clean_race_data, contains_track_name
-from ImageTools.utils.file_utils import create_dir_if_not_exists
+from ImageTools.utils.text_utils import clean_race_data, contains_track_name, regex_match
+from ImageTools.utils.file_utils import create_dir_if_not_exists, get_head
+import itertools
+import re
 
 preprocessing_options = {
     'denoise': [True, False],
@@ -57,3 +59,28 @@ def run_extraction_with_options(options, faulty_dirs, used_img_dir, enhanced_dir
                                              contrast=options['contrast'],
                                              sharpness=options['sharpness'])
     return new_extracted_data
+
+
+
+
+def rerun_text_extraction(img_path, regex):
+    head, tail = os.path.basename(img_path), os.path.dirname(img_path)
+    print(head, tail)
+    combinations = list(itertools.product(*preprocessing_options.values()))
+    for combination in combinations:
+        options = dict(zip(preprocessing_options.keys(), combination))
+        print(f"Testing with options: {options}")
+        save_img_path = tail+'/enh'+head
+        print(save_img_path)
+        enhance_image(img_path, save_img_path,   denoise=options['denoise'],
+                                                    deskew=options['deskew'],
+                                                    grayscale=options['grayscale'],
+                                                    binarize=options['binarize'],
+                                                    contrast=options['contrast'],
+                                                    sharpness=options['sharpness'])
+        extracted_text = extract_text_from_image(save_img_path)
+        number = regex_match(extracted_text, regex)
+
+        if number:
+            return number
+    return None

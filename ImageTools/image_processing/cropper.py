@@ -13,3 +13,9 @@ def crop_image(image_path, save_dir, name, coords, standard_size=STANDARD_SIZE):
         save_path = f"{save_dir}/{name}.png"
         cropped_image.save(save_path)
     return save_path
+
+def crop_image_no_save(image_path, coords, standard_size=STANDARD_SIZE):
+    with Image.open(image_path) as img:
+        resized_image = resize_image(img, standard_size)
+        cropped_image = resized_image.crop(coords)
+        return cropped_image

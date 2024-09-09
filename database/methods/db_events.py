@@ -4,6 +4,7 @@ from ImageTools.utils.file_utils import delete_dir
 from datetime import datetime
 from config import BASE_DIR
 
+
 def reload_events():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -14,7 +15,7 @@ def reload_events():
         cursor.execute("""
         SELECT event_name FROM events
         WHERE end_time < %s AND ended = FALSE;
-        """,(datetime.now(),))
+        """, (datetime.now(),))
         event_names = cursor.fetchall()
         for event_tuple in event_names:
             event_name = event_tuple[0]  # Extract the event name from the tuple
@@ -118,7 +119,6 @@ def get_event_id_by_name(event_name):
                     event_id = get_event_id_by_name(similar_event_name)
                     if event_id:
                         return event_id
-
 
         return None
     except Exception as e:
@@ -270,6 +270,7 @@ def get_serie_number(series_id):
         cursor.close()
         conn.close()
 
+
 def get_serie_id_from_track_set_id(track_set_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -316,6 +317,7 @@ def get_track_set_from_serie(series_id):
         cursor.close()
         conn.close()
 
+
 def get_assignees(track_serie_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -353,7 +355,7 @@ def get_track_set(track_set_name):
         cursor.execute("""
         SELECT club_set_id From club_track_set
         WHERE track_set_name = %s;
-        """,(track_set_name,))
+        """, (track_set_name,))
 
         track_set_id = cursor.fetchone()
         if track_set_id:
@@ -375,7 +377,7 @@ def get_club_from_name(club_name):
         cursor.execute("""
         SELECT club_id From club_event
         WHERE club_name = %s;
-        """,(club_name,))
+        """, (club_name,))
         club_id = cursor.fetchone()
         if club_id:
             return club_id[0]
@@ -387,6 +389,103 @@ def get_club_from_name(club_name):
         cursor.close()
         conn.close()
 
+
+def get_req_id(req):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""SELECT club_req_id FROM club_reqs
+        WHERE req = %s;""", (req,))
+
+        club_req_id = cursor.fetchone()
+        if club_req_id:
+            return club_req_id[0]
+        return None
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def play_club_event(club_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+        UPDATE club_event
+        SET played_matches = played_matches + 1
+        where club_id = %s;""", (club_id,))
+
+        club_event = cursor.fetchone()
+        if club_event:
+            return club_event[0]
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_req_list(club_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""SELECT req_number from club_reqs WHERE club_req_id in
+         (select club_req1_id from club_reqs where club_id = %s) or (select club_req2_id from club_reqs where club_id = %s)""",
+                       (club_id,))
+        club_req_list = cursor.fetchall()
+        req_num1, req_num2 = club_req_list[0], club_req_list[1]
+        req_list = generate_req_list(req_num1, req_num2)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+def generate_req_list(req1_num, req2_num):
+    req_list = []
+
+    # Fill the req_list with req1 requirements
+    for _ in range(req1_num):
+        req_list.append([1])
+
+    # Merge or add req2 requirements
+    if req2_num:
+        if req1_num == 5:
+            # Merge req2 into req1
+            for i in range(min(req1_num, req2_num)):
+                req_list[i].append(2)
+            # If req2_num exceeds req1_num, append additional lists for remaining req2
+            for i in range(req1_num, req1_num + (req2_num - req1_num)):
+                req_list.append([2])
+        else:
+            # Add req2 as new lists
+            for _ in range(req2_num):
+                req_list.append([2])
+
+    return req_list
+def get_played_matches(club_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""SELECT played_matches From club_event WHERE club_id = %s""", (club_id,))
+
+        played_matches = cursor.fetchone()
+        if played_matches:
+            return played_matches[0]
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
 
 
 if __name__ == '__main__':

@@ -9,7 +9,7 @@ from .general_functions import capture_screenshot, remove_screenshot, swipe, tap
 from UI.bot_manager.db_assign import get_corresponding_assignees
 from .resize_functions import resize_coordinate, resize_coordinates, resize_ranges, resize_same_factor, \
     calculate_screen_size
-from .general_game_functions import check_cannot_play
+from .general_game_functions import check_cannot_play, tap_home
 from ImageTools.cropper.classify import get_event_name
 from ImageTools.Events.event_cropper import crop_event_display_img
 from database.methods.db_events import get_event_id_by_name, get_all_active_events
@@ -129,6 +129,7 @@ def check_event_available(event_number: int = 1):
             is_available = True
 
     return is_available, display_img_path
+
 
 
 def swipe_left_one_event():
@@ -340,7 +341,7 @@ def tap_in_event_play():
     time.sleep(5)
 
 
-def swipe_cars_to_slots(assignees):
+def swipe_cars_to_slots(assignees=None):
     print("swiping cars to slots")
     y1, y2 = resize_same_factor(1110, 1150, resize_values[1])
     y_car = random.randint(y1, y2)
@@ -520,12 +521,7 @@ def collect_prizecards(number_of_prizes, img_path):
     remove_screenshot(img_path)
 
 
-def tap_home():
-    print("tapping home")
-    x1, x2, y1, y2 = resize_ranges(940, 1030, 20, 115, resize_values)
-    x, y = random.randint(x1, x2), random.randint(y1, y2)
-    tap(x, y)
-    time.sleep(2)
+
 
 
 # def full_event(stop_event):

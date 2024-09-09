@@ -60,7 +60,6 @@ def get_head(file):
     head = file.split('.')[0]
     return head
 
-
 def move_and_rename(src, dest, new_name=None):
     """
     Moves a file or directory to a specified destination and optionally renames it.

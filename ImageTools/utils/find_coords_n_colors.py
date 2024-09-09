@@ -166,19 +166,24 @@ def retune_coords(coords, size, retune_size, is_color = False):
         return retuned_coords
 
 
-desc_path = './IMG/down.png'
-asc_path = './IMG/asc.png'
-sort_path = 'IMG/3E.png'
-club_shit_path = '../Clubs/tst/club_shit.png'
 
-get_all_coords(sort_path, new_size, STANDARD_SCREEN_SIZE)
-# 226, 226, 227, 255    1966, 162   ASC
-# 254, 254, 254, 255    1966, 180   DOWN
-# print(get_pixel_color(sort_path, 2195, 250, STANDARD_SCREEN_SIZE))
+if __name__ == '__main__':
+    img_path = './IMG/cars1.png'
+    img_path2 = './IMG/cars_need_repair.png'
 
-# print('ASC COLOR, ', get_pixel_color(asc_path, 1966, 163, STANDARD_SCREEN_SIZE))
-# print('DESC COLOR, ', get_pixel_color(desc_path, 1966, 181, STANDARD_SCREEN_SIZE))
-#
-# print('ASC COLOR on sort, ', get_pixel_color(sort_path, 1966, 163, STANDARD_SCREEN_SIZE))
-# print('DESC COLOR on sort, ', get_pixel_color(sort_path, 1966, 181, STANDARD_SCREEN_SIZE))
+    get_all_coords(img_path, new_size2, STANDARD_SCREEN_SIZE)
+    # 226, 226, 227, 255    1966, 162   ASC
+    # 254, 254, 254, 255    1966, 180   DOWN
+    print(get_pixel_color(img_path, 230, 1080, STANDARD_SCREEN_SIZE))
+    print(get_pixel_color(img_path, 580, 1080, STANDARD_SCREEN_SIZE))
+    print(get_pixel_color(img_path, 930, 1080, STANDARD_SCREEN_SIZE))
+    print(get_pixel_color(img_path, 1280, 1080, STANDARD_SCREEN_SIZE))
+    print(get_pixel_color(img_path, 1630, 1080, STANDARD_SCREEN_SIZE))
+
+
+    # print('ASC COLOR, ', get_pixel_color(asc_path, 1966, 163, STANDARD_SCREEN_SIZE))
+    # print('DESC COLOR, ', get_pixel_color(desc_path, 1966, 181, STANDARD_SCREEN_SIZE))
+    #
+    # print('ASC COLOR on sort, ', get_pixel_color(sort_path, 1966, 163, STANDARD_SCREEN_SIZE))
+    # print('DESC COLOR on sort, ', get_pixel_color(sort_path, 1966, 181, STANDARD_SCREEN_SIZE))
 

@@ -74,10 +74,8 @@ def create_tables():
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS club_reqs (
         club_req_id SERIAL PRIMARY KEY,
-        req1 VARCHAR(255),
-        req1_number INTEGER,
-        req2 VARCHAR(255),
-        req2_number INTEGER
+        req VARCHAR(255),
+        req_number INTEGER
         );
         """)
 
@@ -85,11 +83,12 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS club_event (
             club_id SERIAL PRIMARY KEY,
             club_name VARCHAR(255) NOT NULL,
-            played_matches INTEGER default 0,
+            played_matches INTEGER default 1,
             ended BOOLEAN DEFAULT FALSE,       
             rq INTEGER NOT NULL,
             club_set_id INTEGER REFERENCES club_track_set(club_set_id),
-            club_req_id INTEGER REFERENCES club_reqs(club_req_id)
+            club_req1_id INTEGER REFERENCES club_reqs(club_req_id)
+            club_req2_id INTEGER REFERENCES club_reqs(club_req_id)
         );
         """)
 

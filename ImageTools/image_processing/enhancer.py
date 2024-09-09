@@ -1,6 +1,7 @@
 from PIL import Image, ImageEnhance, ExifTags
 import cv2
 import numpy as np
+from ImageTools.utils.file_utils import create_dir_if_not_exists
 
 
 def enhance_contrast(image_path, output_path):

@@ -57,3 +57,9 @@ def remove_excessive_spaces(input_string):
 def remove_newlines(input_string):
     cleaned_string = re.sub(r'\n', ' ', input_string).strip()
     return cleaned_string
+
+def regex_match(s, regex):
+    match = re.search(regex, s)  # Looks for the first sequence of digits
+    if match:
+        return int(match.group())  # Converts the matched string to an integer
+    return None

@@ -170,17 +170,20 @@ def retune_coords(coords, size, retune_size, is_color = False):
 if __name__ == '__main__':
     img_path = './IMG/cars1.png'
     img_path2 = './IMG/cars_need_repair.png'
+    club_home = './IMG/out_club_play.png'
+    in_club_event = './IMG/in_club_event_cropper2.png'
+    add_to_hand = './IMG/in_event_play.png'
 
-    get_all_coords(img_path, new_size2, STANDARD_SCREEN_SIZE)
+    get_all_coords(add_to_hand, new_size2, STANDARD_SCREEN_SIZE)
     # 226, 226, 227, 255    1966, 162   ASC
     # 254, 254, 254, 255    1966, 180   DOWN
-    print(get_pixel_color(img_path, 230, 1080, STANDARD_SCREEN_SIZE))
-    print(get_pixel_color(img_path, 580, 1080, STANDARD_SCREEN_SIZE))
-    print(get_pixel_color(img_path, 930, 1080, STANDARD_SCREEN_SIZE))
-    print(get_pixel_color(img_path, 1280, 1080, STANDARD_SCREEN_SIZE))
-    print(get_pixel_color(img_path, 1630, 1080, STANDARD_SCREEN_SIZE))
+    # print(get_pixel_color(add_to_hand, 250, 798, STANDARD_SCREEN_SIZE))
+    # print(get_pixel_color(img_path, 580, 1080, STANDARD_SCREEN_SIZE))
+    # print(get_pixel_color(img_path, 930, 1080, STANDARD_SCREEN_SIZE))
+    # print(get_pixel_color(img_path, 1280, 1080, STANDARD_SCREEN_SIZE))
+    # print(get_pixel_color(img_path, 1630, 1080, STANDARD_SCREEN_SIZE))
 
-
+    # print(get_pixel_color(club_home, 1280, 614, new_size))
     # print('ASC COLOR, ', get_pixel_color(asc_path, 1966, 163, STANDARD_SCREEN_SIZE))
     # print('DESC COLOR, ', get_pixel_color(desc_path, 1966, 181, STANDARD_SCREEN_SIZE))
     #

@@ -1,6 +1,7 @@
 from PIL import Image
 from ImageTools.utils.image_utils import color_almost_matches, resize_image
-from ImageTools.image_processing.cropper import crop_image_no_save
+from ImageTools.utils.file_utils import delete_dir
+from ImageTools.image_processing.cropper import crop_image_no_save, crop_image
 from ImageTools.image_processing.extractor import extract_text_from_image
 from UI.functions.general_functions import capture_screenshot,remove_screenshot
 import os
@@ -13,14 +14,18 @@ def check_problem():
     coords = (110, 450, 2100, 690)
     problem_color = (51,51,51,255)
     with Image.open(screenshot) as img:
-        resised_img = resize_image(img)
-        color = resised_img.getpixel((x, y))
+        resized_img = resize_image(img)
+        color = resized_img.getpixel((x, y))
         if not color_almost_matches(color, problem_color):
             status = 'NO_PROBLEM'
-    cropped_img = crop_image_no_save(screenshot, coords)
+    remove_screenshot(screenshot)
+    screenshot = capture_screenshot()
+    cropped_img = crop_image(screenshot,'temp', 'crop_problem', coords)
     extracted_text = extract_text_from_image(cropped_img)
     print(extracted_text)
-    remove_screenshot(screenshot)
+    tempdir = os.path.dirname(cropped_img)
+    delete_dir(tempdir)
+
     if status == 'NO_PROBLEM':
         return status
     if 'ended' in extracted_text:

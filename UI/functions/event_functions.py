@@ -13,7 +13,7 @@ from .general_game_functions import check_cannot_play, tap_home
 from ImageTools.cropper.classify import get_event_name
 from ImageTools.Events.event_cropper import crop_event_display_img
 from database.methods.db_events import get_event_id_by_name, get_all_active_events
-from ImageTools.utils.image_utils import resize_image
+from ImageTools.utils.image_utils import resize_image, screenshot_context
 
 this_dir = os.getcwd()
 
@@ -131,7 +131,6 @@ def check_event_available(event_number: int = 1):
     return is_available, display_img_path
 
 
-
 def swipe_left_one_event():
     x1_swipe, x2_swipe, y1, y2 = resize_ranges(1335, 700, 300, 400, resize_values)
     swipe_and_hold(x1_swipe, y1, x2_swipe, y1, 3000)
@@ -211,7 +210,8 @@ def get_display_img_paths(nr_available_events):
             print('printing i after onescreen', event_number)
             display_paths.append(crop_event_display_img(screenshot_path, f'{this_dir}/temp', f'display{event_number}'))
             event_number += 1
-        display_paths.append(crop_event_display_img(screenshot_path, f'{this_dir}/temp', f'display{event_number}', last=True))
+        display_paths.append(
+            crop_event_display_img(screenshot_path, f'{this_dir}/temp', f'display{event_number}', last=True))
         event_number += 1
         remove_screenshot(screenshot_path)
         swipe_left_one_event()
@@ -321,6 +321,13 @@ def tap_events():
                 random.randint(y1, y2))
     tap(rand_tap[0], rand_tap[1])
     time.sleep(3)
+    event_ended = True
+    while event_ended:
+        with screenshot_context() as screenshot:
+            if check_event_ended(screenshot):
+                claim_event()
+            else:
+                event_ended = False
 
 
 def tap_go_button_event():
@@ -521,9 +528,6 @@ def collect_prizecards(number_of_prizes, img_path):
     remove_screenshot(img_path)
 
 
-
-
-
 # def full_event(stop_event):
 #     global resize_values
 #     resize_values = calculate_screen_size()
@@ -584,7 +588,8 @@ def full_event_V2():  # ADD STOP_event
     for event_number in range(len_active_events):
         if event_number == len_active_events - 1:
             last_event = True
-            event_number -= 1
+            if event_number != 0:
+                event_number -= 1
         # Tap home
         tap_home()
 
@@ -595,7 +600,7 @@ def full_event_V2():  # ADD STOP_event
             print(f'Event number: {event_number}')
             for i in range(event_number):
                 swipe_left_one_event()
-        if last_event:
+        if last_event and (event_number != 0):
             tap_event(2)
         else:
             tap_event(1)

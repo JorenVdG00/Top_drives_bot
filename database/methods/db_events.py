@@ -68,6 +68,27 @@ def get_all_active_events():
         conn.close()
 
 
+def get_most_recent_club_reqs():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT time_added
+            FROM club_reqs
+            order by time_added desc limit 1;
+            """)
+        time = cursor.fetchone()
+        if time:
+            time_added = time[0]
+            return time_added
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
 def get_similar_event_names(event_name):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -183,6 +204,26 @@ def get_series(event_id):
         conn.close()
 
 
+def get_club_track_set_of_name(track_set_name):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+        SELECT club_set_id from club_track_set where track_set_name = %s;""", (track_set_name,))
+
+        club_track_sets = cursor.fetchone()
+        if club_track_sets:
+            club_track_sets = club_track_sets[0]
+            return club_track_sets
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
 def get_event_from_serie_id(series_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -210,7 +251,7 @@ def get_event_from_serie_id(series_id):
         conn.close()
 
 
-def get_races(track_set_id):
+def get_races(track_serie_id):
     std_condition_dict = {'SUN': False, 'WET': False, 'HIGH': False, 'ROLLING': False}
 
     conn = get_db_connection()
@@ -219,10 +260,9 @@ def get_races(track_set_id):
     try:
         cursor.execute("""
              SELECT race_id, race_name, road_type, conditions, race_number FROM races
-             WHERE track_serie_id IN (SELECT track_serie_id FROM track_serie
-                                        WHERE track_set_id = '%s')
+             WHERE track_serie_id = '%s'
              ORDER BY race_number ASC;
-        """, (track_set_id,))
+        """, (track_serie_id,))
 
         races = cursor.fetchall()
 
@@ -238,7 +278,7 @@ def get_races(track_set_id):
                                        'number': race[4]}
             return races_dict
         else:
-            print("No race found for series ID {serie_id}.")
+            print(f"No race found for series ID {track_serie_id}.")
         return None
 
     except Exception as e:
@@ -281,9 +321,12 @@ def get_serie_id_from_track_set_id(track_set_id):
         WHERE track_set_id = %s;
         """, (track_set_id,))
 
-        serie_id = cursor.fetchone()
-        if serie_id:
-            return serie_id[0]
+        serie_ids = cursor.fetchall()
+        serie_id_list = []
+        if serie_ids:
+            for serie_id in serie_ids:
+                serie_id_list.append(serie_id[0])
+            return serie_id_list
         else:
             return None
 
@@ -420,6 +463,8 @@ def play_club_event(club_id):
         SET played_matches = played_matches + 1
         where club_id = %s;""", (club_id,))
 
+        conn.commit()
+
         club_event = cursor.fetchone()
         if club_event:
             return club_event[0]
@@ -432,22 +477,57 @@ def play_club_event(club_id):
         conn.close()
 
 
-def get_req_list(club_id):
+def get_req_num(req_id):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("""SELECT req_number from club_reqs WHERE club_req_id in
-         (select club_req1_id from club_reqs where club_id = %s) or (select club_req2_id from club_reqs where club_id = %s)""",
-                       (club_id,))
-        club_req_list = cursor.fetchall()
-        req_num1, req_num2 = club_req_list[0], club_req_list[1]
-        req_list = generate_req_list(req_num1, req_num2)
+        cursor.execute("""SELECT req_number from club_reqs WHERE club_req_id = %s""",
+                       (req_id,))
+        req_num = cursor.fetchone()
+        if req_num:
+            return req_num[0]
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
     finally:
         cursor.close()
         conn.close()
+
+
+def get_req_list(club_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Corrected query to check for club_req1_id or club_req2_id
+        cursor.execute("""
+            SELECT req_number 
+            FROM club_reqs
+            WHERE club_req_id IN (
+                SELECT club_req1_id FROM club_event WHERE club_id = %s
+                UNION
+                SELECT club_req2_id FROM club_event WHERE club_id = %s
+            )
+        """, (club_id, club_id))
+        club_req_list = cursor.fetchall()
+        print(club_req_list)
+        if len(club_req_list) > 1:
+            req_num1, req_num2 = club_req_list[0], club_req_list[1]
+
+        elif len(club_req_list) == 1:
+            req_num1, req_num2 = club_req_list[0], 0
+
+        else:
+            req_num1, req_num2 = 0, 0
+        req_list = generate_req_list(req_num1, req_num2)
+        return req_list
+    except Exception as e:
+        print(f"An error occurred with req_list: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
 
 def generate_req_list(req1_num, req2_num):
     req_list = []
@@ -471,6 +551,8 @@ def generate_req_list(req1_num, req2_num):
                 req_list.append([2])
 
     return req_list
+
+
 def get_played_matches(club_id):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -480,6 +562,40 @@ def get_played_matches(club_id):
         played_matches = cursor.fetchone()
         if played_matches:
             return played_matches[0]
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def get_active_club():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""SELECT club_id From club_event WHERE ended = FALSE""")
+        club_id = cursor.fetchone()
+        if club_id:
+            return club_id[0]
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        cursor.close()
+        conn.close()
+
+
+def end_active_club():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""UPDATE club_event
+         SET ended = TRUE WHERE ended = FALSE""")
+
+        conn.commit()
     except Exception as e:
         print(f"An error occurred: {e}")
         return None

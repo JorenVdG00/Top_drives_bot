@@ -1,5 +1,16 @@
 import math
 from PIL import Image
+from contextlib import contextmanager
+from UI.functions.general_functions import capture_screenshot, remove_screenshot
+
+
+@contextmanager
+def screenshot_context():
+    screenshot = capture_screenshot()
+    try:
+        yield screenshot
+    finally:
+        remove_screenshot(screenshot)
 
 
 def resize_image(image, standard_size=(2210, 1248)):

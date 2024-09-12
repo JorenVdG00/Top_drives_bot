@@ -1,8 +1,5 @@
 import os
 import re
-from ImageTools.Clubs.club_cropper import crop_club_info, get_club_name
-from ImageTools.Clubs.club_reader import extract_club_info
-from ImageTools.utils.file_utils import get_files
 from ImageTools.utils.image_utils import contains_color
 from ImageTools.image_processing.enhancer import enhance_image
 from ImageTools.image_processing.extractor import extract_text_from_image, rerun_text_extraction
@@ -30,15 +27,17 @@ def correct_weight_value(s):
     value = extract_integers(s)
     if value is None:
         return 5
-    fixed_value = str(value)[1:]
+    if len(str(value)) > 1:
+        fixed_value = str(value)[1:]
+    else:
+        fixed_value = str(value)
     return int(fixed_value)
 
 
-def fix_rq_value(extracted_data):
-    rq_value = extracted_data['rq']
+def fix_rq_value(str):
+    rq_value = str
     correct_rq = extract_integers(rq_value)
-    extracted_data['rq'] = correct_rq
-    return extracted_data
+    return correct_rq
 
 
 def fix_score_value(extracted_data):
@@ -69,7 +68,7 @@ def fix_reqs(extracted_data, club_dir_path):
                     if db_req[0] in req_name:
                         extracted_data[f'reqs{i}']['name'], extracted_data[f'reqs{i}']['number'] = db_req[0], db_req[1]
                 else:
-                    if db_req[2] and db_req[2] in req_name:
+                    if len(db_req) > 3 and db_req[2] in req_name:
                         extracted_data[f'reqs{i}']['name'], extracted_data[f'reqs{i}']['number'] = db_req[2], db_req[3]
         else:
             if extracted_data['req_status'] in ('NONE', 'MET'):
@@ -141,7 +140,7 @@ def fix_extracted_data(extracted_data, club_dir_path):
     extracted_data = fix_score_value(extracted_data)
 
     #fix rq
-    extracted_data = fix_rq_value(extracted_data)
+    extracted_data['rq'] = fix_rq_value(extracted_data['rq'])
     # fix weight value because it add a number too much
     correct_weight = correct_weight_value(extracted_data['weight'])
     extracted_data['weight'] = correct_weight

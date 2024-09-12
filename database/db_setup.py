@@ -75,7 +75,8 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS club_reqs (
         club_req_id SERIAL PRIMARY KEY,
         req VARCHAR(255),
-        req_number INTEGER
+        req_number INTEGER,
+        time_added TIMESTAMP NOT NULL
         );
         """)
 
@@ -86,9 +87,9 @@ def create_tables():
             played_matches INTEGER default 1,
             ended BOOLEAN DEFAULT FALSE,       
             rq INTEGER NOT NULL,
-            club_set_id INTEGER REFERENCES club_track_set(club_set_id),
-            club_req1_id INTEGER REFERENCES club_reqs(club_req_id)
-            club_req2_id INTEGER REFERENCES club_reqs(club_req_id)
+            club_set_id INTEGER REFERENCES club_track_set(club_set_id) ON DELETE CASCADE,
+            club_req1_id INTEGER REFERENCES club_reqs(club_req_id) ON DELETE CASCADE,
+            club_req2_id INTEGER REFERENCES club_reqs(club_req_id) ON DELETE CASCADE
         );
         """)
 

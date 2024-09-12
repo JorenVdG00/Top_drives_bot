@@ -1,5 +1,6 @@
 from database.db_general import get_db_connection
 import json
+from datetime import datetime
 
 
 def add_event(event_name, event_dir, end_time):
@@ -146,10 +147,10 @@ def add_club_reqs(req, req_number):
 
     try:
         cursor.execute("""
-            INSERT INTO club_reqs (req, req_number)
-            VALUES (%s, %s)
+            INSERT INTO club_reqs (req, req_number, time_added)
+            VALUES (%s, %s, %s)
             RETURNING club_req_id;
-            """, (req, req_number))
+            """, (req, req_number, datetime.now()))
 
         club_req = cursor.fetchone()[0]
         conn.commit()

@@ -127,7 +127,7 @@ def get_club_reqs():
 
     try:
         cursor.execute("""
-        SELECT req1, req1_number, req2, req2_number
+        SELECT req, req_number
         FROM club_reqs
         """)
         club_reqs = cursor.fetchall()

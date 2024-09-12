@@ -71,7 +71,7 @@ def full_event_reader():
         # while check_event_available(event_number):
         # print(resize_values*10)
         print("try tapping tap_event")
-        if last_event:
+        if last_event and (event_number != 0):
             tap_event(2)
         else:
             tap_event(1)

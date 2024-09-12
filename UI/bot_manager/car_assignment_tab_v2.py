@@ -282,7 +282,7 @@ class CarAssignmentDialog(QDialog):
     #     self.accept()  # Close the dialog after saving
 
     def save_car_assignments_to_db(self, car_assignments):
-        races = get_races(get_track_set_from_serie(self.serie_id))
+        races = get_races(self.serie_id)
         race_dict = {race['number']: race_id for race_id, race in races.items()}
         for race_number, car_number in car_assignments.items():
             race_id = race_dict[race_number]

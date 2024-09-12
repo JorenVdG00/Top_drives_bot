@@ -21,7 +21,7 @@ def find_matching_serie(event_id, image_path, save_dir=f'{BASE_DIR}/TEMP/'):
     highest_match_count = 0
 
     for serie_id in serie_ids:
-        races = get_races(get_track_set_from_serie(serie_id))
+        races = get_races(serie_id)
         race_dict[serie_id] = races
 
         # Compare extracted races with the current series races

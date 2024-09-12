@@ -2,10 +2,12 @@ import os
 
 from PIL import Image
 from ImageTools import pytesseract
-from ImageTools.cropper.coords import club_coordinates, club_info_coords
+from ImageTools.cropper.coords import club_coordinates, club_info_coords, in_event_club_info_coords
+from ImageTools.Clubs.clean_clubs import fix_reqs, fix_rq_value, cut_until_integer
 from ImageTools.utils.image_utils import resize_image
 from ImageTools.utils.file_utils import create_dir_if_not_exists
 from ImageTools.utils.text_utils import remove_excessive_spaces, fix_missing_space
+from database.methods.db_events import get_req_id
 from config import BASE_DIR
 def get_club_event_names(image_path):
     names = []
@@ -67,3 +69,68 @@ def crop_club_info(image_path, save_dir):
                 print(f'image saved: {full_dir}/{key}.png')
     return full_dir
 
+
+
+def crop_in_event_club_info(image_path):
+    club_info_dict = {}
+    with Image.open(image_path) as image:
+        resized_image = resize_image(image)
+        name_coords = in_event_club_info_coords['names']
+        rq_coords = in_event_club_info_coords['rq']
+        req1_coords = in_event_club_info_coords['reqs1']
+        req2_coords = in_event_club_info_coords['reqs2']
+
+        name_cropped_image = resized_image.crop(name_coords)
+        extract_name = pytesseract.image_to_string(name_cropped_image)
+
+        split_name = extract_name.split('-')
+        event_name, event_type = split_name[0], split_name[1]
+
+        cleaned_event_name = remove_excessive_spaces(event_name)
+        final_event_name = cleaned_event_name.replace(' ', '_')
+
+        cleaned_event_type = remove_excessive_spaces(event_type)
+        final_event_type = cleaned_event_type.replace(' ', '_')
+        club_info_dict['event_name'] = final_event_name
+        club_info_dict['event_type'] = final_event_type
+
+        rq_cropped_image = resized_image.crop(rq_coords)
+        rq_extract = pytesseract.image_to_string(rq_cropped_image)
+        fixed_rq = fix_rq_value(rq_extract)
+        club_info_dict['rq'] = fixed_rq
+
+        req1_cropped_image = resized_image.crop(req1_coords)
+        req2_cropped_image = resized_image.crop(req2_coords)
+        req_list = []
+
+        req_list.append(pytesseract.image_to_string(req1_cropped_image))
+        req_list.append(pytesseract.image_to_string(req2_cropped_image))
+
+        for i in range(2):
+            club_info_dict[f'req{i+1}_id'] = None
+
+        index = 1
+        for req in req_list:
+            cutted_str = cut_until_integer(req)
+            req_split = cutted_str.rsplit(' ', 1)
+            print(req_split)
+            if len(req_split) >= 2:
+                req_name, req_number = req_split[0], req_split[1][-1]
+                print(f'{req_name} {req_number}')
+                req_id = get_req_id(req_name)
+                club_info_dict[f'req{index}_id'] = req_id
+                index += 1
+
+    return club_info_dict
+
+
+if __name__ == '__main__':
+    img_path = './tst/in_club_event_cropper.png'
+    img_path2 = './tst/in_club_event_cropper2.png'
+    data_dict1 = crop_in_event_club_info(img_path)
+    data_dict2 = crop_in_event_club_info(img_path2)
+    for key, value in data_dict1.items():
+        print(key, value)
+    print('\n')
+    for key, value in data_dict2.items():
+        print(key, value)

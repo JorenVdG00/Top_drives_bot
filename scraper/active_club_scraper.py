@@ -7,8 +7,10 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from database.methods.db_adder import add_club_reqs, add_track_set, add_race, add_club_track_set, add_track_serie
 from database.methods.db_delete import delete_club_track_sets, delete_club_reqs
+from database.methods.db_events import get_most_recent_club_reqs
 from bs4 import BeautifulSoup
 import time
+from datetime import datetime, timedelta, time as t
 
 # Path to your ChromeDriver
 chrome_driver_path = os.getenv('CHROME_DRIVER_PATH')  # Replace with the path to your ChromeDriver
@@ -197,6 +199,16 @@ def add_club_req_db(req_list):
             add_club_reqs(type[0], amount[0])
 
 def refresh_club_info():
+    recent_refresh = get_most_recent_club_reqs()
+    print('recent_refresh =', recent_refresh)
+    now = datetime.now()
+    target_time = datetime.combine(now.date(), t(13, 0))
+    if get_most_recent_club_reqs():
+
+        if get_most_recent_club_reqs() >= target_time:
+            print("No reset needed club info")
+            return False
+
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     # Set implicit wait

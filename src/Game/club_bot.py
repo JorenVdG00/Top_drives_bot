@@ -46,6 +46,22 @@ class ChoosingEvent(GameBotClub):
             event = {'name': extracted_data['name'], 'score': pick_score, 'number': self.current_number}
             self.compare_best_event(event)
             return False
+        
+    def add_from_garage(self, number_of_cars: int):
+        cars_added = 0
+        garage_used = []
+        tries = 1
+
+
+        while cars_added < number_of_cars:
+            nr = [tries if not tries // 6 >1 else tries%6]
+            x = (nr // 2)+ 1
+            y = [2 if nr % 2 == 0 else 1]
+            
+            self.actions.tap_garage_car(x, y)
+            self.
+            
+
 
     def try_club(self, req_list):
         self.actions.tap_play_club()

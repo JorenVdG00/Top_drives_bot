@@ -30,9 +30,12 @@ class ActionClub(ActionBase):
     def swipe_up_clubs(self):
         self.swipe_action('swipe_up_clubs')
 
-    def add_cars_to_hand(self, number_of_cars: int):
-        for garage_nr, slot_nr
 
+    def tap_garage_car(self, garage_x, garage_y):
+        self.tap_action(f'garage_{garage_x}_{garage_y}')
+
+    def add_cars_to_hand(self):
+        self.tap_action('add_to_hand')
 
 
     def _initialize_action_map(self):
@@ -46,5 +49,12 @@ class ActionClub(ActionBase):
             'club_event_3': 'club_event_3',
             'back_club': 'back_club',
             'swipe_up_clubs': 'swipe_up_clubs',
+            'add_to_hand': 'add_to_hand',
+            'garage_1_1': 'garage_1_1',
+            'garage_1_2': 'garage_1_2',
+            'garage_2_1': 'garage_2_1',
+            'garage_2_2': 'garage_2_2',
+            'garage_3_1': 'garage_3_1',
+            'garage_3_2': 'garage_3_2',            
         }
         self.action_map.update(club_actions)

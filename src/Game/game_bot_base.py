@@ -15,6 +15,8 @@ class GameBotBase(BotBase):
     def go_to_event_page(self):
         self.actions.tap_home()
         self.actions.tap_events()
+        
+
 
     def set_game_state(self, bot_state):
         self.bot_state = bot_state
@@ -69,3 +71,56 @@ class GameBotBase(BotBase):
 
     def fix_after_go_problem(self):
         pass
+        
+    def set_sort(self, sort_order: str):
+            """
+            Sets the sorting order of the items by simulating taps on the sort buttons.
+            Can only set sorting to 'ASC', 'DESC', or 'NONE'.
+
+            Args:
+                sort_order (str): Desired sorting order ('ASC', 'DESC', or 'NONE').
+            """
+            if sort_order.upper() not in ['ASC', 'DESC', 'NONE']:
+                sort_order = 'ASC'
+            
+            sort_status = self.checks.get_sort_status()  # Retrieve current sort status
+            taps = self.calculate_taps(sort_status, sort_order)  # Calculate how many taps are needed
+
+            if taps > 0:
+                self.actions.tap_sort_button()  # Open the sorting menu
+                time.sleep(0.5)
+                for _ in range(taps):
+                    self.actions.tap_sort_rq()  # Perform the necessary sort action taps
+                    time.sleep(0.5)
+
+    def calculate_taps(self, sort_status: str, sort_order: str) -> int:
+        """
+        Calculate the number of taps required to reach the desired sort order.
+
+        Args:
+            sort_status (str): The current sort status ('ASC', 'DESC', 'NONE').
+            sort_order (str): The desired sort order ('ASC', 'DESC').
+
+        Returns:
+            int: The number of taps required to set the desired sorting order.
+        """
+        sort_order = sort_order.upper()
+        
+        # DESCENDING ORDER
+        if sort_order == "DESC":
+            if sort_status == "ASC":
+                return 1  # One tap needed to go from ASC to DESC
+            else:
+                return 0  # Already DESC or NONE (0 taps needed)
+        
+        # ASCENDING ORDER
+        elif sort_order == "ASC":
+            if sort_status == 'NONE':
+                return 1  # One tap needed to go from NONE to ASC
+            elif sort_status == 'DESC':
+                return 2  # Two taps needed to go from DESC to ASC
+            else:
+                return 0  # Already ASC (0 taps needed)
+        
+        return 0  # In case of invalid input or no taps needed
+

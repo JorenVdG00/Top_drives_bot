@@ -1,266 +1,276 @@
 from src.TopDrives.base_bot import BotBase
 from src.Utils.ImageTools.image_utils import ImageUtils
-from typing import Tuple, Union
+from typing import Optional, List, Union, Tuple
 
 
 class CheckBase(BotBase):
     """
-    This class is responsible for performing various checks on the screen or a provided screenshot
-    for different game elements such as buttons, prize stars, tickets, etc.
+    This class performs checks on the screen or a screenshot for various game elements.
     """
 
     def __init__(self):
         """
-        Initializes the CheckBase class. Inherits from BotBase and initializes an ImageUtils instance
-        for image-related operations.
+        Initializes the CheckBase class, setting up color utilities and the check map.
         """
         super().__init__()
         self.color_utils = self.image_utils.color_utils
         self.check_map = {}
         self._initialize_check_map()
 
-    def check_screen_for(self, check_name: str, tolerance: int = 15) -> bool | None:
+    def _get_resized_image(self, screenshot: Optional[str] = None):
         """
-        Checks the current screen for a specific game element based on its name.
+        Helper method to get a resized image from either a provided screenshot or the current screen.
 
         Args:
-            check_name (str): The name of the element to check for.
-            tolerance (int): the tolerance for the distance between color and target color.
+            screenshot (Optional[str]): The path to a screenshot file.
 
         Returns:
-            bool | None: Returns True if the color at the specified coordinates matches the target color,
-                         False if it doesn't, and None if the coordinates are not found.
+            Image: Resized image.
         """
-        coords, target_color = self.get_color_coords(check_name)
-        if coords:
-            with self.screen_manager.screenshot_context() as screenshot:
-                resized_img = self.resize.resize_img(screenshot)
-                if self.color_utils.check_color_at_location(resized_img, coords, target_color):
-                    return True
-                else:
-                    return False
-        else:
-            return None
-
-    def check_screenshot_for(self, image_path: str, check_name: str, tolerance: int = 15) -> bool | None:
-        """
-        Checks a provided screenshot for a specific game element based on its name.
-
-        Args:
-            image_path (str): The path to the screenshot file.
-            check_name (str): The name of the element to check for.
-            tolerance (int): the tolerance for the distance between color and target color.
-
-        Returns:
-            bool | None: Returns True if the color at the specified coordinates matches the target color,
-                         False if it doesn't, and None if the coordinates are not found.
-        """
-        coords, target_color = self.get_color_coords(check_name)
-        if coords:
-            img = self.image_utils.open_image(image_path)
+        if screenshot:
+            img = self.image_utils.open_image(screenshot)
             resized_img = self.resize.resize_img(img)
             self.image_utils.close_image(img)
-
-            if self.color_utils.check_color_at_location(resized_img, coords, target_color):
-                return True
-            else:
-                return False
         else:
+            with self.screen_manager.screenshot_context() as screenshot_img:
+                resized_img = self.resize.resize_img(screenshot_img)
+        return resized_img
+
+    def check_element(
+        self, check_name: str, screenshot: Optional[str] = None, tolerance: int = 15
+    ) -> Optional[bool]:
+        """
+        Generalized function to check for any game element on the current screen or in a screenshot.
+
+        Args:
+            check_name (str): The name of the element to check for.
+            screenshot (Optional[str]): The path to a screenshot file (if provided).
+            tolerance (int): Tolerance level for color checking.
+
+        Returns:
+            Optional[bool]: True if the element is found, False if not, and None if the coordinates are invalid.
+        """
+        coords, target_color = self.get_color_coords(check_name)
+        if not coords:
             return None
 
-    # GO Button Checks
-    def check_blue_go_button(self, screenshot=None) -> bool:
-        """
-        Checks for the presence of the blue 'Go' button on the screen or in a provided screenshot.
+        if screenshot:
+            img = self.image_utils.open_image(screenshot)
+            resized_img = self.resize.resize_img(img)
+            self.image_utils.close_image(img)
+        else:
+            with self.screen_manager.screenshot_context() as screenshot_img:
+                resized_img = self.resize.resize_img(screenshot_img)
 
-        Args:
-            screenshot: An optional screenshot to check. If not provided, the current screen is used.
+        return self.color_utils.check_color_at_location(
+            resized_img, coords, target_color
+        )
+
+    # Specific checks for game elements, using the generalized function
+    def check_go_button(self, color: str, screenshot: Optional[str] = None) -> bool:
+        """Check for 'Go' button of a given color (blue, gray, red)."""
+        return self.check_element(f"{color}_go", screenshot)
+
+    def check_after_go_unavailable(self, screenshot: Optional[str] = None) -> bool:
+        """Check if the 'After Go Unavailable' message is present."""
+        return self.check_element("after_go_unavailable", screenshot)
+
+    def check_play_after_go(self, screenshot: Optional[str] = None) -> bool:
+        """Check if the 'Play After Go' button is present."""
+        return self.check_element("play_after_go", screenshot)
+
+    def check_accept_skip(self, screenshot: Optional[str] = None) -> bool:
+        """Check if the 'Accept Skip' button is present."""
+        return self.check_element("accept_skip", screenshot)
+
+    def check_refresh(self, screenshot: Optional[str] = None) -> bool:
+        """Check if the 'Refresh' button is present."""
+        return self.check_element("refresh", screenshot)
+
+    def check_upgrade_after_match(self, screenshot: Optional[str] = None) -> bool:
+        """Check if the 'Upgrade After Match' button is present."""
+        return self.check_element("upgrade_after_match", screenshot)
+
+    def check_sort(self, order: str, screenshot: Optional[str] = None) -> bool:
+        """Check for sorting buttons (ascending or descending)."""
+        return self.check_element(f"sort_{order}", screenshot)
+
+    def check_is_fusing(self, screenshot: Optional[str] = None) -> bool:
+        return self.check_element("is_fusing", screenshot)
+
+    def check_is_servicing(self, screenshot: Optional[str] = None) -> bool:
+        return self.check_element("is_servicing", screenshot)
+
+    def check_add_to_hand(self) -> Optional[bool]:
+        """
+        Checks the presence of the 'add_to_hand' and 'remove_from_hand' elements
+        in the current screenshot context.
+
+        This method uses the screenshot captured by the screen manager to determine
+        the presence of the specified UI elements.
 
         Returns:
-            bool: True if the blue 'Go' button is present, False otherwise.
+            Optional[bool]:
+                - None if 'add_to_hand' is not found.
+                - False if 'remove_from_hand' is found.
+                - True if 'add_to_hand' is found and 'remove_from_hand' is not found.
         """
-        if screenshot:
-            return self.check_screenshot_for(screenshot, 'blue_go')
-        else:
-            return self.check_screen_for('blue_go')
+        with self.screen_manager.screenshot_context() as screenshot:
+            add_hand = self.check_element("add_to_hand", screenshot)
+            remove_hand = self.check_element("remove_from_hand", screenshot)
 
-    def check_gray_go_button(self, screenshot=None) -> bool:
+        if not add_hand:
+            return None  # 'add_to_hand' not found
+        if remove_hand:
+            return False  # 'remove_from_hand' found
+        return True  # 'add_to_hand' found and 'remove_from_hand' not found
+
+    # Event Checks
+    def check_event_ended(self, screenshot: Optional[str] = None) -> bool:
+        """Checks if you can claim an event is present."""
+        return self.check_element("claim_event", screenshot)
+
+    # Double Check
+    def check_double_check(self, screenshot: Optional[str] = None) -> bool:
+        """Double checks if you can claim an event."""
+        return self.check_element("double_check", screenshot)
+
+    def get_color_coords(
+        self, name: str
+    ) -> Union[Tuple[Tuple[int, int], Tuple[int, int, int, int]], None]:
+        return self.file_utils.get_color_coords(name)
+
+    def get_go_button_color(self) -> str:
+        colors = ["blue", "gray", "red"]
+        with self.screen_manager.screenshot_context() as screenshot:
+            for color in colors:
+                if self.check_go_button(color, screenshot):
+                    return color.upper()
+
+        # If none of above go button is not visible
+        return "NONE"
+
+    def get_after_go_problem(self) -> str:
+        with self.screen_manager.screenshot_context() as problem_screenshot:
+            problem_img = self.image_utils.open_image(problem_screenshot)
+            extracted_text = self.extractor.crop_and_read_image(
+                problem_img, "go_button_problem", "text_coords"
+            )
+            if "ended" in extracted_text.lower():
+                return "EVENT_ENDED"
+            elif "servicing" in extracted_text.lower():
+                return "CARS_SERVICING"
+            elif "again" in extracted_text.lower():
+                return "REQUIREMENTS"
+            else:
+                self.logger.error(f"Error in problems extracted text: {extracted_text}")
+                return "OTHER"
+
+        # Slot Checks
+
+    def check_slots(self, start_key: str, step_key: str, screenshot=None) -> list[int]:
         """
-        Checks for the presence of the gray 'Go' button on the screen or in a provided screenshot.
+        Checks for slots (e.g., missing or repair) by comparing the color of the slots in a sequence.
 
         Args:
-            screenshot: An optional screenshot to check. If not provided, the current screen is used.
+            start_key (str): The key name for the starting coordinates and color.
+            step_key (str): The key name for the step coordinates and color for subsequent slots.
+            screenshot: Optional screenshot to check. If not provided, it will capture a new screenshot.
 
         Returns:
-            bool: True if the gray 'Go' button is present, False otherwise.
+            list[bool]: A list of booleans where each entry corresponds to whether a slot matches the target color.
         """
-        if screenshot:
-            return self.check_screenshot_for(screenshot, 'gray_go')
-        else:
-            return self.check_screen_for('gray_go')
 
-    def check_red_go_button(self, screenshot=None) -> bool:
+        # Get the starting coordinates and color
+        coords, target_color = self.get_color_coords(start_key)
+        step_coords, _ = self.get_color_coords(
+            step_key
+        )  # Get the step for the next slot's X coord
+        start_x, y = coords
+        step_x = step_coords[0]
+
+        resized_img = self._get_resized_image(screenshot)
+        slots =  [
+            resized_img.getpixel((start_x + i * step_x, y)) == target_color
+            for i in range(5)
+        ]
+        
+        slot_numbers = [
+            i + 1 for i, is_True in enumerate(slots) if is_True
+        ]
+        self.logger.info(f"slots: {slot_numbers}")
+        return slot_numbers
+
+    def check_missing_slots(self) -> list[int]:
         """
-        Checks for the presence of the red 'Go' button on the screen or in a provided screenshot.
-
-        Args:
-            screenshot: An optional screenshot to check. If not provided, the current screen is used.
-
-        Returns:
-            bool: True if the red 'Go' button is present, False otherwise.
-        """
-        if screenshot:
-            return self.check_screenshot_for(screenshot, 'red_go')
-        else:
-            return self.check_screen_for('red_go')
-
-    # Other Checks
-    def check_after_go_unavailable(self, screenshot=None) -> bool:
-        """Checks if the 'After Go Unavailable' message is present."""
-
-        if screenshot:
-            return self.check_screenshot_for(screenshot, 'after_go_unavailable')
-        else:
-            return self.check_screen_for('after_go_unavailable')
-
-    def check_play_after_go(self, screenshot=None) -> bool:
-        """Checks if the 'Play After Go' button is present."""
-
-        if screenshot:
-            return self.check_screenshot_for(screenshot, 'play_after_go')
-        else:
-            return self.check_screen_for('play_after_go')
-
-    def check_accept_skip(self, screenshot=None) -> bool:
-        """Checks if the 'Accept Skip' button is present."""
-
-        if screenshot:
-            return self.check_screenshot_for(screenshot, 'accept_skip')
-        else:
-            return self.check_screen_for('accept_skip')
-
-    def check_refresh(self, screenshot=None) -> bool:
-        """Checks if the 'Refresh' button is present."""
-
-        if screenshot:
-            return self.check_screenshot_for(screenshot, 'refresh')
-        else:
-            return self.check_screen_for('refresh')
-
-    def check_upgrade_after_match(self, screenshot=None) -> bool:
-        """Checks if the 'Upgrade After Match' button is present."""
-
-        if screenshot:
-            return self.check_screenshot_for(screenshot, 'upgrade_after_match')
-        else:
-            return self.check_screen_for('upgrade_after_match')
-
-    # Sorting Checks
-    def check_sort_asc(self, screenshot=None) -> bool:
-        if screenshot:
-            return self.check_screenshot_for(screenshot, 'sort_asc')
-        else:
-            return self.check_screen_for('sort_asc')
-
-    def check_sort_desc(self, screenshot=None) -> bool:
-        if screenshot:
-            return self.check_screenshot_for(screenshot, 'sort_desc')
-        else:
-            return self.check_screen_for('sort_desc')
-
-    # Hand Checks
-    def check_add_to_hand(self, screenshot=None) -> bool:
-        if screenshot:
-            return self.check_screenshot_for(screenshot, 'add_to_hand')
-        else:
-            return self.check_screen_for('add_to_hand')
-
-    def check_remove_from_hand(self, screenshot=None) -> bool:
-        if screenshot:
-            return self.check_screenshot_for(screenshot, 'remove_from_hand')
-        else:
-            return self.check_screen_for('remove_from_hand')
-    # Slot Checks
-    def check_missing_slots_start(self, screenshot=None) -> list[bool]:
-        """
-        Checks for missing slots at the start by comparing the color of the slots
-        in a sequence of 5 slots.
+        Checks for missing slots at the start by comparing the color of the slots in a sequence of 5 slots.
 
         Args:
             screenshot: Optional screenshot to check. If not provided, it will capture a new screenshot.
 
         Returns:
-            list[bool]: A list of booleans where each entry corresponds to whether a slot is missing.
+            List[bool]: A list of booleans where each entry corresponds to whether a slot is missing.
         """
-        is_missing_list = []
+        missing_slots = self.check_slots("missing_slots_start", "missing_slots_step")
+        self.logger.info(f"missing_slots: {missing_slots}")
+        return missing_slots
 
-        # Get the starting coordinates and color
-        coords, target_color = self.get_color_coords('missing_slots_start')
-        step_coords, _ = self.get_color_coords('missing_slots_step')  # Get the step for the next slot's X coord
-        start_x, y = coords
-        step_x = step_coords[0]
+    def check_repair_slots(self) -> list[int]:
+        """
+        Checks for repair slots by comparing the color of the slots in a sequence of 5 slots.
 
-        # Handle screenshot: use provided or capture a new one
-        if screenshot is None:
-            with self.screen_manager.screenshot_context() as screenshot:
-                resized_img = self.resize.resize_img(screenshot)
+        Returns:
+            List[bool]: A list of booleans where each entry corresponds to whether a slot needs repair.
+        """
+        # broken_slots = self.check_slots("repair_slots_start", "repair_slots_step")
+        # broken_slot_numbers = [
+        #     i + 1 for i, is_broken in enumerate(broken_slots) if is_broken
+        # ]
+        # self.logger.info(f"Broken slots: {broken_slot_numbers}")
+        # return broken_slot_numbers
+        slot_numbers = self.check_slots('repair_slots_start', 'repair_slots_step')
+        self.logger.info(f"repair_slots: {slot_numbers}")
+        return slot_numbers
+    
+    
+
+    def get_sort_status(self) -> Optional[str]:
+        """
+        Determines the current sort status ('ASC', 'DESC', or 'NONE')
+        by comparing the colors of the sort indicators.
+
+        Returns:
+            'ASC': if ascending sort is active,
+            'DESC': if descending sort is active,
+            'NONE': if no sort is active,
+            None: if sorting information cannot be retrieved.
+        """
+        sort_dict = {}
+        sort_types = ["asc", "desc"]
+
+        with self.screen_manager.screenshot_context() as screenshot_img:
+            resized_img = self.resize.resize_img(screenshot_img)
+            for sort_type in sort_types:
+                coords, target_color = self.get_color_coords(f"sort_{sort_type}")
+
+                # Handle missing coordinates early
+                if not coords:
+                    self.logger.error(
+                        f"Failed to find coordinates for {sort_type} sorting."
+                    )
+                    return None
+
+                # Retrieve color at the specified location
+                color = self.color_utils.get_color_at_location(coords)
+                sort_dict[sort_type] = color
+
+        # Compare colors and determine sort status
+        if sort_dict.get("asc") == sort_dict.get("desc"):
+            return "NONE"
+        elif sort_dict.get("asc") == target_color:
+            return "ASC"
         else:
-            img = self.image_utils.open_image(screenshot)
-            resized_img = self.resize.resize_img(img)
-            self.image_utils.close_image(img)
-
-        # Check for missing slots
-        for i in range(5):
-            x = start_x + (i * step_x)  # Calculate the X coordinate for each slot
-            color = resized_img.getpixel((x, y))
-            is_missing_list.append(color == target_color)
-
-        return is_missing_list
-
-    # Event Checks
-    def check_event_ended(self, screenshot=None) -> bool:
-        """Checks if you can claim an event is present."""
-        if screenshot:
-            return self.check_screenshot_for(screenshot, 'claim_event')
-        else:
-            return self.check_screen_for('claim_event')
-
-    # Double Check
-    def check_double_check(self, screenshot=None) -> bool:
-        """Double checks if you can claim an event."""
-        if screenshot:
-            return self.check_screenshot_for(screenshot, 'double_check')
-        else:
-            return self.check_screen_for('double_check')
-
-    def get_color_coords(self, name: str) -> Union[Tuple[Tuple[int, int], Tuple[int, int, int, int]], None]:
-        return self.file_utils.get_color_coords(name)
-
-    def get_go_button_color(self) -> str:
-        with self.screen_manager.screenshot_context as screenshot:
-            is_blue = self.check_blue_go_button(screenshot)
-            is_gray = self.check_gray_go_button(screenshot)
-            is_red = self.check_red_go_button(screenshot)
-        if is_blue:
-            return 'BLUE'
-        if is_gray:
-            return 'GRAY'
-        if is_red:
-            return 'RED'
-        # If none of above go button is not visible
-        return 'NONE'
-
-    def get_after_go_problem(self) -> str:
-        with self.screen_manager.screenshot_context as problem_screenshot:
-            problem_img = self.image_utils.open_image(problem_screenshot)
-            extracted_text = self.extractor.crop_and_read_image(problem_img, 'go_button_problem', 'text_coords')
-            if 'ended' in extracted_text.lower():
-                return 'EVENT_ENDED'
-            elif 'servicing' in extracted_text.lower():
-                return 'CARS_REPAIR'
-            else:
-                self.logger.error(f'Error in problems extracted text: {extracted_text}')
-                return 'OTHER'
+            return "DESC"
 
     def _initialize_check_map(self):
         """
@@ -269,20 +279,22 @@ class CheckBase(BotBase):
         to populate the check_map with common checks.
         """
         club_checks = {
-            'blue_go': 'blue_go',
-            'red_go': 'red_go',
-            'gray_go': 'gray_go',
-            'after_go_unavailable': 'after_go_unavailable',
-            'play_after_go': 'play_after_go',
-            'accept_skip': 'accept_skip',
-            'refresh': 'refresh',
-            'upgrade_after_match': 'upgrade_after_match',
-            'sort_asc': 'sort_asc',
-            'sort_desc': 'sort_desc',
-            'add_to_hand': 'add_hand',
-            'missing_slots_start': 'missing_slots_start',
-            'missing_slots_step': 'missing_slots_step',
-            'claim_event': 'claim_event',
-            'double_check': 'double_check',
+            "blue_go": "blue_go",
+            "red_go": "red_go",
+            "gray_go": "gray_go",
+            "after_go_unavailable": "after_go_unavailable",
+            "play_after_go": "play_after_go",
+            "accept_skip": "accept_skip",
+            "refresh": "refresh",
+            "upgrade_after_match": "upgrade_after_match",
+            "sort_asc": "sort_asc",
+            "sort_desc": "sort_desc",
+            "add_to_hand": "add_hand",
+            "missing_slots_start": "missing_slots_start",
+            "missing_slots_step": "missing_slots_step",
+            "claim_event": "claim_event",
+            "double_check": "double_check",
+            "is_fusing": "is_fusing",
+            "is_servicing": "is_servicing",
         }
         self.check_map.update(club_checks)

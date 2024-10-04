@@ -59,6 +59,9 @@ class ColorUtils:
                     self.logger.debug(f'Color {color} found in pixels {x}, {y}')
                     return True
         return False
+    
+    def get_color_at_location(self, image: Image, coords: tuple[int,int]) -> tuple[int,int,int,int]:
+        return image.getpixel(coords)
 
     def color_almost_matches(self, color, target_color, tolerance=10):
         distance = self.color_distance(color, target_color)

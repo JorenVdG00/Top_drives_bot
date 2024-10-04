@@ -66,6 +66,9 @@ class ActionBase(BotBase):
 
     def tap_home(self) -> bool:
         return self.tap_action('home')
+    
+    def tap_back(self) -> bool:
+        return self.tap_action('back')
 
     def tap_events(self) -> bool:
         return self.tap_action('events')
@@ -122,20 +125,43 @@ class ActionBase(BotBase):
     def swipe_left_cars(self) -> bool:
         return self.swipe_action('swipe_left_cars')
 
-    def unswipe_slots(self) -> bool:
+    def unswipe_slots(self, slot_number: int = None) -> bool:
+        """
+        Swipes cars from hand slots back to the garage.
+
+        This method either swipes all cars from all hand slots to a predefined garage location or 
+        swipes a specific car from a given hand slot, based on the provided `slot_number`.
+
+        Args:
+            slot_number (int, optional): The slot number of the car to swipe back to the garage.
+                                        If not provided, all hand slots (1 to 5) will be swiped.
+                                        Defaults to None.
+        
+        Returns:
+            bool: Returns True if the swipe action was successful, False if an error occurs.
+
+        Behavior:
+            - If `slot_number` is None, it swipes all cars from slots 1 to 5 back to the garage.
+            - If a specific `slot_number` is provided, it swipes the car in that slot back to the garage.
+        
+        Raises:
+            ValueError: If an invalid slot_number is provided.
+        """
         try:
-            self.swipe_a_to_b('hand_1', 'garage_1_2')
-            time.sleep(0.2)
-            self.swipe_a_to_b('hand_2', 'garage_1_2')
-            time.sleep(0.2)
-            self.swipe_a_to_b('hand_3', 'garage_1_2')
-            time.sleep(0.2)
-            self.swipe_a_to_b('hand_4', 'garage_1_2')
-            time.sleep(0.2)
-            self.swipe_a_to_b('hand_5', 'garage_1_2')
-            time.sleep(0.2)
-        finally:
+            # Validate slot_number if provided
+            if slot_number is not None:
+                if not 1 <= slot_number <= 5:
+                    raise ValueError(f"Invalid slot_number: {slot_number}. Must be between 1 and 5.")
+                self.swipe_a_to_b(f'hand_{slot_number}', 'garage_1_2')
+            else:
+                # Swipe all hand slots (1 to 5) back to the garage
+                for i in range(1, 6):
+                    self.swipe_a_to_b(f'hand_{i}', 'garage_1_2')
+                    time.sleep(0.2)  # Adding a delay to mimic user action and allow for animation
             return True
+        except Exception as e:
+            self.logger.error(f"Error swiping slots: {e}")
+            return False
 
     def swipe_cars_to_slots_in_match(self, assignments: list[int] = None) -> bool:
         """
@@ -150,6 +176,9 @@ class ActionBase(BotBase):
             self.logger.debug(f'swiping car {car} to slot {slot_nr}')
             self.swipe_a_to_b(f'ingame_car{car}', f'ingame_slot{slot_nr}')
         return True
+    
+
+
 
     def _initialize_action_map(self):
         """

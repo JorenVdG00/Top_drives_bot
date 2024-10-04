@@ -1,3 +1,4 @@
+
 coordinates:
   box_coords:
     # BASICS
@@ -6,6 +7,11 @@ coordinates:
       y1: 20
       x2: 1030
       y2: 115
+    - name: "back"
+      x1: 40
+      y1: 50
+      x2: 80
+      y2: 90
     - name: "events"
       x1: 920
       y1: 280
@@ -165,6 +171,7 @@ coordinates:
       y1: 780
       x2: 250
       y2: 780
+   
     - name: "exit_car"
       x1: 100
       y1: 780
@@ -177,10 +184,10 @@ coordinates:
       y2: 1215
     # RACE
     - name: "skip"
-      x1: 1000
-      y1: 55
-      x2: 1200
-      y2: 95
+      x1: 1830
+      y1: 80
+      x2: 2000
+      y2: 130
     - name: "skip_accept"
       x1: 1280
       y1: 780
@@ -389,7 +396,7 @@ coordinates:
         A: 255
     - name: "sort_desc"
       x: 1966
-      y: 163
+      y: 181
       color:
         R: 255
         G: 255
@@ -400,12 +407,20 @@ coordinates:
     # SLOTS
     - name: "add_hand"
       x: 250
-      y: 780
+      y: 800
       color:
         R: 102
         G: 102
         B: 102
         A: 255
+    - name: "remove_hand"
+    x: 250
+    y: 780
+    color:
+      R: 255
+      G: 255
+      B: 255
+      A: 255
     - name: "missing_slots_start"
       x: 230
       y: 1120
@@ -421,6 +436,38 @@ coordinates:
         R: 125
         G: 142
         B: 176
+        A: 255
+    - name: "repair_slots_start"
+      x: 200
+      y: 1085
+      color:
+        R: 255
+        G: 74
+        B: 74
+        A: 255
+    - name: "repair_slots_step"
+      x: 350
+      y: 1085
+      color:
+        R: 255
+        G: 74
+        B: 74
+        A: 255
+    - name: "is_fusing"
+      x: 1925
+      y: 575
+      color:
+        R: 250
+        G: 173
+        B: 23
+        A: 255
+    - name: "is_servicing"
+      x: 1880
+      y: 845
+      color:
+        R: 255
+        G: 74
+        B: 74
         A: 255
 
     # EVENTS

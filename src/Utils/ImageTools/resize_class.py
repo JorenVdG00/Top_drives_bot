@@ -1,4 +1,4 @@
-from logging import Logger
+# from logging import Logger
 from typing import Any
 
 from PIL import Image
@@ -12,9 +12,9 @@ STANDARD_SIZE = (BASIC_WIDTH, BASIC_HEIGHT)
 
 
 class ResizeClass:
-    def __init__(self, logger: Logger):
-        self.resize_values = self.calculate_screen_size()
+    def __init__(self, logger: 'Logger'):
         self.logger = logger
+        self.resize_values = self.calculate_screen_size()
 
     def resize_coordinate(self, value: int, resize_factor: float) -> int:
         """
@@ -73,6 +73,8 @@ class ResizeClass:
         size_result = run_subprocess_from_path(command)
         self.logger.info(f"Size of screen: {size_result}")
         if size_result == None:
+            return STANDARD_SIZE
+            # TODO: Add error handling
             connect_adb_to_game()
             return self.calculate_screen_size()
         size = size_result.strip()

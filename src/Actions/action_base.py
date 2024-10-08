@@ -16,10 +16,10 @@ class ActionBase(BotBase):
         if coords:
             x, y = coords
             self.cmd_runner.tap(x, y)
-            self.logger.success(f"Tapped: {name} at ({x}, {y})")
+            self.logger.info(f"Tapped: {name} at ({x}, {y})")
             return True
         else:
-            self.logger.error(f"Coordinates for '{name}' not found in configuration")
+            self.logger.error(f"No Box Coordinates for '{name}' not found in configuration")
             return False
 
     def swipe(self, name: str) -> bool:
@@ -51,7 +51,7 @@ class ActionBase(BotBase):
         if coord_name:
             return self.tap(coord_name)
         else:
-            self.logger.error(f"No coordinates found for action: {action_name}")
+            self.logger.error(f"No box-coordinates found for action: {action_name}")
             return False
 
     def swipe_action(self, action_name: str) -> bool:
@@ -59,7 +59,7 @@ class ActionBase(BotBase):
         if coord_name:
             return self.swipe(coord_name)
         else:
-            self.logger.error(f"No coordinates found for action: {action_name}")
+            self.logger.error(f"No Swipecoordinates found for action: {action_name}")
             return False
 
     # COMMON TAPS

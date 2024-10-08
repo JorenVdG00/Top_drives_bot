@@ -3,6 +3,7 @@ from src.Actions.action_clubs import ActionClub
 from src.StatusChecks.check_clubs import CheckClubs
 from src.Utils.ImageTools.Extractor.extractor_club import ExtractorClub
 import time
+import threading
 from collections import Counter
 from typing import Optional
 
@@ -44,6 +45,7 @@ class GameBotClub(GameBotBase):
         From anywhere THat you can go to home.
         
         """
+        self.logger.debug("Going to club page")
         self.go_to_event_page()
         self.claim_event()
         self.actions.tap_clubs()
@@ -196,8 +198,6 @@ class GameBotClub(GameBotBase):
                 self.actions.tap_play_in_club()
                 time.sleep(0.5)
                 if self.tap_go_and_play():
-                
-                
                     self.played_matches += 1
                 else:
                     self.club_status = "problem"
@@ -433,7 +433,7 @@ class ProblemFixer:
 class EventPicker:
     def __init__(self, game_bot: GameBotClub):
         self.game = game_bot
-        self.extractor = ExtractorClub()
+        self.extractor = ExtractorClub(self.game)
         self.best_event = {"name": None, "score": 20000, "number": 0}
         self.current_number = 0
 
@@ -510,17 +510,22 @@ class ClubBot(GameBotClub):
         self.bot_status = "Null"
         self.bot_running = False
         
-    def play_clubs(self):
+    def play_clubs(self, stop_event: threading.Event):
+        self.stop_event = stop_event
         active = self.active_event
         
         self.go_to_club_page()
         self.claim_club_rewards()
-        while self.bot_running:
+        while True:
+            if self.stop_event.is_set():
+                self.logger.debug("Club-bot stopped")
+                break
             while active:
                 if self.claim_club_rewards():
                     break
                 
                 if self.active_event:
+                    # PLAY CLUBS TILL MAXED|PROBLEM|END
                     if not self.play_active_event():
                         active = False
                         

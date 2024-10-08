@@ -4,7 +4,10 @@ from src.Actions.action_base import ActionBase
 class ActionClub(ActionBase):
     def __init__(self):
         super().__init__()
+        super()._initialize_action_map()
         self._initialize_action_map()
+        for index, key in enumerate(self.action_map.keys()):
+            print(index, key)
 
     def tap_clubs(self):
         self.tap_action("clubs")

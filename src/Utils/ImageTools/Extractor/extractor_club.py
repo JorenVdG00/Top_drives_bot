@@ -3,10 +3,10 @@ from src.Utils.ImageTools.Extractor.text_cleaner import ClubCleaner
 
 
 class ExtractorClub(ExtractorBase):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, bot_base):
+        super().__init__(bot_base=bot_base)
         self.club_dict = None
-        self.cleaner = ClubCleaner()
+        self.cleaner = ClubCleaner(bot_base)
 
     def read_club_names(self) -> list:
         club_names = []

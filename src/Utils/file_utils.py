@@ -31,9 +31,9 @@ class FileUtils:
         # Check if the directory already exists
         if not os.path.exists(full_path):
             os.makedirs(full_path)
-            self.logger.info(f'Created directory {full_path}')
+            self.logger.info(f"Created directory {full_path}")
         else:
-            self.logger.debug('Directory already exists')
+            self.logger.debug("Directory already exists")
 
     # COORDS
 
@@ -48,7 +48,7 @@ class FileUtils:
         Returns:
             Dict[str, Any]: A dictionary containing the coordinates data loaded from the YAML file.
         """
-        with open(file_path, 'r') as file:
+        with open(file_path, "r") as file:
             data = yaml.safe_load(file)
             return data
 
@@ -63,18 +63,30 @@ class FileUtils:
             Union[Tuple[int, int], None]: A tuple of (x, y) representing random coordinates within the bounding box if found;
             otherwise, None if no matching bounding box is found.
         """
-        coords = next((item for item in self.coords_data['coordinates']['box_coords'] if item['name'] == name), None)
+        coords = next(
+            (
+                item
+                for item in self.coords_data["coordinates"]["box_coords"]
+                if item["name"] == name
+            ),
+            None,
+        )
 
         if coords:
             # Generate random coordinates within the bounding box
-            rand_coords = (random.randint(coords['x1'], coords['x2']), random.randint(coords['y1'], coords['y2']))
-            self.logger.debug(f'Random coordinates: {rand_coords} for box {name}')
+            rand_coords = (
+                random.randint(coords["x1"], coords["x2"]),
+                random.randint(coords["y1"], coords["y2"]),
+            )
+            self.logger.debug(f"Random coordinates: {rand_coords} for box {name}")
             return rand_coords
         else:
-            self.logger.error(f'No coordinates found for box {name}')
+            self.logger.error(f"No coordinates found for box {name}")
             return None
 
-    def get_color_coords(self, name: str) -> Union[Tuple[Tuple[int, int], Tuple[int, int, int, int]], None]:
+    def get_color_coords(
+        self, name: str
+    ) -> Union[Tuple[Tuple[int, int], Tuple[int, int, int, int]], None]:
         """
         Retrieve the color coordinates and RGBA color value by name.
 
@@ -88,19 +100,26 @@ class FileUtils:
                 - The second tuple contains the RGBA color value.
             - None if no entry is found with the specified name.
         """
-        coords = next((item for item in self.coords_data['coordinates']['color_coords'] if item['name'] == name), None)
+        coords = next(
+            (
+                item
+                for item in self.coords_data["coordinates"]["color_coords"]
+                if item["name"] == name
+            ),
+            None,
+        )
         if coords:
-            color_coords = (coords['x'], coords['y'])
+            color_coords = (coords["x"], coords["y"])
             color = (
-                coords['color'].get('R', 0),  # Default to 0 if key is missing
-                coords['color'].get('G', 0),
-                coords['color'].get('B', 0),
-                coords['color'].get('A', 255)  # Default to 255 if key is missing
+                coords["color"].get("R", 0),  # Default to 0 if key is missing
+                coords["color"].get("G", 0),
+                coords["color"].get("B", 0),
+                coords["color"].get("A", 255),  # Default to 255 if key is missing
             )
-            self.logger.debug(f'Color coordinates: {color_coords} for color {name}')
+            self.logger.debug(f"Color coordinates: {color_coords} for color {name}")
             return color_coords, color
         else:
-            self.logger.error(f'No coordinates found for color {name}')
+            self.logger.error(f"No coordinates found for color {name}")
             return None
 
     def get_coords(self, name: str) -> Union[Tuple[int, int, int, int], None]:
@@ -114,14 +133,21 @@ class FileUtils:
             Union[Tuple[int, int, int, int], None]: A tuple of (x1, y1, x2, y2) representing swipe coordinates if found;
             otherwise, None if no matching swipe coords are found.
         """
-        coords = next((item for item in self.coords_data['coordinates']['box_coords'] if item['name'] == name), None)
+        coords = next(
+            (
+                item
+                for item in self.coords_data["coordinates"]["box_coords"]
+                if item["name"] == name
+            ),
+            None,
+        )
 
         if coords:
-            coords_tup = (coords['x1'], coords['y1'], coords['x2'], coords['y2'])
-            self.logger.debug(f'Swipe coordinates: {coords_tup} for box {name}')
+            coords_tup = (coords["x1"], coords["y1"], coords["x2"], coords["y2"])
+            self.logger.debug(f"Swipe coordinates: {coords_tup} for box {name}")
             return coords_tup
         else:
-            self.logger.error(f'No coordinates found for swipe {name}')
+            self.logger.error(f"No coordinates found for swipe {name}")
             return None
 
     def get_swipe_coords(self, name: str) -> Union[Tuple[int, int, int, int], None]:
@@ -135,18 +161,26 @@ class FileUtils:
             Union[Tuple[int, int, int, int], None]: A tuple of (x1, y1, x2, y2) representing swipe coordinates if found;
             otherwise, None if no matching swipe coords are found.
         """
-        coords = next((item for item in self.coords_data['coordinates']['swipe_coords'] if item['name'] == name), None)
+        coords = next(
+            (
+                item
+                for item in self.coords_data["coordinates"]["swipe_coords"]
+                if item["name"] == name
+            ),
+            None,
+        )
 
         if coords:
-            swipe_coords = (coords['x1'], coords['y1'], coords['x2'], coords['y2'])
-            self.logger.debug(f'Swipe coordinates: {swipe_coords} for box {name}')
+            swipe_coords = (coords["x1"], coords["y1"], coords["x2"], coords["y2"])
+            self.logger.debug(f"Swipe coordinates: {swipe_coords} for box {name}")
             return swipe_coords
         else:
-            self.logger.error(f'No coordinates found for swipe {name}')
+            self.logger.error(f"No coordinates found for swipe {name}")
             return None
 
-    def get_crop_coords(self, category: str, sub_cat: str) -> Union[
-        Dict[str, Tuple[int, int, int, int]], Tuple[int, int, int, int], None]:
+    def get_crop_coords(
+        self, category: str, sub_cat: str
+    ) -> Union[Dict[str, Tuple[int, int, int, int]], Tuple[int, int, int, int], None]:
         """
         Retrieve cropping coordinates from a predefined dataset based on the provided category and optional name.
 
@@ -182,28 +216,37 @@ class FileUtils:
         #     "road_type": (75, 150, 330, 215)
         # }
         """
-        dict = next((item for item in self.coords_data['coordinates']['color_coords'] if item['category'] == category),
-                    None)
+        dict = next(
+            (
+                item
+                for item in self.coords_data["coordinates"]["color_coords"]
+                if item["category"] == category
+            ),
+            None,
+        )
         if dict is None:
-            self.logger.error(f'No dict found for category {category}')
+            self.logger.error(f"No dict found for category {category}")
             return None
         else:
             for key, value in dict.items():
                 if isinstance(value, dict):
                     for sub_key, sub_values in value.items():
                         if sub_cat in sub_key:
-                            self.logger.debug(f'Sub category {sub_key} found in nested-dict {key}')
+                            self.logger.debug(
+                                f"Sub category {sub_key} found in nested-dict {key}"
+                            )
                             return sub_values
                 if sub_cat in key:
-                    self.logger.debug(f'Sub category {key} found in dict {key}')
+                    self.logger.debug(f"Sub category {key} found in dict {key}")
                     return value
-        self.logger.debug(f'No CropCoords found for category {category}-{sub_cat}')
+        self.logger.debug(f"No CropCoords found for category {category}-{sub_cat}")
         return None
 
-    def get_crop_dict(self, category: str) -> Union[
-        Dict[Any], None]:
-        """
-        Retrieve cropping coordinates from a predefined dataset based on the provided category and optional name.
+    def get_crop_dict(self, category: str):
+        # """ -> Union[
+        # Dict[Any], None]"""
+        # """
+        """Retrieve cropping coordinates from a predefined dataset based on the provided category and optional name.
 
         Parameters:
         ----------
@@ -237,11 +280,12 @@ class FileUtils:
         #     "road_type": (75, 150, 330, 215)
         # }
         """
-        dict = next((item for item in self.coords_data['coordinates']['color_coords'] if item['category'] == category),
-                    None)
+        dict = next(
+            (item for item in self.coords_data["coordinates"]["color_coords"]
+            if item["category"] == category), None)
         if dict is None:
-            self.logger.error(f'No dict found for category {category}')
+            self.logger.error(f"No dict found for category {category}")
             return None
         else:
-            self.logger.debug(f'CropCoordsDict found for category {category}')
+            self.logger.debug(f"CropCoordsDict found for category {category}")
             return dict

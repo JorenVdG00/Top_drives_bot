@@ -27,7 +27,7 @@ class GameBotBase(BotBase):
     def claim_event(self):
         can_claim, double_check = True, True
         while can_claim and double_check:
-            with self.screen_manager.screenshot_context as screenshot:
+            with self.screen_manager.screenshot_context() as screenshot:
                 can_claim = self.checks.check_event_ended(screenshot)
                 if can_claim:
                     double_check = self.checks.check_double_check(screenshot)

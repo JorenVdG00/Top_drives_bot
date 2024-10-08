@@ -2,17 +2,17 @@ import os
 
 from PIL import Image
 from contextlib import contextmanager
-from src.TopDrives.base_bot import BotBase
+# from src.TopDrives.base_bot import BotBase
 
 
-class CropperBase(BotBase):
-    def __init__(self):
-        super().__init__()
+class CropperBase():
+    def __init__(self, bot_base: 'BotBase'):
+        self.bot = bot_base
         self.crop_map = {}
         self._initialize_crop_map()
 
     def crop_image(self, image, category, sub_cat) -> Image:
-        coords = self.file_utils.get_crop_coords(category, sub_cat)
+        coords = self.bot.file_utils.get_crop_coords(category, sub_cat)
         if coords:
             cropped_image = image.crop(coords)
             return cropped_image
@@ -21,8 +21,8 @@ class CropperBase(BotBase):
 
 
     def crop_all_types(self, image, category, save_dir):
-        resized_image = self.resize.resize_img(image)
-        coords_dict = self.file_utils.get_crop_dict(category)
+        resized_image = self.bot.resizer.resize_img(image)
+        coords_dict = self.bot.file_utils.get_crop_dict(category)
         img_dict = {}
         for key, value in coords_dict.items():
             if isinstance(value, dict):

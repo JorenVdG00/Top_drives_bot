@@ -3,10 +3,10 @@ from logging import Logger
 from contextlib import contextmanager
 
 from PIL import Image, ImageEnhance, ImageFilter
-from src.TopDrives.base_bot import ScreenshotManager
+# from src.TopDrives.base_bot import ScreenshotManager
 
 class ImageUtils:
-    def __init__(self, logger: Logger, screen_manager: ScreenshotManager):
+    def __init__(self, logger: Logger, screen_manager: 'ScreenshotManager'):  # ScreenshotManager: ScreenshotManager):
         self.logger = logger
         self.image = None
         self.color_utils = ColorUtils(self.logger)

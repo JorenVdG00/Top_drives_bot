@@ -3,10 +3,12 @@ import os
 from logging import Logger
 
 from src.Utils.ImageTools.image_utils import ColorUtils
-from src.TopDrives.base_bot import BotBase
-class TextCleaner(BotBase):
-    def __init__(self):
-        super().__init__()
+# from src.TopDrives.base_bot import BotBase
+class TextCleaner():
+    def __init__(self, bot_base: 'BotBase'):
+        self.bot = bot_base
+    
+        
     @staticmethod
     def remove_newline(input_string):
         return input_string.split('\n')[0]
@@ -50,9 +52,9 @@ class TextCleaner(BotBase):
         return result
 
 class ClubCleaner(TextCleaner):
-    def __init__(self):
-        super().__init__()
-        self.color_utils = ColorUtils(self.logger)
+    def __init__(self, bot_base: 'BotBase'):
+        super().__init__(bot_base=bot_base)
+        self.color_utils = ColorUtils(self.bot.logger)
         self.team_colors = {'FULL_THROTTLE': (203, 119, 86, 255),
                             'LEGACY': (255, 247, 177, 255),
                             'MIDNIGHT': (74, 136, 163, 255)}

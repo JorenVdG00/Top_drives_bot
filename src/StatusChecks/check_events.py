@@ -40,10 +40,10 @@ class CheckEvents(CheckBase):
         if start_coords:
             if screenshot is None:
                 with self.screen_manager.screenshot_context() as screenshot:
-                    resized_img = self.resize.resize_img(screenshot)
+                    resized_img = self.resizer.resize_img(screenshot)
             else:
                 img = self.image_utils.open_image(screenshot)
-                resized_img = self.resize.resize_img(img)
+                resized_img = self.resizer.resize_img(img)
                 self.image_utils.close_image(img)
 
             prize_cards_left = [

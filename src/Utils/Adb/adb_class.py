@@ -4,8 +4,8 @@ from datetime import datetime
 from logging import Logger
 from dotenv import load_dotenv
 from config import ADB_SERIAL_CMD, BOT_SCREENSHOTS_DIR
-from file_utils import create_dir_if_not_exists
-from src.Utils.ImageTools.resize_class import ResizeClass
+from src.Utils.file_utils import FileUtils
+# from src.Utils.ImageTools.resize_class import ResizeClass
 
 load_dotenv()
 
@@ -21,11 +21,27 @@ class AdbClass:
         adb_connector: An instance of AdbConnector that handles ADB connection.
     """
 
-    def __init__(self, ip_address: str, port: str, logger: Logger, resize: ResizeClass):
-        self.adb_cmd_runner = AdbCommandRunner(logger, resize)
-        self.adb_connector = AdbConnector(ip_address, port, logger, self.adb_cmd_runner)
-        self.connection = self.adb_connector.check_adb_connection()
+    def __init__(self, ip_address: str, port: str, logger: Logger, resize: 'ResizeClass'):
+        self.ip_address = ip_address
+        self.port = port
+        self.logger = logger
+        self.file_utils = FileUtils(self.logger)
+        self.adb_cmd_runner = AdbCommandRunner(logger, resize, self.file_utils)
+        self.adb_connector = AdbConnector(self.ip_address, self.port, logger, self.adb_cmd_runner)
+        self.connection = self.check_connection()
 
+    def set_ip_address(self, ip_address: str):
+        self.ip_address = ip_address
+
+    def set_port(self, port: str):
+        self.port = port
+        
+    def reload_adb_connector(self):
+        self.adb_connector = AdbConnector(self.ip_address, self.port, self.logger, self.adb_cmd_runner)
+        self.connection = self.check_connection()
+    
+    def check_connection(self) -> bool:
+        return self.adb_connector.check_adb_connection()
 
 class AdbCommandRunner:
     """
@@ -35,9 +51,10 @@ class AdbCommandRunner:
         logger: The logger instance for logging debug and error information.
     """
 
-    def __init__(self, logger: Logger, resize: ResizeClass):
+    def __init__(self, logger: Logger, resize: 'ResizeClass', file_utils: 'FileUtils'):
         self.logger = logger
         self.resize = resize
+        self.file_utils = file_utils
         self.set_cwd()
 
     def tap(self, x: int, y: int):
@@ -103,10 +120,11 @@ class AdbCommandRunner:
         self.set_cwd()
 
         if parent_dir and sub_dir and name:
-            create_dir_if_not_exists(parent_dir, sub_dir)
+            self.file_utils.create_dir_if_not_exists(parent_dir, sub_dir)
             filename = f"{parent_dir}/{sub_dir}/{name}.png"
         else:
             timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+            self.file_utils.create_dir_if_not_exists(BOT_SCREENSHOTS_DIR)
             filename = f"{BOT_SCREENSHOTS_DIR}/screenshot_{timestamp}.png"
 
         # Capture the screenshot
@@ -191,6 +209,8 @@ class AdbConnector:
         else:
             self.logger.error(f"Failed to connect to {self.ip_address}:{self.port}")
 
+
+    # TODO: WHYYY?????
     def connect_adb_to_game(self):
         """
         Shortcut to connect ADB to the game instance.

@@ -414,13 +414,13 @@ coordinates:
         B: 102
         A: 255
     - name: "remove_hand"
-    x: 250
-    y: 780
-    color:
-      R: 255
-      G: 255
-      B: 255
-      A: 255
+      x: 250
+      y: 780
+      color:
+        R: 255
+        G: 255
+        B: 255
+        A: 255
     - name: "missing_slots_start"
       x: 230
       y: 1120

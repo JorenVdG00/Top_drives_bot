@@ -29,11 +29,11 @@ class CheckBase(BotBase):
         """
         if screenshot:
             img = self.image_utils.open_image(screenshot)
-            resized_img = self.resize.resize_img(img)
+            resized_img = self.resizer.resize_img(img)
             self.image_utils.close_image(img)
         else:
             with self.screen_manager.screenshot_context() as screenshot_img:
-                resized_img = self.resize.resize_img(screenshot_img)
+                resized_img = self.resizer.resize_img(screenshot_img)
         return resized_img
 
     def check_element(
@@ -56,11 +56,11 @@ class CheckBase(BotBase):
 
         if screenshot:
             img = self.image_utils.open_image(screenshot)
-            resized_img = self.resize.resize_img(img)
+            resized_img = self.resizer.resize_img(img)
             self.image_utils.close_image(img)
         else:
             with self.screen_manager.screenshot_context() as screenshot_img:
-                resized_img = self.resize.resize_img(screenshot_img)
+                resized_img = self.resizer.resize_img(screenshot_img)
 
         return self.color_utils.check_color_at_location(
             resized_img, coords, target_color
@@ -249,7 +249,7 @@ class CheckBase(BotBase):
         sort_types = ["asc", "desc"]
 
         with self.screen_manager.screenshot_context() as screenshot_img:
-            resized_img = self.resize.resize_img(screenshot_img)
+            resized_img = self.resizer.resize_img(screenshot_img)
             for sort_type in sort_types:
                 coords, target_color = self.get_color_coords(f"sort_{sort_type}")
 

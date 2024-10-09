@@ -1,5 +1,5 @@
 from src.Actions.action_base import ActionBase
-
+import time
 
 class ActionClub(ActionBase):
     def __init__(self):
@@ -30,11 +30,16 @@ class ActionClub(ActionBase):
     def tap_back_club(self):
         self.tap_action("back_club")
 
-    def swipe_up_clubs(self):
-        self.swipe_action("swipe_up_clubs")
+    def swipe_up_clubs(self, times:int = 1):
+        for _ in range(times):
+            self.swipe_and_hold_action("swipe_up_clubs")
+            time.sleep(0.5)
 
     def tap_garage_car(self, garage_x, garage_y):
         self.tap_action(f"garage_{garage_x}_{garage_y}")
+        
+    def tap_exit_info(self):
+        self.tap_action("exit_info")
 
     def add_cars_to_hand(self):
         self.tap_action("add_to_hand")
@@ -57,5 +62,6 @@ class ActionClub(ActionBase):
             "garage_2_2": "garage_2_2",
             "garage_3_1": "garage_3_1",
             "garage_3_2": "garage_3_2",
+            "exit_info": "exit_info",
         }
         self.action_map.update(club_actions)

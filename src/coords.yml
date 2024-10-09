@@ -20,8 +20,13 @@ coordinates:
     - name: "go_button"
       x1: 1930
       y1: 1050
-      x2: 2040
-      y2: 1090
+      x2: 2000
+      y2: 1080
+    - name: "close_problem_go"
+      x1: 220
+      y1: 800
+      x2: 1050
+      y2: 890
 
     - name: "play_after_go"
       x1: 1200
@@ -173,10 +178,10 @@ coordinates:
       y2: 780
    
     - name: "exit_car"
-      x1: 100
-      y1: 780
-      x2: 100
-      y2: 780
+      x1: 1800
+      y1: 100
+      x2: 1800
+      y2: 100
     - name: "unswipe_slots"
       x1: 70
       y1: 1010
@@ -287,6 +292,12 @@ coordinates:
       y1: 170
       x2: 1650
       y2: 210
+    - name: "exit_info"
+      x1: 2070
+      y1: 940
+      x2: 2080
+      y2: 960
+
 
 
   swipe_coords:
@@ -360,6 +371,15 @@ coordinates:
         G: 200
         B: 215
         A: 255
+    - name: "reset_hand"
+      x: 2137
+      y: 74
+      color:
+        R: 204
+        G: 204
+        B: 204
+        A: 255
+    
     - name: "accept_skip"
       x: 1290
       y: 830
@@ -405,7 +425,7 @@ coordinates:
 
 
     # SLOTS
-    - name: "add_hand"
+    - name: "add_to_hand"
       x: 250
       y: 800
       color:
@@ -413,7 +433,7 @@ coordinates:
         G: 102
         B: 102
         A: 255
-    - name: "remove_hand"
+    - name: "remove_from_hand"
       x: 250
       y: 780
       color:
@@ -655,6 +675,22 @@ coordinates:
         G: 196
         B: 79
         A: 255
+    - name: "info_icon"
+      x: 1628
+      y: 167
+      color:
+        R: 255
+        G: 255
+        B: 255
+        A: 255     
+    - name: "exit_info"
+      x: 2075
+      y: 94
+      color:
+        R: 24
+        G: 29
+        B: 240
+        A: 255 
 
 
   crop_coords:
@@ -667,12 +703,12 @@ coordinates:
     # CLUBS
     - category: club_info
       name: (1680, 140, 2180, 210)
-      event_ty: (1760, 210, 2190, 260)
+      event_type: (1760, 210, 2190, 260)
       time_left: (1850, 260, 2180, 300)
-      rq_coords: (2000, 365, 2180, 405)
-      reqs1_coords: (1850, 405, 2180, 455)
-      reqs2_coords: (1850, 455, 2180, 505)
-      player_amount_coords:
+      rq: (2000, 365, 2180, 405)
+      reqs1: (1850, 405, 2180, 455)
+      reqs2: (1850, 455, 2180, 505)
+      player_amount:
         players_left: (1580, 570, 1750, 620)
         players_right: (2025,570, 2195, 620)
       score:

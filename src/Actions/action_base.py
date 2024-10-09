@@ -27,12 +27,27 @@ class ActionBase(BotBase):
         if coords:
             x1, y1, x2, y2 = coords
             self.cmd_runner.swipe(x1, y1, x2, y2)
-            self.logger.success(f"Swiped: {name} ... ({x1}, {y1})-->({x2}, {y2})")
+            self.logger.info(f"Swiped: {name} ... ({x1}, {y1})-->({x2}, {y2})")
             return True
         else:
             self.logger.error(f"Coordinates for '{name}' not found in configuration")
             return False
-
+        
+    def swipe_and_hold(self, name: str) -> bool:
+        coords = self.file_utils.get_swipe_coords(name)
+        if coords:
+            x1, y1, x2, y2 = coords
+            horizontal = False
+            if abs(x2-x1) > abs(y2-y1):
+                horizontal = True
+                
+            self.cmd_runner.swipe_and_hold(x1, y1, x2, y2, moves_horizontal=horizontal)
+            self.logger.info(f"Swiped: {name} ... ({x1}, {y1})-->({x2}, {y2})")
+            return True
+        else:
+            self.logger.error(f"Coordinates for '{name}' not found in configuration")
+            return False
+        
     def swipe_a_to_b(self, nameA: str, nameB: str) -> bool:
         coordsA = self.file_utils.get_rand_box_coords(nameA)
         coordsB = self.file_utils.get_rand_box_coords(nameB)
@@ -40,7 +55,7 @@ class ActionBase(BotBase):
             xA, yA = coordsA
             xB, yB = coordsB
             self.cmd_runner.swipe(xA, yA, xB, yB)
-            self.logger.success(f"Swiped: {nameA}-->{nameB} ... ({xA}, {yA})-->({xB}, {yB})")
+            self.logger.info(f"Swiped: {nameA}-->{nameB} ... ({xA}, {yA})-->({xB}, {yB})")
             return True
         else:
             self.logger.error(f'Coordinates for {nameA} and {nameB} not found in configuration')
@@ -62,6 +77,13 @@ class ActionBase(BotBase):
             self.logger.error(f"No Swipecoordinates found for action: {action_name}")
             return False
 
+    def swipe_and_hold_action(self, action_name: str) -> bool:
+        coord_name = self.action_map.get(action_name)
+        if coord_name:
+            return self.swipe_and_hold(coord_name)
+        else:
+            self.logger.error(f"No Swipecoordinates found for action: {action_name}")
+            return False
     # COMMON TAPS
 
     def tap_home(self) -> bool:
@@ -120,6 +142,8 @@ class ActionBase(BotBase):
     def tap_exit_car(self):
         return self.tap_action('exit_car')
 
+    def close_problem_after_go(self):
+        return self.tap_action('close_problem_go')
     # SWIPES
 
     def swipe_left_cars(self) -> bool:
@@ -156,8 +180,9 @@ class ActionBase(BotBase):
             else:
                 # Swipe all hand slots (1 to 5) back to the garage
                 for i in range(1, 6):
+                    self.logger.debug(f'swiping slot {i} back to garage')
                     self.swipe_a_to_b(f'hand_{i}', 'garage_1_2')
-                    time.sleep(0.2)  # Adding a delay to mimic user action and allow for animation
+                    time.sleep(0.5)  # Adding a delay to mimic user action and allow for animation
             return True
         except Exception as e:
             self.logger.error(f"Error swiping slots: {e}")
@@ -220,7 +245,8 @@ class ActionBase(BotBase):
             'ingame_slot5': 'ingame_slot5',
             'reset_hand': 'reset_hand',
             'add_to_hand': 'add_to_hand',
-            'exit_car': 'exit_car'
+            'exit_car': 'exit_car',
+            'close_problem_go': 'close_problem_go',
         }
         self.action_map.update(base_actions)
 

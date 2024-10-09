@@ -82,7 +82,7 @@ class ScreenshotManager:
             self.logger.debug(f"Deleted screenshot {screenshot}")
 
     @contextmanager
-    def screenshot_context(self):
+    def  screenshot_context(self):
         """
         Context manager for capturing and automatically removing a screenshot.
         """

@@ -16,6 +16,7 @@ class ImageUtils:
     def set_image(self, image: Image):
         self.image = image
 
+
     def save_image(self, image, image_path: str):
         image.save(image_path)
 
@@ -44,9 +45,9 @@ class ColorUtils:
         self.logger = logger
 
     def check_color_at_location(self, image: Image, coords: tuple[int, int],
-                                target_color: tuple[int, int, int, int]) -> bool:
+                                target_color: tuple[int, int, int, int], tolerance: int = 10) -> bool:
         color = image.getpixel(coords)
-        if self.color_almost_matches(color, target_color, 10):
+        if self.color_almost_matches(color, target_color, tolerance):
             return True
         else:
             return False

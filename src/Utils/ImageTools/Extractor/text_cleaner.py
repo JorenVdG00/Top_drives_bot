@@ -54,7 +54,8 @@ class TextCleaner():
 class ClubCleaner(TextCleaner):
     def __init__(self, bot_base: 'BotBase'):
         super().__init__(bot_base=bot_base)
-        self.color_utils = ColorUtils(self.bot.logger)
+        self.logger = self.bot.logger
+        self.color_utils = ColorUtils(self.logger)
         self.team_colors = {'FULL_THROTTLE': (203, 119, 86, 255),
                             'LEGACY': (255, 247, 177, 255),
                             'MIDNIGHT': (74, 136, 163, 255)}
@@ -82,21 +83,34 @@ class ClubCleaner(TextCleaner):
         return correct_rq
 
     def fix_score_value(self, extracted_data):
-        left_score = extracted_data['score-left']
-        right_score = extracted_data['score-right']
-        extracted_data['score-left'] = self.extract_integers(left_score)
-        extracted_data['score-right'] = self.extract_integers(right_score)
+        sides = ['left', 'right']
+        for side in sides:
+            score = extracted_data[f'score_{side}']
+            extracted_data[f'score_{side}'] = self.extract_integers(score)
+            if extracted_data[f'score_{side}'] is None:
+                extracted_data[f'score_{side}'] = 5000
+                
+                
         return extracted_data
+        # left_score = extracted_data['score_left']
+        # right_score = extracted_data['score_right']
+        # extracted_data['score_left'] = self.extract_integers(left_score)
+        # extracted_data['score_right'] = self.extract_integers(right_score)
+        
+        # return extracted_data
 
     def fix_reqs(self, extracted_data):
         for i in range(1, 3):
-            req_str = extracted_data[f'reqs{i}_coords']
-            cutted_str = self.cut_until_integer(req_str)
-            req_split = cutted_str.rsplit(' ', 1)
-            req_name, req_number = req_split[0], req_split[1][-1]
-            if req_number is None:
-                req_number = 0
-            extracted_data[f'reqs{i}_coords'] = {'name': req_name, 'number': req_number}
+            req_str = extracted_data[f'reqs{i}']
+            if len(req_str) > 2:
+                cutted_str = self.cut_until_integer(req_str)
+                req_split = cutted_str.rsplit(' ', 1)
+                self.logger.debug('req_split: ' + str(req_split))
+                req_name, req_number = req_split[0], req_split[1][-1]
+                req_number = self.extract_integers(req_number)
+            else:
+                req_name, req_number = '', 0
+            extracted_data[f'reqs{i}'] = {'name': req_name, 'number': req_number}
         return extracted_data
 
     def has_req_met(self, image):
@@ -124,13 +138,16 @@ class ClubCleaner(TextCleaner):
         return extracted_data
 
     def fix_extracted_data(self, extracted_data):
-
+        for key, value in extracted_data.items():
+            self.logger.debug(f'{key}:  {value}')
+        
         # fix player_amounts
         extracted_data = self.fix_players(extracted_data)
 
         # fix requirements
         extracted_data = self.fix_reqs(extracted_data)
-
+    
+        print(extracted_data.get('score_left'))
         # fix scores
         extracted_data = self.fix_score_value(extracted_data)
 
@@ -140,3 +157,9 @@ class ClubCleaner(TextCleaner):
         extracted_data['weight'] = self.correct_weight_value(extracted_data['weight'])
 
         return extracted_data
+
+
+    def fix_short_data(self, extracted_data: dict[str, str])-> dict[str, str]:
+        extracted_data = self.fix_reqs(extracted_data)
+        extracted_data['rq'] = self.fix_rq_value(extracted_data['rq'])
+        return extracted_data        

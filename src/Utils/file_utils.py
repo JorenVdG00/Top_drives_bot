@@ -216,19 +216,22 @@ class FileUtils:
         #     "road_type": (75, 150, 330, 215)
         # }
         """
-        dict = next(
-            (
-                item
-                for item in self.coords_data["coordinates"]["color_coords"]
-                if item["category"] == category
-            ),
-            None,
-        )
-        if dict is None:
+        # coords_dict = next(
+        #     (
+        #         item
+        #         for item in self.coords_data["coordinates"]["crop_coords"]
+        #         if item["category"] == category
+        #     ),
+        #     None,
+        # )
+        coords_dict = self.get_crop_dict(category)
+        if coords_dict is None:
             self.logger.error(f"No dict found for category {category}")
             return None
         else:
-            for key, value in dict.items():
+            for key, value in coords_dict.items():
+                if key == 'category':
+                    continue
                 if isinstance(value, dict):
                     for sub_key, sub_values in value.items():
                         if sub_cat in sub_key:
@@ -280,12 +283,35 @@ class FileUtils:
         #     "road_type": (75, 150, 330, 215)
         # }
         """
+        # print(f'Length of coords_data: {len(self.coords_data['coordinates']['crop_coords'])}')
+        # crop_dict = self.coords_data['coordinates']['crop_coords']
+        # for item in crop_dict:
+        #     print(f'Length of coords_data: {len(crop_dict)}')
+        #     if item['category'] == category:
+        #         print(True, item)
+        #     else:
+        #         print(False, item)
+        # for index, key in enumerate(self.coords_data.keys()):
+        #     print(index, key)
         dict = next(
-            (item for item in self.coords_data["coordinates"]["color_coords"]
-            if item["category"] == category), None)
+            (
+                item
+                for item in self.coords_data["coordinates"]["crop_coords"]
+                if item['category'] == category
+            ),
+            None,
+        )
         if dict is None:
             self.logger.error(f"No dict found for category {category}")
             return None
         else:
             self.logger.debug(f"CropCoordsDict found for category {category}")
+            # dict.pop('category')
             return dict
+
+    def coords_str_to_tuple(self, coords_str: str) -> Tuple[int, int, int, int]:
+        coords = coords_str[1:-1].split(",")
+        coords = [int(coord) for coord in coords]
+        print(f'Coords {coords}')
+        print(f'Tuple {tuple(coords)}')
+        return tuple(coords)

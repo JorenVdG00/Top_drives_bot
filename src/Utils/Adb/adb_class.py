@@ -66,8 +66,8 @@ class AdbCommandRunner:
             y (int): The y-coordinate for the tap.
         """
         rs_x, rs_y = self.resize.resize_coordinates(x,y)
-        os.system(f"{ADB_SERIAL_CMD} shell input tap {x} {y}")
-        self.logger.info(f"Tapped at ({x}, {y})")
+        os.system(f"{ADB_SERIAL_CMD} shell input tap {rs_x} {rs_y}")
+        self.logger.info(f"Tapped at ({rs_x}, {rs_y})")
 
     def swipe(self, x1: int, y1: int, x2: int, y2: int, duration: int = 500):
         """

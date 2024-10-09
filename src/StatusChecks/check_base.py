@@ -14,6 +14,7 @@ class CheckBase(BotBase):
         """
         super().__init__()
         self.color_utils = self.image_utils.color_utils
+        self.image_utils = self.image_utils
         self.check_map = {}
         self._initialize_check_map()
 
@@ -32,7 +33,7 @@ class CheckBase(BotBase):
             resized_img = self.resizer.resize_img(img)
             self.image_utils.close_image(img)
         else:
-            with self.screen_manager.screenshot_context() as screenshot_img:
+            with self.image_utils.take_and_use_screenshot() as screenshot_img:
                 resized_img = self.resizer.resize_img(screenshot_img)
         return resized_img
 
@@ -55,21 +56,17 @@ class CheckBase(BotBase):
             return None
 
         if screenshot:
-            img = self.image_utils.open_image(screenshot)
-            resized_img = self.resizer.resize_img(img)
-            self.image_utils.close_image(img)
+            resized_img = self._get_resized_image(screenshot)
         else:
-            with self.screen_manager.screenshot_context() as screenshot_img:
-                resized_img = self.resizer.resize_img(screenshot_img)
-
+            resized_img = self._get_resized_image()
         return self.color_utils.check_color_at_location(
-            resized_img, coords, target_color
+            resized_img, coords, target_color, tolerance=tolerance
         )
 
     # Specific checks for game elements, using the generalized function
     def check_go_button(self, color: str, screenshot: Optional[str] = None) -> bool:
         """Check for 'Go' button of a given color (blue, gray, red)."""
-        return self.check_element(f"{color}_go", screenshot)
+        return self.check_element(f"{color}_go", screenshot, tolerance=30)
 
     def check_after_go_unavailable(self, screenshot: Optional[str] = None) -> bool:
         """Check if the 'After Go Unavailable' message is present."""
@@ -77,8 +74,12 @@ class CheckBase(BotBase):
 
     def check_play_after_go(self, screenshot: Optional[str] = None) -> bool:
         """Check if the 'Play After Go' button is present."""
-        return self.check_element("play_after_go", screenshot)
+        return self.check_element("play_after_go", screenshot, tolerance=30)
 
+    def check_reset_hand(self, screenshot: Optional[str] = None) -> bool:
+        """Check if the 'Reset Hand' button is present."""
+        return self.check_element("reset_hand", screenshot)
+        
     def check_accept_skip(self, screenshot: Optional[str] = None) -> bool:
         """Check if the 'Accept Skip' button is present."""
         return self.check_element("accept_skip", screenshot)
@@ -160,7 +161,7 @@ class CheckBase(BotBase):
                 return "EVENT_ENDED"
             elif "servicing" in extracted_text.lower():
                 return "CARS_SERVICING"
-            elif "again" in extracted_text.lower():
+            elif "you need" in extracted_text.lower():
                 return "REQUIREMENTS"
             else:
                 self.logger.error(f"Error in problems extracted text: {extracted_text}")
@@ -188,12 +189,21 @@ class CheckBase(BotBase):
         )  # Get the step for the next slot's X coord
         start_x, y = coords
         step_x = step_coords[0]
-
+        # start_x, y = self.resizer.resize_coordinates(coords[0], coords[1])
+        # step_x, _= self.resizer.resize_coordinates(step_coords[0], coords[1])
+        self.logger.debug(f"start_x: {start_x}, y: {y}, step_x: {step_x}")
         resized_img = self._get_resized_image(screenshot)
         slots =  [
-            resized_img.getpixel((start_x + i * step_x, y)) == target_color
+            self.image_utils.color_utils.color_almost_matches(resized_img.getpixel((start_x + (i * step_x), y)), target_color, 15)
             for i in range(5)
         ]
+        for i in range(5):
+            x = (start_x + (i * step_x))
+            print('x: ', x)
+            print(resized_img.getpixel((start_x + (i * step_x), y)))
+    
+        
+        
         
         slot_numbers = [
             i + 1 for i, is_True in enumerate(slots) if is_True
@@ -248,7 +258,7 @@ class CheckBase(BotBase):
         sort_dict = {}
         sort_types = ["asc", "desc"]
 
-        with self.screen_manager.screenshot_context() as screenshot_img:
+        with self.image_utils.take_and_use_screenshot() as screenshot_img:
             resized_img = self.resizer.resize_img(screenshot_img)
             for sort_type in sort_types:
                 coords, target_color = self.get_color_coords(f"sort_{sort_type}")
@@ -261,7 +271,7 @@ class CheckBase(BotBase):
                     return None
 
                 # Retrieve color at the specified location
-                color = self.color_utils.get_color_at_location(coords)
+                color = self.color_utils.get_color_at_location(resized_img, coords)
                 sort_dict[sort_type] = color
 
         # Compare colors and determine sort status
@@ -289,12 +299,14 @@ class CheckBase(BotBase):
             "upgrade_after_match": "upgrade_after_match",
             "sort_asc": "sort_asc",
             "sort_desc": "sort_desc",
-            "add_to_hand": "add_hand",
+            "add_to_hand": "add_to_hand",
+            "remove_from_hand": "remove_from_hand",
             "missing_slots_start": "missing_slots_start",
             "missing_slots_step": "missing_slots_step",
             "claim_event": "claim_event",
             "double_check": "double_check",
             "is_fusing": "is_fusing",
             "is_servicing": "is_servicing",
+            "reset_hand": "reset_hand",
         }
         self.check_map.update(club_checks)

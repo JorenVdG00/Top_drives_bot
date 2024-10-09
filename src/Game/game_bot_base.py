@@ -11,9 +11,12 @@ class GameBotBase(BotBase):
         self.actions = ActionBase()
         self.checks = CheckBase()
         self.bot_state = None
+        self.stop_event = None
+
 
     def go_to_event_page(self):
         self.actions.tap_home()
+        time.sleep(0.5)
         self.actions.tap_events()
         
 
@@ -63,10 +66,12 @@ class GameBotBase(BotBase):
             time.sleep(3)
 
         self.actions.tap_accept_skip()
-        for _ in range(5):
+        for _ in range(3):
             self.actions.tap_skip_match()
+            time.sleep(1)
         if self.checks.check_upgrade_after_match():
             self.actions.tap_upgrade_after_match()
+        time.sleep(1)
 
 
     def fix_after_go_problem(self):

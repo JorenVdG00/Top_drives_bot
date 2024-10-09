@@ -47,7 +47,9 @@ class GameBotClub(GameBotBase):
         """
         self.logger.debug("Going to club page")
         self.go_to_event_page()
+        time.sleep(5)
         self.claim_event()
+        time.sleep(0.5)
         self.actions.tap_clubs()
         
 
@@ -66,33 +68,50 @@ class GameBotClub(GameBotBase):
         # Assign the first request count (req1_count) and initialize req2_count as None
         req1_count = req_list[0]
         req2_count = req_list[1] if len(req_list) > 1 else None
-
+        time.sleep(0.5)
+        # Switch to the first request
         self.actions.tap_req_tab()
-
+        time.sleep(1)
         # If there's a second request, handle accordingly
         if req2_count is not None:
             if req1_count + req2_count > 5:
                 # When the combined car count exceeds 5
                 self.actions.tap_req_1()
+                time.sleep(0.5)
                 self.actions.tap_req_2()
-
+                time.sleep(0.5)
+                self.actions.tap_req_tab()
+                time.sleep(0.5)
                 # Fill the second request first
                 self.add_from_garage(req2_count)
-
+                time.sleep(1)
                 # Go back and switch to the first request to fill the remaining slots
                 self.actions.tap_req_tab()
+                time.sleep(0.5)
                 self.actions.tap_req_2()
-                self.add_from_garage(5 - req2_count, is_first=False)
+                time.sleep(0.5)
+                self.actions.tap_req_tab()
+                time.sleep(0.5)
+                self.add_from_garage(5 - req2_count)
             else:
                 # When combined car count is 5 or fewer
                 self.actions.tap_req_1()
+                time.sleep(0.5)
+                self.actions.tap_req_tab()
+                time.sleep(0.5)
                 self.add_from_garage(req1_count)
+                time.sleep(0.5)
 
                 # Switch to the second request
                 self.actions.tap_req_tab()
+                time.sleep(1)
                 self.actions.tap_req_1()
+                time.sleep(0.5)
                 self.actions.tap_req_2()
-                self.add_from_garage(req2_count, is_first=False)
+                time.sleep(0.5)
+                self.actions.tap_req_tab()
+                time.sleep(0.5)
+                self.add_from_garage(req2_count)
         else:
             # Single request handling
             self.add_from_garage(req1_count)
@@ -118,7 +137,7 @@ class GameBotClub(GameBotBase):
 
         # Interact with the car
         self.actions.tap_garage_car(x, y)
-
+        time.sleep(0.5)
         # Check if the car can be added to hand
         can_add = self.checks.check_add_to_hand()
         is_fusing = self.checks.check_is_fusing()
@@ -127,6 +146,7 @@ class GameBotClub(GameBotBase):
             return True
         else:
             self.actions.tap_exit_car()
+            time.sleep(0.5)
             return False
 
     def add_from_garage(self, number_of_cars: int, start_spot: int = 1) -> bool:
@@ -151,6 +171,7 @@ class GameBotClub(GameBotBase):
         cars_added = 0
 
         while cars_added < number_of_cars:
+            time.sleep(0.5)
             # Try to add car from the garage to the hand
             if self.add_car_to_hand(start_spot):
                 cars_added += 1
@@ -183,18 +204,19 @@ class GameBotClub(GameBotBase):
             bool: True if rewards were claimed, False otherwise.
         """
         if self.checks.check_club_rewards():
+            self.logger.debug("Claiming club rewards...")
             self.actions.tap_claim_club_reward()
             self.remove_active_event()
             return True
         return False
 
     def play_active_event(self) -> bool:
-        while self.played_matches < 32:
+        while self.played_matches < 34:
             if self.claim_club_rewards():
                 return False
             if self.checks.check_go_to_club():
                 self.actions.tap_play_club()
-            if self.checks.check_play_in_club():
+            if self.checks.check_play_in_club_page():
                 self.actions.tap_play_in_club()
                 time.sleep(0.5)
                 if self.tap_go_and_play():
@@ -202,6 +224,8 @@ class GameBotClub(GameBotBase):
                 else:
                     self.club_status = "problem"
                     return False
+            else:
+                return False
         self.club_status = "Maxed out"
         return True
 
@@ -217,10 +241,13 @@ class GameBotClub(GameBotBase):
         self.logger.debug("Tapping GO-BUTTON and checking for problems")
 
         self.actions.tap_go()
+        time.sleep(4)
         if self.checks.check_play_after_go():
+            
             self.play_match()
             return True
         else:
+            time.sleep(1)
             self.problem_fixer.fix_after_go_problem()
             return self.problem_fixer.test_and_play_go()
 
@@ -266,10 +293,12 @@ class GameBotClub(GameBotBase):
                     return False
 
             elif go_button_color == "RED":
+                self.logger.debug("fixing Red-BUTTON")
                 self.tap_red_go_button()
                 continue
 
             elif go_button_color == "GRAY":
+                self.logger.debug("fixing GRAY-BUTTON")
                 self.tap_gray_go_button()
                 continue
 
@@ -279,49 +308,85 @@ class GameBotClub(GameBotBase):
 
     def play_match(self):
         self.actions.tap_play_after_go()
-        time.sleep(0.5)
-        self.actions.swipe_cars_to_slots_in_match()
-        time.sleep(0.5)
+        time.sleep(4)
+        # self.actions.swipe_cars_to_slots_in_match()
+        self.logger.debug("CHecking for reset hand")
+        while self.checks.check_reset_hand():
+            time.sleep(3)
+            self.logger.debug("swiping cars to slots in match")
+            self.actions.swipe_cars_to_slots_in_match()
+            time.sleep(2)
         self.skip_match()
+        for _ in range(2):
+            self.actions.tap_back_club()
+            time.sleep(1)
+
 
     def fix_missing_slots(self):
         missing_slots = self.checks.check_missing_slots()
         req_list = self.active_event["req_list"]
-        if sum(req_list) > 5:
-            if req_list[1] < min(missing_slots):
-                self.actions.tap_req_tab()
-                self.actions.tap_req_1()
-                self.add_from_garage(len(missing_slots))
-            elif req_list[1] > max(missing_slots):
-                self.actions.tap_req_tab()
-                self.actions.tap_req_1()
-                self.actions.tap_req_2()
-                self.add_from_garage(len(missing_slots))
+        if len(missing_slots) > 0:
+            if sum(req_list) > 5:
+                if req_list[1] < min(missing_slots):
+                    self.actions.tap_req_tab()
+                    time.sleep(0.5)
+                    self.actions.tap_req_1()
+                    time.sleep(0.5)
+                    self.actions.tap_req_tab()
+                    time.sleep(0.5)
+                    self.add_from_garage(len(missing_slots))
+                elif req_list[1] > max(missing_slots):
+                    self.actions.tap_req_tab()
+                    time.sleep(0.5)
+                    self.actions.tap_req_1()
+                    time.sleep(0.5)
+                    self.actions.tap_req_2()
+                    time.sleep(0.5)
+                    self.actions.tap_req_tab()
+                    time.sleep(0.5)
+                    self.add_from_garage(len(missing_slots))
+                else:
+                    under_req2 = [x for x in missing_slots if x < req_list[1]]
+                    self.actions.tap_req_tab()
+                    time.sleep(0.5)
+                    self.actions.tap_req_1()
+                    time.sleep(0.5)
+                    self.actions.tap_req_2()
+                    time.sleep(0.5)
+                    self.actions.tap_req_tab()
+                    time.sleep(0.5)
+                    self.add_from_garage(len(under_req2))
+
+                    self.actions.tap_req_tab()
+                    time.sleep(0.5)
+                    self.actions.tap_req_2()
+                    time.sleep(0.5)
+                    self.actions.tap_req_tab()
+                    time.sleep(0.5)
+                    self.add_from_garage(len(missing_slots) - len(under_req2))
+
             else:
-                under_req2 = [x for x in missing_slots if x < req_list[1]]
-                self.actions.tap_req_tab()
-                self.actions.tap_req_1()
-                self.actions.tap_req_2()
-                self.add_from_garage(len(under_req2))
+                if req_list[1] == 0:
+                    self.actions.tap_req_tab()
+                    self.add_from_garage(len(missing_slots))
+                else:
+                    self.actions.tap_req_tab()
+                    under_req1 = [x for x in missing_slots if x < req_list[0]]
+                    self.actions.tap_req_1()
+                    time.sleep(0.5)
+                    self.actions.tap_req_tab()
+                    time.sleep(0.5)
+                    self.add_from_garage(len(under_req1))
 
-                self.actions.tap_req_tab()
-                self.actions.tap_req_2()
-                self.add_from_garage(len(missing_slots) - len(under_req2))
-
-        else:
-            if len(req_list) == 1:
-                self.actions.tap_req_1()
-                self.add_from_garage(len(missing_slots))
-            else:
-                self.actions.tap_req_tab()
-                under_req1 = [x for x in missing_slots if x < req_list[0]]
-                self.actions.tap_req_1()
-                self.add_from_garage(len(under_req1))
-
-                self.actions.tap_req_tab()
-                self.actions.tap_req_1()
-                self.actions.tap_req_2()
-                self.add_from_garage(len(missing_slots) - len(under_req1))
+                    self.actions.tap_req_tab()
+                    time.sleep(0.5)
+                    self.actions.tap_req_1()
+                    time.sleep(0.5)
+                    self.actions.tap_req_2()
+                    time.sleep(0.5)
+                    self.actions.tap_req_tab()
+                    time.sleep(0.5)
+                    self.add_from_garage(len(missing_slots) - len(under_req1))
 
         # if len(missing_slots) > 0:
 
@@ -354,6 +419,7 @@ class GameBotClub(GameBotBase):
 class ProblemFixer:
     def __init__(self, game_bot: GameBotClub):
         self.game = game_bot
+        self.logger = self.game.logger
         
     # GET PROBLEMS
     def get_go_problem(self):
@@ -365,9 +431,10 @@ class ProblemFixer:
     # AFTER GO
     def fix_after_go_problem(self):
         problem = self.get_go_problem()
-
+        time.sleep(1)
         # Random_tap to get out of problem_screen
-        self.game.actions.tap_go()
+        self.game.actions.close_problem_after_go()
+        time.sleep(0.5)
 
         if problem == "EVENT_ENDED":
             self.fix_event_ended()
@@ -389,7 +456,9 @@ class ProblemFixer:
         test_loops = 0
         while test_loops < 5:
             self.game.actions.tap_go()
+            time.sleep(4)
             if self.game.checks.check_play_after_go():
+                time.sleep(0.5)
                 self.game.play_match()
                 return True
             else:
@@ -417,8 +486,11 @@ class ProblemFixer:
 
     def fix_reqs(self):
         self.game.actions.unswipe_slots()
+        
+        self.logger.debug("req_list: " + str(self.game.active_event["req_list"]))
         req_list = self.game.active_event["req_list"]
-        self.game.fill_hand_slots(req_list)
+        # self.game.fill_hand_slots(req_list)
+        self.game.fix_missing_slots()
 
     # GO COLOR PROBLEMS
 
@@ -433,6 +505,7 @@ class ProblemFixer:
 class EventPicker:
     def __init__(self, game_bot: GameBotClub):
         self.game = game_bot
+        self.logger = self.game.logger
         self.extractor = ExtractorClub(self.game)
         self.best_event = {"name": None, "score": 20000, "number": 0}
         self.current_number = 0
@@ -446,29 +519,50 @@ class EventPicker:
 
     def find_worthy_event(self):
         number = 0
-
+        play_best = False
         while self.game.active_event == None:
-            if number > 3:
+            if self.game.stop_event.is_set():
+                return False
+            with self.game.screen_manager.screenshot_context() as screenshot:
+                if not self.game.checks.check_info_icon(screenshot) and self.game.checks.check_exit_info(screenshot):
+                    self.game.actions.tap_exit_info()
+                    
+            if play_best:
+                number = self.best_event["number"]
+            if number > 2:
                 self.game.actions.swipe_up_clubs(number // 3)
-            self.game.actions.tap_club_event((number % 3) + 1)
+                self.logger.debug(f"swiped up {number // 3} times")
+                
+            self.logger.debug(f"Tapping event {number}")
+            while not self.game.checks.check_go_to_club():
+                self.game.actions.tap_club_event((number % 3) + 1)
+                time.sleep(0.5)
+                self.game.claim_club_rewards()
+            
             event = self.evaluate_club_event()
-            if event != False:
+            if event != False or play_best:
                 self.game.set_active_event(event)
+                time.sleep(0.5)
                 has_active = self.try_club()
                 if has_active:
                     # self.set_active_event(event)
                     return True
                 else:
+                    play_best = False
                     self.game.remove_active_event()
             # NOT WORTHY EVENT
-            if number == 31:
+            if number == 12:
+                play_best = True
                 number = 0
+                self.game.go_to_club_page()
             else:
                 number += 1
+            self.game.actions.tap_back_club()
+
 
     def evaluate_club_event(self):
         pick_score, extracted_data = self.extractor.evaluate_club_pick()
-        req_list = self.extractor.get_req_list()
+        req_list = self.extractor.get_req_list(extracted_data)
 
         event = {
             "name": extracted_data["name"],
@@ -487,12 +581,12 @@ class EventPicker:
 
     def try_club(self) -> bool:
         self.game.actions.tap_play_club()
-        time.sleep(0.5)
+        time.sleep(2)
 
         # Checking play-button is clickable in club-event
-        if self.game.checks.check_play_in_club():
+        if self.game.checks.check_play_in_club_page():
             self.game.actions.tap_play_in_club()
-            time.sleep(0.5)
+            time.sleep(2)
             self.game.set_sort("ASC")
             if self.game.tap_go_and_play():
                 return True
@@ -500,35 +594,45 @@ class EventPicker:
                 return False
             
         else:
-            self.game.actions.tap_back()
+            self.game.go_to_club_page()
             return False
 
 
 class ClubBot(GameBotClub):
     def __init__(self):
         super().__init__()
+        self.extractor = ExtractorClub(self)
         self.bot_status = "Null"
         self.bot_running = False
         
     def play_clubs(self, stop_event: threading.Event):
         self.stop_event = stop_event
-        active = self.active_event
         
+        self.logger.debug("Club-bot started")
         self.go_to_club_page()
+        
+        
+        time.sleep(2)
+        
         self.claim_club_rewards()
+        if self.active_event == None and self.checks.check_go_to_club():
+            self.actions.tap_play_club()
+            self.active_event = self.extractor.extract_necessary_club_info_in_event()
+            
         while True:
             if self.stop_event.is_set():
-                self.logger.debug("Club-bot stopped")
                 break
-            while active:
+            while self.active_event:
                 if self.claim_club_rewards():
                     break
-                
+                if self.stop_event.is_set():
+                    self.logger.debug("Club-bot stopped")
+                    break
                 if self.active_event:
                     # PLAY CLUBS TILL MAXED|PROBLEM|END
                     if not self.play_active_event():
                         active = False
-                        
+                        self.go_to_club_page()
             if self.picker.find_worthy_event():
                 continue
         

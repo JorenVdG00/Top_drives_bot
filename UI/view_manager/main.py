@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QDialog
-from main_window import MainWindow
-from config_check import ConfigDialog, check_config  # Import the config check functions and dialog
+from UI.view_manager.main_window import MainWindow
+from UI.view_manager.config_check import ConfigDialog, check_config  # Import the config check functions and dialog
 
 def main():
     app = QApplication(sys.argv)

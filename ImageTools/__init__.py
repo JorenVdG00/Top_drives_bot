@@ -7,8 +7,6 @@ from config import TRACK_NAMES_PATH
 # Load environment variables
 load_dotenv()
 
-# Set up Tesseract path
-pytesseract.pytesseract.tesseract_cmd = os.getenv('TESSERACT_PATH')
 
 # Load track names and make them available throughout the package
 track_names = set()

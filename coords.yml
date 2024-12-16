@@ -1,0 +1,753 @@
+
+coordinates:
+  box_coords:
+    # BASICS
+    - name: "home"
+      x1: 940
+      y1: 20
+      x2: 1030
+      y2: 115
+    - name: "back"
+      x1: 40
+      y1: 50
+      x2: 80
+      y2: 90
+    - name: "events"
+      x1: 920
+      y1: 280
+      x2: 1280
+      y2: 470
+    - name: "go_button"
+      x1: 1930
+      y1: 1050
+      x2: 2000
+      y2: 1080
+    - name: "close_problem_go"
+      x1: 220
+      y1: 800
+      x2: 1050
+      y2: 890
+
+    - name: "play_after_go"
+      x1: 1200
+      y1: 850
+      x2: 1500
+      y2: 900
+    - name: "upgrade_after_match"
+      x1: 860
+      y1: 1050
+      x2: 880
+      y2: 1060
+
+    #SORTS
+    - name: "sort_button"
+      x1: 1966
+      y1: 163
+      x2: 1966
+      y2: 163
+    - name: "sort_rq"
+      x1: 110
+      y1: 560
+      x2: 110
+      y2: 560
+
+
+    #CARS&SLOTS
+    - name: "ingame_car1"
+      x1: 490
+      y1: 1110
+      x2: 520
+      y2: 1150
+    - name: "ingame_car2"
+      x1: 880
+      y1: 1110
+      x2: 920
+      y2: 1150
+    - name: "ingame_car3"
+      x1: 1280
+      y1: 1110
+      x2: 1300
+      y2: 1150
+    - name: "ingame_car4"
+      x1: 1560
+      y1: 1110
+      x2: 1600
+      y2: 1150
+    - name: "ingame_car5"
+      x1: 1900
+      y1: 1110
+      x2: 1930
+      y2: 1150
+    - name: "ingame_slot1"
+      x1: 200
+      y1: 700
+      x2: 300
+      y2: 800
+    - name: "ingame_slot2"
+      x1: 610
+      y1: 700
+      x2: 700
+      y2: 800
+    - name: "ingame_slot3"
+      x1: 1050
+      y1: 700
+      x2: 1150
+      y2: 800
+    - name: "ingame_slot4"
+      x1: 1460
+      y1: 700
+      x2: 1570
+      y2: 800
+    - name: "ingame_slot5"
+      x1: 1880
+      y1: 700
+      x2: 2000
+      y2: 800
+    - name: "reset_hand"
+      x1: 2100
+      y1: 40
+      x2: 2120
+      y2: 45
+
+    - name: "garage_1_1"
+      x1: 840
+      y1: 350
+      x2: 940
+      y2: 450
+    - name: "garage_2_1"
+      x1: 1420
+      y1: 350
+      x2: 1520
+      y2: 450
+    - name: "garage_3_1"
+      x1: 2000
+      y1: 350
+      x2: 2100
+      y2: 450
+    - name: "garage_1_2"
+      x1: 840
+      y1: 700
+      x2: 940
+      y2: 800
+    - name: "garage_2_2"
+      x1: 1420
+      y1: 700
+      x2: 1520
+      y2: 800
+    - name: "garage_3_2"
+      x1: 2000
+      y1: 700
+      x2: 2100
+      y2: 800
+
+    - name: "hand_1"
+      x1: 230
+      y1: 1120
+      x2: 250
+      y2: 1120
+    - name: "hand_2"
+      x1: 580
+      y1: 1120
+      x2: 600
+      y2: 1120
+    - name: "hand_3"
+      x1: 930
+      y1: 1120
+      x2: 950
+      y2: 1120
+    - name: "hand_4"
+      x1: 1280
+      y1: 1120
+      x2: 1300
+      y2: 1120
+    - name: "hand_5"
+      x1: 1630
+      y1: 1120
+      x2: 1650
+      y2: 1120
+
+    - name: "unswipe_to_car" #x2 is x-step for unswipe_slots
+      x1: 830
+      y1: 820
+      x2: 31
+      y2: 0
+    - name: "add_to_hand"
+      x1: 250
+      y1: 780
+      x2: 250
+      y2: 780
+   
+    - name: "exit_car"
+      x1: 1800
+      y1: 100
+      x2: 1800
+      y2: 100
+    - name: "unswipe_slots"
+      x1: 70
+      y1: 1010
+      x2: 390
+      y2: 1215
+    # RACE
+    - name: "skip"
+      x1: 1830
+      y1: 80
+      x2: 2000
+      y2: 130
+    - name: "skip_accept"
+      x1: 1280
+      y1: 780
+      x2: 1700
+      y2: 860
+
+    - name: "claim_event"
+      x1: 840
+      y1: 1000
+      x2: 845
+      y2: 1005
+
+    - name: "claim_prizes" #x1,y1 prizecard coords, x2,y2 step per card
+      x1: 195
+      y1: 413
+      x2: 415
+      y2: 264
+
+    # REQUIREMENTS
+    - name: "requirements_tab"
+      x1: 1140
+      y1: 150
+      x2: 1160
+      y2: 170
+    - name: "requirements_1"
+      x1: 1140
+      y1: 240
+      x2: 1160
+      y2: 270
+    - name: "requirements_2"
+      x1: 1140
+      y1: 390
+      x2: 1160
+      y2: 430
+
+    # EVENTS
+    - name: "play_event"
+      x1: 1700
+      y1: 1150
+      x2: 1800
+      y2: 1200
+    - name: "event_1"
+      x1: 840
+      y1: 400
+      x2: 1180
+      y2: 800
+    - name: "event_2"
+      x1: 1480
+      y1: 400
+      x2: 1890
+      y2: 800
+    - name: "event_3"
+      x1: 2000
+      y1: 400
+      x2: 2150
+      y2: 800
+
+    # CLUBS
+    - name: "clubs"
+      x1: 260
+      y1: 500
+      x2: 520
+      y2: 750
+    - name: "claim_clubs"
+      x1: 1400
+      y1: 1000
+      x2: 1450
+      y2: 1050
+
+    - name: "play_in_club" #play_button when in club
+      x1: 1350
+      y1: 1150
+      x2: 1350
+      y2: 1150
+    - name: "play_club" #play_button from club-page
+      x1: 1800
+      y1: 1180
+      x2: 2000
+      y2: 1220
+    - name: "club_event_1" #club_event 1 from club-page
+      x1: 1600
+      y1: 680
+      x2: 2000
+      y2: 825
+    - name: "club_event_2" #club_event 2 from club-page
+      x1: 1600
+      y1: 845
+      x2: 2000
+      y2: 990
+    - name: "club_event_3" #club_event 3 from club-page
+      x1: 1600
+      y1: 1010
+      x2: 2000
+      y2: 1155
+    - name: "back_club"
+      x1: 1600
+      y1: 170
+      x2: 1650
+      y2: 210
+    - name: "exit_info"
+      x1: 2070
+      y1: 940
+      x2: 2080
+      y2: 960
+
+
+
+  swipe_coords:
+    - name: "swipe_left_event"  #Swipe coords for swiping 1 event to the left
+      x1: 1700
+      y1: 1150
+      x2: 1800
+      y2: 1200
+    - name: "swipe_left_cars"  #Swipe coords for swiping 2 cars to the left
+      x1: 1600
+      y1: 300
+      x2: 495
+      y2: 400
+    - name: "swipe_up_clubs"  #Swipe coords for swiping 3 clubevents up
+      x1: 1600
+      y1: 1160
+      x2: 1600
+      y2: 670
+
+
+
+  color_coords:
+    #BASICS
+    #GO-BUTTON
+    - name: "blue_go"
+      x: 1900
+      y: 1070
+      color:
+        R: 36
+        G: 207
+        B: 216
+        A: 255
+    - name: "gray_go"
+      x: 1900
+      y: 1070
+      color:
+        R: 71
+        G: 90
+        B: 113
+        A: 255
+    - name: "red_go"
+      x: 1900
+      y: 1070
+      color:
+        R: 216
+        G: 40
+        B: 45
+        A: 255
+    - name: "after_go_unavailable"
+      x: 900
+      y: 680
+      color:
+        R: 255
+        G: 255
+        B: 255
+        A: 255
+    - name: "problem"
+      x: 1450
+      y: 750
+      color:
+        R: 51
+        G: 51
+        B: 51
+        A: 255
+
+    - name: "play_after_go"
+      x: 850
+      y: 870
+      color:
+        R: 28
+        G: 200
+        B: 215
+        A: 255
+    - name: "reset_hand"
+      x: 2137
+      y: 74
+      color:
+        R: 204
+        G: 204
+        B: 204
+        A: 255
+    
+    - name: "accept_skip"
+      x: 1290
+      y: 830
+      color:
+        R: 27
+        G: 199
+        B: 214
+        A: 255
+    - name: "refresh"
+      x: 2107
+      y: 44
+      color:
+        R: 90
+        G: 197
+        B: 159
+        A: 255
+    - name: "upgrade_after_match"
+      x: 1031
+      y: 178
+      color:
+        R: 0
+        G: 101
+        B: 239
+        A: 255
+
+    #SORT
+    - name: "sort_asc"
+      x: 1966
+      y: 163
+      color:
+        R: 255
+        G: 255
+        B: 255
+        A: 255
+    - name: "sort_desc"
+      x: 1966
+      y: 181
+      color:
+        R: 255
+        G: 255
+        B: 255
+        A: 255
+
+
+    # SLOTS
+    - name: "add_to_hand"
+      x: 280
+      y: 805
+      color:
+        R: 102
+        G: 102
+        B: 102
+        A: 255
+    - name: "remove_from_hand"
+      x: 280
+      y: 780
+      color:
+        R: 255
+        G: 255
+        B: 255
+        A: 255
+    - name: "empty_garage_slot"
+      x: 900
+      y: 430
+      color:
+        R: 92
+        G: 148
+        B: 177
+        A: 255
+    - name: "empty_garage_slot_step"
+      x: 500
+      y: 370
+      color:
+        R: 92
+        G: 148
+        B: 177
+        A: 255
+    
+    - name: "missing_slots_start"
+      x: 230
+      y: 1120
+      color:
+        R: 125
+        G: 142
+        B: 176
+        A: 255
+    - name: "missing_slots_step"
+      x: 350
+      y: 1120
+      color:
+        R: 125
+        G: 142
+        B: 176
+        A: 255
+    - name: "repair_slots_start"
+      x: 200
+      y: 1085
+      color:
+        R: 255
+        G: 74
+        B: 74
+        A: 255
+    - name: "repair_slots_step"
+      x: 350
+      y: 1085
+      color:
+        R: 255
+        G: 74
+        B: 74
+        A: 255
+    - name: "is_fusing"
+      x: 1925
+      y: 575
+      color:
+        R: 250
+        G: 173
+        B: 23
+        A: 255
+    - name: "is_servicing"
+      x: 1880
+      y: 845
+      color:
+        R: 255
+        G: 74
+        B: 74
+        A: 255
+
+    # EVENTS
+    - name: "ticket"
+      x: 890
+      y: 1150
+      color:
+        R: 248
+        G: 171
+        B: 23
+        A: 255
+    - name: "empty_ticket"
+      x: 890
+      y: 1150
+      color:
+        R: 146
+        G: 146
+        B: 146
+        A: 255
+    - name: "claim_event"
+      x: 840
+      y: 1000
+      color:
+        R: 28
+        G: 207
+        B: 215
+        A: 255
+    - name: "double_check"
+      x: 1630
+      y: 300
+      color:
+        R: 255
+        G: 255
+        B: 255
+        A: 255
+
+    #PRIZES
+    - name: "prize_star_1"
+      x: 1910
+      y: 200
+      color:
+        R: 242
+        G: 165
+        B: 23
+        A: 255
+    - name: "prize_star_2"
+      x: 2000
+      y: 200
+      color:
+        R: 242
+        G: 165
+        B: 23
+        A: 255
+    - name: "prize_star_3"
+      x: 2090
+      y: 200
+      color:
+        R: 242
+        G: 165
+        B: 23
+        A: 255
+    - name: "prize_card_start"
+      x: 195
+      y: 413
+      color:
+        R: 239
+        G: 90
+        B: 36
+        A: 255
+    - name: "prize_card_step"
+      x: 415
+      y: 264
+      color:
+        R: 239
+        G: 90
+        B: 36
+        A: 255
+
+    #UNAVAILABLE
+    - name: "event_1"
+      x: 1080
+      y: 266
+      color:
+        R: 112
+        G: 112
+        B: 112
+        A: 255
+    - name: "event_2"
+      x: 1700
+      y: 266
+      color:
+        R: 112
+        G: 112
+        B: 112
+        A: 255
+    - name: "event_3"
+      x: 2180
+      y: 266
+      color:
+        R: 112
+        G: 112
+        B: 112
+        A: 255
+    - name: "unavailable_event"
+      x: 1120
+      y: 290
+      color:
+        R: 112
+        G: 112
+        B: 112
+        A: 255
+    - name: "unavailable_last_visible"
+      x: 2195
+      y: 250
+      color:
+        R: 112
+        G: 112
+        B: 112
+        A: 255
+    - name: "no_last_visible"
+      x: 2195
+      y: 250
+      color:
+        R: 89
+        G: 147
+        B: 180
+        A: 255
+    - name: "available_event_1"
+      x: 1080
+      y: 250
+      color:
+        R: 24
+        G: 24
+        B: 24
+        A: 255
+    - name: "available_event_2"
+      x: 1700
+      y: 250
+      color:
+        R: 24
+        G: 24
+        B: 24
+        A: 255
+    - name: "available_event_3"
+      x: 2180
+      y: 250
+      color:
+        R: 24
+        G: 24
+        B: 24
+        A: 255
+
+    # REQS
+    - name: "event_reqs_not_met"
+      x: 645
+      y: 288
+      color:
+        R: 67
+        G: 67
+        B: 67
+        A: 255
+
+    #CLUBS
+    - name: "club_rewards"
+      x: 1430
+      y: 1050
+      color:
+        R: 25
+        G: 200
+        B: 212
+        A: 255
+    - name: "play_in_club"
+      x: 1350
+      y: 1144
+      color:
+        R: 41
+        G: 218
+        B: 220
+        A: 255
+    - name: "go_to_club"
+      x: 1700
+      y: 1160
+      color:
+        R: 255
+        G: 196
+        B: 79
+        A: 255
+    - name: "info_icon"
+      x: 1628
+      y: 167
+      color:
+        R: 255
+        G: 255
+        B: 255
+        A: 255     
+    - name: "exit_info"
+      x: 2075
+      y: 94
+      color:
+        R: 24
+        G: 29
+        B: 240
+        A: 255
+    - name: "last_club"
+      x: 2202
+      y: 1210
+      color:
+        R: 150
+        G: 151
+        B: 155
+        A: 255 
+
+
+  crop_coords:
+    # BASICS
+    - category: go_button_problem
+      text_coords: (110, 450, 2100, 690)
+
+
+
+    # CLUBS
+    - category: club_info
+      name: (1680, 140, 2180, 210)
+      event_type: (1760, 210, 2190, 260)
+      time_left: (1850, 260, 2180, 300)
+      rq: (2000, 365, 2180, 405)
+      reqs1: (1850, 405, 2180, 455)
+      reqs2: (1850, 455, 2180, 505)
+      player_amount:
+        players_left: (1580, 570, 1750, 620)
+        players_right: (2025,570, 2195, 620)
+      score:
+        score_left: (1770, 780, 1870, 830)
+        score_right: (1900, 780, 2000, 830)
+      weight: (1800, 940, 2000, 1040)
+
+    - category: club_names
+      club_event_1: (1580, 680, 2140, 825)
+      club_event_2: (1580, 845, 2140, 990)
+      club_event_3: (1580, 1010, 2140, 1155)
+
+    - category: in_event_club_info
+      name: (55, 200, 750, 260)
+      rq: (310,270, 470, 310)
+      reqs1: (250, 320, 550, 380)
+      reqs2: (250, 380, 550, 440)

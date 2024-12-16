@@ -8,7 +8,6 @@ ImageTools/utils/IMG/*
 ImageTools/Clubs/tst/*
 ImageTools/Clubs/tst
 
-
 UI/bot_manager/temp
 UI/bot_screenshots/*
 ZZZZpractice/bot_screenshots/*
@@ -19,7 +18,18 @@ image_reader/tests/*
 database/temp/*
 ZZZZpractice/*
 ZZZZpractice
+Z_FIND_COORDS_IMG/
 
+
+#NOT YET IMPLEMENTED
+scraper/
+database/
+
+
+#TEST FILES
+
+get_coords.py
+test_pytesseract.py
 
 **__pycache__/
 .idea

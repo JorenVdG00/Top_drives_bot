@@ -1,17 +1,21 @@
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QTabWidget, QLabel, QTextEdit, QAction
 from UI.view_manager.terminal_tab import TerminalTab
-# from UI.view_manager.event_tab import EventTab
-# from UI.view_manager.car_assignment_tab_v2 import CarAssignmentTab
+# from UI.view_manager.Not_YET_USING.event_tab import EventTab
+# from UI.view_manager.Not_YET_USING.car_assignment_tab_v2 import CarAssignmentTab
+from UI.view_manager.club_tab import ClubTab
 from UI.view_manager.config_check import ConfigDialog
 from UI.view_manager.worker import Worker
 from dotenv import load_dotenv
 from config import adb_ip, adb_port, ADB_SERIAL_CMD
+from utils.adb import calculate_screen_size, adb_connect
+
 import os
 load_dotenv()
 
-
-
-#!!!!!!!!! calculate_screensize
+#!!TESTS
+from game.general.general_actions import swipe_left_cars
+from game.general.general_checks import get_nr_available_cars
+from game.clubs.club_actions import swipe_up_clubs
 
 
 
@@ -23,6 +27,8 @@ class MainWindow(QMainWindow):
         self.setupConnections()
 
     def initUI(self):
+        adb_connect()
+        calculate_screen_size()
         self.setWindowTitle('Game Bot Manager')
         self.setGeometry(100, 100, 800, 600)
 
@@ -43,14 +49,27 @@ class MainWindow(QMainWindow):
         test_action = QAction('Test ADB', self)
         test_action.triggered.connect(self.show_test_dialog)
         test_menu.addAction(test_action)
+        
+        test_swipe_left_cars = QAction('Test Swipe Left Cars', self)
+        test_swipe_left_cars.triggered.connect(self.test_swipe_left_cars)
+        test_menu.addAction(test_swipe_left_cars)
+        
+        test_swipe_up_clubs = QAction('Test Swipe up clubs', self)
+        test_swipe_up_clubs.triggered.connect(self.test_swipe_up_clubs)
+        test_menu.addAction(test_swipe_up_clubs)
+        
+        test_available_cars = QAction('Test Available Cars', self)
+        test_available_cars.triggered.connect(self.test_available_cars)
+        test_menu.addAction(test_available_cars)
 
         # Add tabs
         terminal_tab = TerminalTab(self.worker, self)
+        club_tab = ClubTab(self)
         # event_tab = EventTab(self)
         # car_assignment_tab = CarAssignmentTab(self)
 
         tabs.addTab(terminal_tab, "Terminal Functions")
-        # tabs.addTab(event_tab, "Event Functions")
+        tabs.addTab(club_tab, "Event Functions")
         # tabs.addTab(car_assignment_tab, "Car Assignment")
 
         # Status and log
@@ -84,7 +103,7 @@ class MainWindow(QMainWindow):
         # Log messages to the log area
         self.log_area.append(message)
 
-    def open_config_dialog(self):
+    def open_config_dialog(self):   
         config_dialog = ConfigDialog()
         config_dialog.exec_()
 
@@ -94,3 +113,21 @@ class MainWindow(QMainWindow):
         adb_path_env = os.getenv('ADB_PATH')
         self.log(f"Connecting to {adb_ip_env}:{adb_port_env}\n{adb_path_env}")
         self.log(f"2.0. Connecting to {adb_ip}:{adb_port}\n{ADB_SERIAL_CMD}")
+
+    
+    def test_swipe_left_cars(self):
+        self.log("Swiping left cars...")
+        
+        swipe_left_cars()
+        self.log("Swiping left cars completed.")
+        
+    def test_swipe_up_clubs(self):
+        self.log("Swiping up clubs...")
+        
+        swipe_up_clubs(1)
+        self.log("Swiping up clubs completed.")
+        
+    def test_available_cars(self):
+        self.log("Checking available cars...")
+        available_amount = get_nr_available_cars()
+        self.log("Available cars: " + str(available_amount))

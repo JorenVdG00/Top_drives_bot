@@ -1,0 +1,5 @@
+{
+    "adb_ip": "127.0.0.1",
+    "adb_port": 5555,
+    "adb_serial": "adb -s"
+}

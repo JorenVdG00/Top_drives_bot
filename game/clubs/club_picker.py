@@ -117,7 +117,8 @@ from game.clubs.club_actions import (
     tap_exit_info,
     swipe_up_clubs,
     tap_play_club,
-    tap_play_in_club
+    tap_play_in_club,
+    tap_back_club
 )
 from game.clubs.club_problem_fixer import fix_problems
 
@@ -164,6 +165,7 @@ def pick_club_event(club_state: ClubState, stop_event):
             if event_found:
                 event_entered = True
         else:
+            tap_back_club()
             event_number += 1
         if event_number > 20:
             return False

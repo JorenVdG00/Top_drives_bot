@@ -4,7 +4,7 @@ from datetime import datetime
 from PIL import Image
 from contextlib import contextmanager
 from config import BOT_SCREENSHOTS_DIR, ADB_SERIAL_CMD, logger
-from functions.general_functions import capture_screenshot, remove_screenshot
+# from functions.general_functions import capture_screenshot, remove_screenshot
 from utils.os_utils import set_cwd, create_dir_if_not_exists
 from typing import Optional
 

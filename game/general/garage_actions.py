@@ -12,6 +12,8 @@ from game.general.general_checks import (
     check_is_servicing,
     check_missing_slots,
 )
+from game.clubs.club_checks import check_club_rewards
+from utils.image_utils import screenshot_context
 
 
 def add_car_to_hand(tries: int = 0) -> bool:
@@ -53,6 +55,27 @@ def add_car_to_hand(tries: int = 0) -> bool:
         time.sleep(1)
         return False
 
+def check_garage_car_available() -> bool:
+    
+    """
+    Checks if there is a garage car available to be added to the hand.
+
+    Checks if car is able to be added to hand.
+    Checks if car is not being fused or serviced.
+
+    Returns:
+        bool: True if a car is available, False otherwise.
+    """
+    
+    with screenshot_context() as screenshot:
+        can_add = check_add_to_hand(screenshot)
+        is_fusing = check_is_fusing(screenshot)
+        is_servicing = check_is_servicing(screenshot)
+        
+    if can_add and not is_fusing and not is_servicing:
+        return True
+    else:
+        return False
 
 def add_from_garage(stop_event, number_of_cars: int, start_spot: int = 0) -> bool:
     """
@@ -65,6 +88,8 @@ def add_from_garage(stop_event, number_of_cars: int, start_spot: int = 0) -> boo
     Returns:
         bool: True if cars are successfully added, False if there are not enough missing slots or an error occurs.
     """
+    if check_club_rewards():
+        return False
     if stop_event.is_set():
         return False 
     # Check initial missing slots

@@ -14,7 +14,7 @@ load_dotenv()
 
 #!!TESTS
 from game.general.general_actions import swipe_left_cars
-from game.general.general_checks import get_nr_available_cars
+from game.general.general_checks import get_nr_available_cars, get_nav_title
 from game.clubs.club_actions import swipe_up_clubs
 
 
@@ -62,6 +62,9 @@ class MainWindow(QMainWindow):
         test_available_cars.triggered.connect(self.test_available_cars)
         test_menu.addAction(test_available_cars)
 
+        test_nav_title = QAction('Test Nav Title', self)
+        test_nav_title.triggered.connect(self.test_nav_title)
+        test_menu.addAction(test_nav_title)
         # Add tabs
         terminal_tab = TerminalTab(self.worker, self)
         club_tab = ClubTab(self)
@@ -131,3 +134,8 @@ class MainWindow(QMainWindow):
         self.log("Checking available cars...")
         available_amount = get_nr_available_cars()
         self.log("Available cars: " + str(available_amount))
+        
+    def test_nav_title(self):
+        self.log("Checking nav title...")
+        nav_title = get_nav_title()
+        self.log("Nav title: " + str(nav_title))

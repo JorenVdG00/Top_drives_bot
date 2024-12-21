@@ -31,6 +31,7 @@ def play_club_events(stop_event):
         # tap_back_club()
         time.sleep(1)
         club_state.set_active_event(event)
+        club_state.set_req_list(event['req_list'])
     
     while not stop_event.is_set():
         if claim_club_rewards():

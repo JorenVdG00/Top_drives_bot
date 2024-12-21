@@ -1,6 +1,7 @@
 import time
 from game.clubs.club_state import ClubState
 from game.general.navigator import go_to_club_page
+from game.clubs.club_checks import check_club_rewards
 from game.general.general_actions import unswipe_slots, tap_req_tab, tap_req_1, tap_req_2, tap_exit_after_go_problem
 from game.general.general_checks import check_missing_slots, get_nr_available_cars, check_repair_slots
 from game.general.garage_actions import add_from_garage
@@ -159,6 +160,8 @@ def fix_missing_slots(club_state: ClubState, stop_event) -> ClubState:
             succes = handle_five_or_fewer_slots(req_list, missing_slots, stop_event)
 
         if not succes:
+            if check_club_rewards():
+                return True
             if len(check_missing_slots()) == 0:
                 return True
             return False

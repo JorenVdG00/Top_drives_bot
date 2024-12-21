@@ -31,7 +31,8 @@ def extract_necessary_club_info_in_event() -> dict:
     screenshot_path = capture_screenshot()
     extracted_data = crop_and_read_category(screenshot_path, "in_event_club_info")
     fixed_data = fix_short_data(extracted_data)
-    req_list = get_req_list(extracted_data)
+    req_list = get_req_list(fixed_data)
+    logger.debug(f"req_list: {req_list}")
     fixed_data["req_list"] = req_list
     remove_screenshot(screenshot_path)
     return fixed_data

@@ -723,7 +723,8 @@ coordinates:
     - category: go_button_problem
       text_coords: (110, 450, 2100, 690)
 
-
+    - category: title_bar
+      title: (260, 20, 650, 105)
 
     # CLUBS
     - category: club_info

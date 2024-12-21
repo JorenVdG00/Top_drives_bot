@@ -425,7 +425,6 @@ def swipe_left_cars() -> bool:
     Swipe the cars to the left.
     """
     return swipe_and_hold_action("swipe_left_cars")
-#TODO add test_swipe_left_cars
 
 def unswipe_slots(slot_number: int = None) -> bool:
     """

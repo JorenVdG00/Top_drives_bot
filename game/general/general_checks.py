@@ -80,12 +80,15 @@ def check_sort(order: str, screenshot: Optional[str] = None) -> bool:
     return check_element(f"sort_{order}", screenshot)
 
 def check_is_fusing(screenshot: Optional[str] = None) -> bool:
+    """Check if a car is currently being fused."""
+    
     return check_element("is_fusing", screenshot)
 
 def check_is_servicing(screenshot: Optional[str] = None) -> bool:
+    """Check if a car is currently being serviced."""
     return check_element("is_servicing", screenshot)
 
-def check_add_to_hand() -> Optional[bool]:
+def check_add_to_hand(screenshot: Optional[str] = None) -> Optional[bool]:
     """
     Checks the presence of the 'add_to_hand' and 'remove_from_hand' elements
     in the current screenshot context.
@@ -99,7 +102,11 @@ def check_add_to_hand() -> Optional[bool]:
             - False if 'remove_from_hand' is found.
             - True if 'add_to_hand' is found and 'remove_from_hand' is not found.
     """
-    with screenshot_context() as screenshot:
+    if not screenshot:
+        with screenshot_context() as screenshot:
+            add_hand = check_element("add_to_hand", screenshot)
+            remove_hand = check_element("remove_from_hand", screenshot)
+    else:
         add_hand = check_element("add_to_hand", screenshot)
         remove_hand = check_element("remove_from_hand", screenshot)
 
@@ -276,3 +283,24 @@ def get_sort_status() -> Optional[str]:
     else:
         return "NONE"
 
+
+
+def get_nav_title() -> str:
+    """
+    Retrieves the current title of the navigation bar.
+
+    Returns:
+        str: the title of the navigation bar, or 'OTHER' if it doesn't match any of the
+             following options: My Cars, Home, Events, Overview.
+
+    """
+    title_options = ["My Cars", "Home", "Events", "Overview"]
+    with screenshot_context() as screenshot:
+        extracted_text = crop_and_read_image(    
+            screenshot, "title_bar", "title")
+        
+    for option in title_options:
+        if option.upper() in extracted_text.upper():
+            return option
+    return "OTHER"    
+    

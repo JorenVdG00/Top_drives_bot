@@ -149,7 +149,7 @@ def pick_club_event(club_state: ClubState, stop_event):
         swipe_up_to_club_event(event_number)
 
         # Taps the desired club event.
-        tap_club_event_number(event_number)
+        tap_club_event_number(event_number, stop_event)
         
         if stop_event.is_set():
             return False        
@@ -201,14 +201,16 @@ def swipe_up_to_club_event(event_number: int):
         logger.debug(f"swiped up {event_number // 3} times")
 
 
-def tap_club_event_number(event_number: int):
+def tap_club_event_number(event_number: int, stop_event):
     logger.debug(f"Tapping event {event_number}")
 
     while not check_go_to_club():
         tap_club_event(event_number % 3)
         time.sleep(0.5)
-        #! Maybe remove Not sure yet
-        claim_club_rewards()
+        if stop_event.is_set():
+            return False
+        # #! Maybe remove Not sure yet
+        # claim_club_rewards()
 
 
 

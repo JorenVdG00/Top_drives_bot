@@ -1,9 +1,10 @@
 import time
 from game.clubs.club_state import ClubState
-from game.general.navigator import go_to_club_page
+from game.general.general_game_bot import play_match
+from game.general.navigator import go_to_club_page, go_to_event_page
 from game.clubs.club_checks import check_club_rewards
-from game.general.general_actions import unswipe_slots, tap_req_tab, tap_req_1, tap_req_2, tap_exit_after_go_problem
-from game.general.general_checks import check_missing_slots, get_nr_available_cars, check_repair_slots
+from game.general.general_actions import unswipe_slots, tap_req_tab, tap_req_1, tap_req_2, tap_exit_after_go_problem, tap_home
+from game.general.general_checks import check_missing_slots, get_nr_available_cars, check_repair_slots, check_play_after_go, get_nav_title, check_reset_hand
 from game.general.garage_actions import add_from_garage
 
 
@@ -150,6 +151,10 @@ def fix_missing_slots(club_state: ClubState, stop_event) -> ClubState:
     missing_slots = check_missing_slots()
     req_list = club_state.req_list
 
+    nav_title = get_nav_title()
+    if nav_title == 'OVERVIEW':
+        return False
+    
     if not handle_req_tab_logic(req_list):
         return False
 
@@ -261,3 +266,38 @@ def split_additions_between_req_tabs(stop_event, req_threshold, missing_slots):
         return False
 
     return True
+
+
+def fix_unexpected_screens(stop_event, nav_title, expected_screen):
+    """Checks if the screen is expected and fixes it if not.
+    possibilities for expected: HOME, CLUB, EVENT"""
+    if stop_event.is_set():
+        return False
+    if nav_title == 'OTHER':
+        #CHECK IF PLAY AFTER GO then play match
+        
+        if check_play_after_go() or check_reset_hand():
+            play_match()
+            to_home_to_expected_screen(expected_screen)
+            return True
+        else:
+            for _ in range(3):
+                tap_home()
+                time.sleep(0.5)
+            nav_title = get_nav_title()
+            if nav_title == 'OTHER':
+                return False
+    to_home_to_expected_screen(expected_screen)
+    return True
+        
+        
+
+def to_home_to_expected_screen(expected_screen):
+    SCREENS = ['HOME', 'CLUB', 'EVENTS']
+    if (expected_screen not in SCREENS) or expected_screen == 'HOME':
+        tap_home()
+    elif expected_screen == 'CLUB':
+        go_to_club_page()
+    elif expected_screen == 'EVENTS':
+        go_to_event_page()
+    

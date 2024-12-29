@@ -26,6 +26,8 @@ def add_car_to_hand(tries: int = 0) -> bool:
     Returns:
         bool: True if the car is successfully added, False otherwise.
     """
+    if check_club_rewards():
+        return False
     # Swipe left after every 6 tries
     if tries % 6 == 0 and tries != 0:
         swipe_left_cars()
@@ -42,14 +44,19 @@ def add_car_to_hand(tries: int = 0) -> bool:
     # Interact with the car
     tap_garage_car(x, y)
     time.sleep(1)
-    # Check if the car can be added to hand
-    can_add = check_add_to_hand()
-    is_fusing = check_is_fusing()
-    is_servicing = check_is_servicing()
-    if can_add and not is_fusing and not is_servicing:
+    
+    if check_garage_car_available():
         tap_add_to_hand()
         time.sleep(1)
         return True
+    # # Check if the car can be added to hand
+    # can_add = check_add_to_hand()
+    # is_fusing = check_is_fusing()
+    # is_servicing = check_is_servicing()
+    # if can_add and not is_fusing and not is_servicing:
+    #     tap_add_to_hand()
+    #     time.sleep(1)
+    #     return True
     else:
         tap_exit_car()
         time.sleep(1)
@@ -88,8 +95,7 @@ def add_from_garage(stop_event, number_of_cars: int, start_spot: int = 0) -> boo
     Returns:
         bool: True if cars are successfully added, False if there are not enough missing slots or an error occurs.
     """
-    if check_club_rewards():
-        return False
+
     if stop_event.is_set():
         return False 
     # Check initial missing slots
@@ -103,6 +109,8 @@ def add_from_garage(stop_event, number_of_cars: int, start_spot: int = 0) -> boo
     cars_added = 0
 
     while cars_added < number_of_cars:
+        if check_club_rewards():
+            return False
         if stop_event.is_set():
             return False
         time.sleep(0.5)

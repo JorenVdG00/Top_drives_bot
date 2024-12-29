@@ -14,7 +14,7 @@ load_dotenv()
 
 #!!TESTS
 from game.general.general_actions import swipe_left_cars
-from game.general.general_checks import get_nr_available_cars, get_nav_title
+from game.general.general_checks import get_nr_available_cars, get_nav_title, check_is_fusing
 from game.clubs.club_actions import swipe_up_clubs
 
 
@@ -137,5 +137,5 @@ class MainWindow(QMainWindow):
         
     def test_nav_title(self):
         self.log("Checking nav title...")
-        nav_title = get_nav_title()
-        self.log("Nav title: " + str(nav_title))
+        nav_title = check_is_fusing()
+        self.log("is_fusing: " + str(nav_title))

@@ -491,8 +491,8 @@ coordinates:
         B: 74
         A: 255
     - name: "is_fusing"
-      x: 1925
-      y: 575
+      x: 1910
+      y: 590
       color:
         R: 250
         G: 173

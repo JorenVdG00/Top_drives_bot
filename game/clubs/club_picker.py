@@ -120,10 +120,10 @@ from game.clubs.club_actions import (
     tap_play_in_club,
     tap_back_club
 )
-from game.clubs.club_problem_fixer import fix_problems
+from game.clubs.club_problem_fixer import fix_problems, fix_unexpected_screens
 
 from game.general.general_actions import set_sort, tap_go
-from game.general.general_checks import get_go_button_color, check_play_after_go, get_after_go_problem
+from game.general.general_checks import get_go_button_color, check_play_after_go, get_after_go_problem, get_nav_title
 from game.general.general_game_bot import play_match
 from game.clubs.club_state import ClubState
 from ImageTools.extractors.extractor_club import evaluate_club_pick, extract_necessary_club_info_in_event
@@ -135,10 +135,22 @@ def pick_club_event(club_state: ClubState, stop_event):
     event_number = 0
     event_entered = False
     while event_entered == False:
+
+        nav_title = get_nav_title()
+        logger.debug(f"^pick_club_event^ NAV TITLE: {nav_title}")
+        if nav_title != "OVERVIEW":
+            logger.error(f"NAV TITLE: {nav_title}, Fixing unexpected screen")
+            fix_unexpected_screens(stop_event, nav_title, "CLUB")
         if stop_event.is_set():
             return False
         if claim_club_rewards():     # Taps the 'Exit Info' button if the screen is in the club-event info screen.
             return False
+        logger.debug("^pick_club_event^---- Check_go_to_club")
+        if check_go_to_club():
+            logger.debug("Already in a club")
+            setup_active_event(club_state)
+            return True
+
         check_and_exit_club_info()
 
         # Resets Event Number when still not in an event when last event is visible
@@ -208,10 +220,14 @@ def tap_club_event_number(event_number: int, stop_event):
         tap_club_event(event_number % 3)
         time.sleep(0.5)
         if stop_event.is_set():
-            return False
-        # #! Maybe remove Not sure yet
-        # claim_club_rewards()
-
+            return False        
+        claim_club_rewards()
+        nav_title = get_nav_title()
+        logger.debug(f"^pick_club_event^ NAV TITLE: {nav_title}")
+        if nav_title != "OVERVIEW":
+            logger.error(f"NAV TITLE: {nav_title}, Fixing unexpected screen")
+            fix_unexpected_screens(stop_event, nav_title, "CLUB")
+            time.sleep(1)
 
 
 def  evaluate_active_club_event():
@@ -265,7 +281,15 @@ def try_club(club_state: ClubState, stop_event):
         return False
     
     
-    
+def setup_active_event(club_state: ClubState):
+    tap_play_club()
+    time.sleep(1)
+    event = evaluate_active_club_event()
+    # tap_back_club()
+    time.sleep(1)
+    club_state.set_active_event(event)
+    club_state.set_req_list(event['req_list'])
+
     
 def try_club_event_first_time(club_state: ClubState, stop_event):
     if stop_event.is_set():

@@ -1,12 +1,13 @@
 import time
+from config import logger
 from game.clubs.club_state import ClubState
 
 from game.general.general_actions import tap_go, tap_back
-from game.general.general_checks import get_go_button_color, get_after_go_problem, check_play_after_go
+from game.general.general_checks import get_go_button_color, get_after_go_problem, check_play_after_go, get_nav_title
 from game.clubs.club_actions import claim_club_rewards, tap_play_club, tap_play_in_club, tap_back_club
 from game.clubs.club_checks import check_go_to_club, check_play_in_club_page
-from game.clubs.club_problem_fixer import fix_problems
-from game.clubs.club_picker import pick_club_event, evaluate_club_event, evaluate_active_club_event
+from game.clubs.club_problem_fixer import fix_problems, fix_unexpected_screens
+from game.clubs.club_picker import pick_club_event, evaluate_club_event, evaluate_active_club_event, setup_active_event
 from game.general.general_game_bot import play_match
 from game.general.navigator import go_to_club_page
 
@@ -25,13 +26,7 @@ def play_club_events(stop_event):
         club_state.reset_game_state()
         
     if check_go_to_club():
-        tap_play_club()
-        time.sleep(1)
-        event = evaluate_active_club_event()
-        # tap_back_club()
-        time.sleep(1)
-        club_state.set_active_event(event)
-        club_state.set_req_list(event['req_list'])
+        setup_active_event(club_state)
     
     while not stop_event.is_set():
         if claim_club_rewards():
@@ -47,6 +42,10 @@ def play_club_events(stop_event):
 
 def play_active_event(club_state: ClubState, stop_event):
     while club_state.played_matches < 34:
+        nav_title = get_nav_title()
+        if nav_title not in ('OVERVIEW', 'EVENTS'):
+            logger.error(f"NAV TITLE: {nav_title}, Fixing unexpected screen")
+            fix_unexpected_screens(stop_event, nav_title, 'CLUB')
         if stop_event.is_set():
             return club_state
         if claim_club_rewards():
@@ -68,7 +67,8 @@ def play_active_event(club_state: ClubState, stop_event):
             else:
                 club_state.add_played_match()
         else:
-            tap_back()
+            if nav_title == 'EVENTS':
+                tap_back()
                     
     club_state.set_club_status = 'Maxed out'
     return club_state
@@ -118,7 +118,9 @@ def tap_go_and_play():
 def find_and_start_new_event(club_state: ClubState, stop_event):
     if stop_event.is_set():
         return club_state
-    
+    if check_go_to_club():
+        setup_active_event(club_state)
+        return club_state
     
     if pick_club_event(club_state, stop_event):
         club_state.add_played_match()

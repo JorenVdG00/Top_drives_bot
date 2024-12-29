@@ -291,16 +291,16 @@ def get_nav_title() -> str:
 
     Returns:
         str: the title of the navigation bar, or 'OTHER' if it doesn't match any of the
-             following options: My Cars, Home, Events, Overview.
+             following options: My Cars, Home, Events, Overview, Options.
 
     """
-    title_options = ["My Cars", "Home", "Events", "Overview"]
+    title_options = ["My Cars", "Home", "Events", "Overview", "Options"]
     with screenshot_context() as screenshot:
         extracted_text = crop_and_read_image(    
             screenshot, "title_bar", "title")
         
     for option in title_options:
         if option.upper() in extracted_text.upper():
-            return option
+            return option.upper()
     return "OTHER"    
     

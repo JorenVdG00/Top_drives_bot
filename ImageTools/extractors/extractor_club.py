@@ -143,9 +143,9 @@ def evaluate_club_pick():
         pickscore = 2
     if weight > 1000:
         pickscore = 3
-    if left_winning and weight > 300 and left_score < 6000:
+    if left_winning and weight > 500 and left_score < 5000:
         pickscore = 4
-    if not left_winning and weight > 300 and right_score < 6000:
+    if not left_winning and weight > 500 and right_score < 5000:
         pickscore = 4
     if left_score < 4000 or right_score < 4000:
         pickscore = 5

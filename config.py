@@ -3,6 +3,7 @@ import json
 import pytesseract
 from dotenv import load_dotenv
 import logging
+from enum import Enum
 
 load_dotenv()
 
@@ -20,6 +21,11 @@ BASICS_DIR = os.path.join(BASE_DIR, "basics")
 UI_DIR = os.path.join(BASE_DIR, "UI")
 BOT_SCREENSHOTS_DIR = os.path.join(UI_DIR, "bot_screenshots")
 COORDS_YML = os.path.join(BASE_DIR, "coords.yml")
+TEMP_IMG_DIR = os.path.join(BASE_DIR, "Temp")
+TEMP_GARAGE_DIR = os.path.join(TEMP_IMG_DIR, "TempGarage")
+CROPPED_IMG_DIR = os.path.join(TEMP_IMG_DIR, "CroppedCars")
+car_brands_csv_path = os.path.join(BASE_DIR, "utils/Brands/car_brands.csv")
+
 # CONFIG_FILE = os.path.join(BASE_DIR, "config.json")
 
 
@@ -30,7 +36,7 @@ COORDS_YML = os.path.join(BASE_DIR, "coords.yml")
 #             json.dump(
 #                 {"adb_ip": "127.0.0.1", "adb_port": 5555, "adb_serial": "adb -s"}, file
 #             )
-            
+
 #     # Load the configuration
 #     with open(CONFIG_FILE, "r") as file:
 #         return json.load(file)
@@ -53,6 +59,33 @@ COORDS_YML = os.path.join(BASE_DIR, "coords.yml")
 adb_ip = os.getenv("ADB_IP")
 adb_port = os.getenv("ADB_PORT")
 adb_serial = os.getenv("ADB_SERIAL")
+
+TOP_DRIVES_RECORDS_MAIL = os.getenv("TOPDRIVES_RECORDS_MAIL")
+TOP_DRIVES_RECORDS_PASSWORD = os.getenv("TOPDRIVES_RECORDS_PASSWORD")
+
+
+class DataBaseType(Enum):
+    POSTGRESQL = "postgresql"
+    MARIADB = "mysql+pymysql"
+    SQLITE = "sqlite"
+    MICROSOFT_SQL_SERVER = "mssql+pyodbc"
+
+#*  Set the database type
+DATABASE_TYPE = DataBaseType.POSTGRESQL.value
+
+DATABASE_USER = os.getenv("DATABASE_USER", "")
+DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD", "")
+DATABASE_HOST = os.getenv("DATABASE_HOST", "")
+DATABASE_PORT = os.getenv("DATABASE_PORT", "")
+DATABASE_NAME = os.getenv("DATABASE_NAME", "")
+DATABASE_FILE = os.getenv("DATABASE_FILE", "")
+
+# Handle SQLite separately
+if DATABASE_TYPE == "sqlite":
+    DATABASE_URL = f"sqlite:///{DATABASE_FILE}"
+else:
+    DATABASE_URL = f"{DATABASE_TYPE}://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
+
 
 BASIC_WIDTH = 2210
 BASIC_HEIGHT = 1248

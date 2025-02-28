@@ -17,6 +17,11 @@ coordinates:
       y1: 280
       x2: 1280
       y2: 470
+    - name: "all_cars"
+      x1: 800
+      y1: 1140
+      x2: 1082
+      y2: 1200
     - name: "go_button"
       x1: 1930
       y1: 1050
@@ -309,7 +314,7 @@ coordinates:
     - name: "swipe_left_cars"  #Swipe coords for swiping 2 cars to the left
       x1: 1600
       y1: 300
-      x2: 495
+      x2: 510
       y2: 400
     - name: "swipe_up_clubs"  #Swipe coords for swiping 3 clubevents up
       x1: 1600
@@ -506,7 +511,22 @@ coordinates:
         G: 74
         B: 74
         A: 255
-
+    - name: "left_score_half"
+      x: 1733
+      y: 804
+      color:
+        R: 38
+        G: 38
+        B: 38
+        A: 255
+    - name: "right_score_half"
+      x: 2055
+      y: 804
+      color:
+        R: 38
+        G: 38
+        B: 38
+        A: 255
     # EVENTS
     - name: "ticket"
       x: 890
@@ -740,7 +760,7 @@ coordinates:
       score:
         score_left: (1770, 780, 1870, 830)
         score_right: (1900, 780, 2000, 830)
-      weight: (1800, 940, 2000, 1040)
+      weight: (1800, 940, 1950, 1040)
 
     - category: club_names
       club_event_1: (1580, 680, 2140, 825)

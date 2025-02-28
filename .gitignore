@@ -7,7 +7,7 @@ ZZZZZ-TEST-IIIIIIIIMG/*
 ImageTools/utils/IMG/*
 ImageTools/Clubs/tst/*
 ImageTools/Clubs/tst
-
+garageReader/TestGarage/
 UI/bot_manager/temp
 UI/bot_screenshots/*
 ZZZZpractice/bot_screenshots/*
@@ -25,11 +25,16 @@ Z_FIND_COORDS_IMG/
 scraper/
 database/
 
+#TEMPORARY FILES
+temp/
 
 #TEST FILES
 
 get_coords.py
 test_pytesseract.py
+test_garage_reader.py
+test_car_scraper.py
+test_top_enhancers.py
 
 **__pycache__/
 .idea
@@ -37,3 +42,6 @@ venv/
 .env
 !ZZZZZZ-FIND_COORDS&COLORS/bot_screenshots/.gitkeep
 !UI/bot_screenshots/.gitkeep
+
+**OLD/
+**bot_screenshots/

@@ -60,6 +60,9 @@ def add_car(
 def get_all_cars():
     return session.query(Car).all()
 
+def get_all_rids():
+    return session.query(Car.rid).distinct().all()
+
 
 def get_car_by_id(car_id):
     return session.query(Car).filter(Car.car_id == car_id).first()

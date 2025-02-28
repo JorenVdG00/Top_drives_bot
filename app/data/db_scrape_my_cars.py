@@ -1,7 +1,8 @@
 from app.scraper.scrape_topdrive_records import get_all_info_my_cars
 from app.data.db_setup import engine
-from app.services.car_service import add_car
-
+from app.services.car_service import add_car, get_all_cars, get_all_rids
+import requests
+import json
 
 def db_scrape_my_cars():
     # Dont forget to clear all cars
@@ -31,3 +32,18 @@ def db_scrape_my_cars():
             body_types=specs['bodyTypes'],
             tags=specs['tags'],
             tune=tune)
+        
+        
+        
+def scrape_times_all_cars():
+    all_rids = get_all_rids()
+    print(f"Found {len(all_rids)} cars to scrape")
+    
+    for index, rid in enumerate(all_rids):
+        print(f"Scraping {rid[0]}")
+        url = f"https://api.topdrivesrecords.com/car/{rid[0]}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            print(response.text)
+            print(f"{index}/{len(all_rids)}:\n  {(response.text)}")
+    
